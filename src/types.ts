@@ -70,12 +70,14 @@ export interface OfficerUser {
   aadhaarNumber: string;
   maskedAadhaar: string;
   name: string;
+  email: string;
   role: 'officer';
   departmentId: string;
   departmentCode: DepartmentCode;
   designation: string;
   employeeCode: string;
   officeLocation: string;
+  phone?: string;
 }
 
 export type DepartmentCode =

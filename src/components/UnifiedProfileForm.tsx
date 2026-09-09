@@ -5,7 +5,7 @@
  * Includes optional manual document submission toggles.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   User,
   ShieldCheck,
@@ -23,7 +23,9 @@ import {
   FileCheck2,
   Layers,
   ChevronDown,
-  Check
+  Check,
+  ArrowLeft,
+  X
 } from 'lucide-react';
 import { CitizenUser, CitizenDocument } from '../types.ts';
 import { Language, TRANSLATIONS } from '../locales.ts';
@@ -32,14 +34,17 @@ interface Props {
   citizen: CitizenUser;
   language: Language;
   onProfileSaved: (updatedCitizen: CitizenUser) => void;
+  onCancel?: () => void;
 }
 
 export const UnifiedProfileForm: React.FC<Props> = ({
   citizen,
   language,
-  onProfileSaved
+  onProfileSaved,
+  onCancel
 }) => {
   const t = TRANSLATIONS[language];
+  const isExistingProfile = Boolean(citizen.isProfileComplete || citizen.name);
 
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -75,6 +80,31 @@ export const UnifiedProfileForm: React.FC<Props> = ({
   const [bankName, setBankName] = useState(citizen.dbtBankDetails?.bankName || 'State Bank of India');
   const [accountNumber, setAccountNumber] = useState(citizen.dbtBankDetails?.accountNumber || '309981245512');
   const [ifscCode, setIfscCode] = useState(citizen.dbtBankDetails?.ifscCode || 'SBIN0001234');
+
+  // Reset fields when citizen object changes
+  useEffect(() => {
+    setFullName(citizen.name || '');
+    setFullNameMr(citizen.nameMr || '');
+    setDob(citizen.dob || '1995-05-20');
+    setGender(citizen.gender || 'MALE');
+    setPhone(citizen.phone || '+91 98220 12345');
+    setEmail(citizen.email || 'citizen@mahashasan.gov.in');
+    setStreet(citizen.address?.street || 'Gat No. 101, Shetkari Nagar');
+    setVillage(citizen.address?.villageOrCity || 'Haveli');
+    setTaluka(citizen.address?.taluka || 'Haveli');
+    setDistrict(citizen.address?.district || 'Pune');
+    setPincode(citizen.address?.pincode || '411024');
+    setCategory(citizen.category || 'OBC');
+    setAnnualIncome(citizen.annualIncome || 72000);
+    setRationCardType(citizen.rationCardType || 'ORANGE');
+    setDisabilityStatus(citizen.disabilityStatus || 'NO');
+    setGatNumber(citizen.landHolding?.gatNumber || 'MH-REV-712-GAT-101');
+    setAreaInAcres(citizen.landHolding?.areaInAcres || 2.5);
+    setIrrigationType(citizen.landHolding?.irrigationType || 'Seasonal Rainfed');
+    setBankName(citizen.dbtBankDetails?.bankName || 'State Bank of India');
+    setAccountNumber(citizen.dbtBankDetails?.accountNumber || '309981245512');
+    setIfscCode(citizen.dbtBankDetails?.ifscCode || 'SBIN0001234');
+  }, [citizen]);
 
   // Documents state with optional manual upload toggle
   const [documents, setDocuments] = useState<Array<{
@@ -233,28 +263,49 @@ export const UnifiedProfileForm: React.FC<Props> = ({
 
   return (
     <div className="bg-white/85 backdrop-blur-2xl border border-black/10 rounded-3xl p-6 sm:p-8 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.12)] space-y-6">
-      {/* Prominent Callout Banner for Blank / New Profile */}
+      {/* Prominent Callout Banner for Blank / Existing Profile */}
       <div className="bg-linear-to-r from-[#111815] to-[#1e2a25] text-white p-6 rounded-2xl border border-black/10 shadow-sm relative overflow-hidden">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-xl bg-amber-400 text-[#111111] flex items-center justify-center font-bold text-xl shrink-0 shadow-md">
-            <User className="w-6 h-6" />
-          </div>
-          <div className="space-y-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="px-3 py-0.5 rounded-full bg-amber-400 text-black text-[10px] font-extrabold uppercase tracking-widest">
-                Create Unified Digital Profile
-              </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-emerald-300 text-[10px] font-mono border border-white/15">
-                Aadhaar Verified: {citizen.maskedAadhaar}
-              </span>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-xl bg-amber-400 text-[#111111] flex items-center justify-center font-bold text-xl shrink-0 shadow-md">
+              <User className="w-6 h-6" />
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white mt-1">
-              Initial Identity Setup (एकात्मिक डिजिटल प्रोफाईल)
-            </h2>
-            <p className="text-xs text-gray-300 max-w-3xl leading-relaxed mt-1">
-              No profile details exist in the database for this Aadhaar yet. Fill in your one-time Unified Digital Profile below. All Maharashtra welfare scheme portals (Namo Shetkari, Ladki Bahin, MahaDBT, Revenue) will fetch this data automatically.
-            </p>
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="px-3 py-0.5 rounded-full bg-amber-400 text-black text-[10px] font-extrabold uppercase tracking-widest">
+                  {isExistingProfile ? (language === 'mr' ? 'डिजिटल प्रोफाईल संपादन' : language === 'hi' ? 'डिजिटल प्रोफाइल संपादन' : 'Edit Unified Profile') : 'Create Unified Digital Profile'}
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-emerald-300 text-[10px] font-mono border border-white/15">
+                  Aadhaar Verified: {citizen.maskedAadhaar}
+                </span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white mt-1">
+                {isExistingProfile
+                  ? (language === 'mr' ? 'एकात्मिक डिजिटल प्रोफाईल संपादित करा' : language === 'hi' ? 'एकीकृत डिजिटल प्रोफाइल संपादित करें' : 'Update Your Unified Digital Profile')
+                  : 'Initial Identity Setup (एकात्मिक डिजिटल प्रोफाईल)'}
+              </h2>
+              <p className="text-xs text-gray-300 max-w-3xl leading-relaxed mt-1">
+                {isExistingProfile
+                  ? (language === 'mr'
+                      ? 'येथे आपली सामाजिक-आर्थिक माहिती, कायमचा पत्ता, ७/१२ शेतजमीन, थेट बँक खाते (DBT) व आवश्यक कागदपत्रे कधीही अद्ययावत करू शकता. सर्व ४,७०९+ योजनांसाठी हाच डेटा त्वरित लागू होईल.'
+                      : language === 'hi'
+                      ? 'यहाँ आप अपना सामाजिक-आर्थिक विवरण, स्थायी पता, 7/12 कृषि भूमि, प्रत्यक्ष बैंक खाता (DBT) एवं आवश्यक दस्तावेज कभी भी अपडेट कर सकते हैं।'
+                      : 'You can update your socio-economic status, address, 7/12 land records, DBT bank account, and document attachments at any time. Changes sync instantly across all 4,709+ government schemes.')
+                  : 'No profile details exist in the database for this Aadhaar yet. Fill in your one-time Unified Digital Profile below. All Maharashtra welfare scheme portals will fetch this data automatically.'}
+              </p>
+            </div>
           </div>
+
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/15 transition-all shrink-0 cursor-pointer"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>{t.backToServices || 'Back'}</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -712,22 +763,41 @@ export const UnifiedProfileForm: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* Submit & Save Button */}
+        {/* Submit & Save / Cancel Buttons */}
         <div className="pt-4 border-t border-black/8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-xs text-[#5c5c5c] flex items-center gap-1.5">
             <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>Profile will be synchronized with Maharashtra Mahasetu & Supabase DB</span>
           </div>
 
-          <button
-            id="btn-save-unified-profile"
-            type="submit"
-            disabled={saving}
-            className="w-full sm:w-auto px-8 py-3.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            <Save className="w-4 h-4" />
-            <span>{saving ? 'Saving Profile to Supabase...' : 'Save Unified Profile to Database'}</span>
-          </button>
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            {onCancel && (
+              <button
+                type="button"
+                onClick={onCancel}
+                className="w-full sm:w-auto px-5 py-3.5 bg-black/5 hover:bg-black/10 text-[#111111] font-semibold text-xs rounded-2xl border border-black/10 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <X className="w-4 h-4 text-[#5c5c5c]" />
+                <span>{t.backToServices || 'Cancel'}</span>
+              </button>
+            )}
+
+            <button
+              id="btn-save-unified-profile"
+              type="submit"
+              disabled={saving}
+              className="w-full sm:w-auto px-8 py-3.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-2xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+            >
+              <Save className="w-4 h-4" />
+              <span>
+                {saving
+                  ? (language === 'mr' ? 'सुपाबेस डेटाबेसमध्ये जतन करत आहे...' : 'Saving Profile to Supabase...')
+                  : isExistingProfile
+                  ? (language === 'mr' ? 'डिजिटल प्रोफाईल अद्ययावत करा' : language === 'hi' ? 'डिजिटल प्रोफाइल अपडेट करें' : 'Update Unified Profile')
+                  : (language === 'mr' ? 'डिजिटल प्रोफाईल जतन करा' : language === 'hi' ? 'डिजिटल प्रोफाइल सहेजें' : 'Save Unified Profile to Database')}
+              </span>
+            </button>
+          </div>
         </div>
       </form>
     </div>

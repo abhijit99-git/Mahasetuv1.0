@@ -498,10 +498,10 @@ export const HeroSection: React.FC<Props> = ({
 
       {/* 2. MAIN HERO DISPLAY (2-COLUMN MODERN SPLIT) */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-12 sm:pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
           
           {/* LEFT COLUMN: Mission, Core Slogan, Value Props, Telemetry */}
-          <div className="lg:col-span-7 flex flex-col justify-center space-y-6">
+          <div className="lg:col-span-6 flex flex-col justify-center space-y-6">
             {/* Main Headline */}
             <div className="space-y-3">
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#111111] leading-[1.12]">
@@ -600,83 +600,30 @@ export const HeroSection: React.FC<Props> = ({
             )}
           </div>
 
-          {/* RIGHT COLUMN: Interactive Live Data Mesh Visualizer & Smart Citizen Sahayak */}
-          <div className="lg:col-span-5 space-y-4">
-            {/* Citizen-Friendly How Mahasetu Works Card */}
-            <div className="p-5 rounded-3xl bg-white/85 backdrop-blur-xl border border-black/10 shadow-md relative overflow-hidden">
-              <div className="flex items-center justify-between border-b border-black/8 pb-3 mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
-                    <ShieldCheck className="w-4 h-4 text-emerald-700" />
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-bold text-[#111111]">
-                      {language === 'mr' ? 'महासेतू कसे कार्य करते?' : language === 'hi' ? 'महासेतु कैसे काम करता है?' : 'How Mahasetu Works for Citizens'}
-                    </h3>
-                    <p className="text-[10.5px] text-[#5c5c5c]">
-                      {language === 'mr' ? '३ सोप्या पायऱ्यांमध्ये शून्य कागदपत्र सेवा' : language === 'hi' ? '3 आसान चरणों में शून्य दस्तावेज सेवा' : '3 Simple steps to access zero-upload benefits'}
-                    </p>
-                  </div>
-                </div>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-bold">
-                  {language === 'mr' ? '१००% मोफत' : language === 'hi' ? '100% मुफ्त' : '100% Free'}
-                </span>
-              </div>
+          {/* RIGHT COLUMN: Video Showcase & Smart Citizen Sahayak */}
+          <div className="lg:col-span-6 space-y-4 flex flex-col justify-center">
+            {/* Floating Phone Video with Blurred & Transparent Corners */}
+            <div className="relative w-full flex items-center justify-center py-2 overflow-hidden rounded-3xl">
+              {/* Outer Edge & Corner Blur Vignette (Center is completely clear and unblurred) */}
+              <div className="absolute inset-0 z-10 backdrop-blur-md [mask-image:radial-gradient(ellipse_75%_70%_at_50%_50%,transparent_45%,rgba(0,0,0,0.5)_70%,black_100%)] [-webkit-mask-image:radial-gradient(ellipse_75%_70%_at_50%_50%,transparent_45%,rgba(0,0,0,0.5)_70%,black_100%)] pointer-events-none" />
+              
+              {/* 4 Corner-Specific Soft Blurs */}
+              <div className="absolute top-0 left-0 w-36 h-36 z-10 backdrop-blur-lg [mask-image:radial-gradient(circle_at_0%_0%,black_30%,transparent_80%)] [-webkit-mask-image:radial-gradient(circle_at_0%_0%,black_30%,transparent_80%)] pointer-events-none" />
+              <div className="absolute top-0 right-0 w-36 h-36 z-10 backdrop-blur-lg [mask-image:radial-gradient(circle_at_100%_0%,black_30%,transparent_80%)] [-webkit-mask-image:radial-gradient(circle_at_100%_0%,black_30%,transparent_80%)] pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-36 h-36 z-10 backdrop-blur-lg [mask-image:radial-gradient(circle_at_0%_100%,black_30%,transparent_80%)] [-webkit-mask-image:radial-gradient(circle_at_0%_100%,black_30%,transparent_80%)] pointer-events-none" />
+              <div className="absolute bottom-0 right-0 w-36 h-36 z-10 backdrop-blur-lg [mask-image:radial-gradient(circle_at_100%_100%,black_30%,transparent_80%)] [-webkit-mask-image:radial-gradient(circle_at_100%_100%,black_30%,transparent_80%)] pointer-events-none" />
 
-              {/* 3 Citizen Steps */}
-              <div className="space-y-2.5">
-                <div className="p-2.5 rounded-2xl bg-black/[0.02] border border-black/5 flex items-start gap-2.5">
-                  <div className="w-6 h-6 rounded-full bg-amber-100 text-amber-800 font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">
-                    1
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-[#111111]">
-                      {language === 'mr' ? 'आधार बायोमेट्रिक पडताळणी' : language === 'hi' ? 'आधार बायोमेट्रिक सत्यापन' : 'Aadhaar Biometric Login'}
-                    </h4>
-                    <p className="text-[11px] text-[#4a4a4a] leading-tight mt-0.5">
-                      {language === 'mr' ? 'कोणताही पासवर्ड किंवा कागदपत्र अपलोड न करता सुरक्षित प्रवेश.' : language === 'hi' ? 'बिना पासवर्ड या दस्तावेज अपलोड किए सुरक्षित लॉगिन।' : 'Instant secure login without passwords or document scans.'}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-2.5 rounded-2xl bg-black/[0.02] border border-black/5 flex items-start gap-2.5">
-                  <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">
-                    2
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-[#111111]">
-                      {language === 'mr' ? 'आपोआप माहिती जोडणी' : language === 'hi' ? 'स्वचालित डेटा सत्यापन' : 'Automatic Government Data Fetch'}
-                    </h4>
-                    <p className="text-[11px] text-[#4a4a4a] leading-tight mt-0.5">
-                      {language === 'mr' ? '७/१२ दाखला, उत्पन्न व जात प्रमाणपत्र थेट सरकारी नोंदींमधून येते.' : language === 'hi' ? '7/12 खतौनी, आय और जाति प्रमाण पत्र सीधे सरकारी रिकॉर्ड से आता है।' : 'Land records (7/12), income, and caste records auto-verify from government databases.'}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-2.5 rounded-2xl bg-black/[0.02] border border-black/5 flex items-start gap-2.5">
-                  <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-800 font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">
-                    3
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-[#111111]">
-                      {language === 'mr' ? 'पूर्ण संमती व गोपनीयता' : language === 'hi' ? 'पूर्ण सहमति और गोपनीयता' : 'Your Consent, Your Control'}
-                    </h4>
-                    <p className="text-[11px] text-[#4a4a4a] leading-tight mt-0.5">
-                      {language === 'mr' ? 'तुमच्या पूर्वपरवानगीशिवाय कोणताही विभाग तुमची माहिती पाहू शकत नाही.' : language === 'hi' ? 'आपकी अनुमति के बिना कोई भी विभाग आपकी जानकारी नहीं देख सकता।' : 'No department can access your records without your explicit digital consent.'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Connected Departments Badge Strip */}
-              <div className="mt-3 pt-2.5 border-t border-black/8 flex items-center justify-between text-[10.5px]">
-                <span className="text-[#5c5c5c] font-medium">
-                  {language === 'mr' ? 'जोडलेले सरकारी विभाग:' : language === 'hi' ? 'जुड़े सरकारी विभाग:' : 'Connected State Depts:'}
-                </span>
-                <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                  {language === 'mr' ? 'महसूल • शिक्षण • भूमी अभिलेख • परिवहन' : language === 'hi' ? 'राजस्व • शिक्षा • भूमि • परिवहन' : 'Revenue • Education • Land • Transport'}
-                </span>
-              </div>
+              {/* Main Video with smooth corner fade to transparent */}
+              <video
+                src="/GovTech_platform_product_animation_202609092312.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                controls={false}
+                className="w-full h-auto max-h-[440px] lg:max-h-[500px] object-contain mix-blend-multiply [mask-image:radial-gradient(ellipse_85%_80%_at_50%_50%,black_55%,rgba(0,0,0,0.85)_75%,transparent_100%)] [-webkit-mask-image:radial-gradient(ellipse_85%_80%_at_50%_50%,black_55%,rgba(0,0,0,0.85)_75%,transparent_100%)] pointer-events-none"
+                title="Mahasetu Citizen Digital Services Animation"
+              />
             </div>
 
             {/* Smart Multilingual AI Sahayak Prompt Bar */}

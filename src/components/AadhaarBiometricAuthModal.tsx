@@ -39,8 +39,10 @@ export const AadhaarBiometricAuthModal: React.FC<Props> = ({
 
   const [authMode, setAuthMode] = useState<'citizen' | 'officer'>('citizen');
   const [step, setStep] = useState<'CREDENTIALS' | 'SELECT_GOOGLE' | 'LOGGING_IN'>('CREDENTIALS');
-  const [aadhaarInput, setAadhaarInput] = useState<string>('9876 5432 1098');
-  const [customGoogleEmail, setCustomGoogleEmail] = useState<string>('abhijittikone0@gmail.com');
+  const [aadhaarInput, setAadhaarInput] = useState<string>('');
+  const [customGoogleEmail, setCustomGoogleEmail] = useState<string>('');
+  const [officerEmail, setOfficerEmail] = useState<string>('');
+  const [officerAadhaar, setOfficerAadhaar] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string>('');
   const [supabaseConfig, setSupabaseConfig] = useState<{ supabaseUrl: string; supabaseAnonKey: string } | null>(null);
 
@@ -76,10 +78,10 @@ export const AadhaarBiometricAuthModal: React.FC<Props> = ({
   };
 
   const handleExecuteGoogleLogin = async (selectedEmail: string, selectedName?: string) => {
-    const cleanDigits = aadhaarInput.replace(/[^0-9]/g, '') || '987654321098';
+    const cleanDigits = (aadhaarInput || '').replace(/[^0-9]/g, '');
 
     if (cleanDigits.length !== 12) {
-      setErrorMsg('Please enter a valid 12-digit Aadhaar UID Number.');
+      setErrorMsg('Please enter your 12-digit Aadhaar UID Number.');
       setStep('CREDENTIALS');
       return;
     }
@@ -98,7 +100,7 @@ export const AadhaarBiometricAuthModal: React.FC<Props> = ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           aadhaarNumber: cleanDigits,
-          email: selectedEmail || 'abhijittikone0@gmail.com',
+          email: selectedEmail || '',
           name: selectedName || (selectedEmail ? selectedEmail.split('@')[0] : 'Verified Citizen'),
           photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80'
         })
@@ -121,10 +123,10 @@ export const AadhaarBiometricAuthModal: React.FC<Props> = ({
 
   const handleGoogleSignInRedirect = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    const cleanDigits = aadhaarInput.replace(/[^0-9]/g, '') || '987654321098';
+    const cleanDigits = (aadhaarInput || '').replace(/[^0-9]/g, '');
 
     if (cleanDigits.length !== 12) {
-      setErrorMsg('Please enter a valid 12-digit Aadhaar UID Number.');
+      setErrorMsg('Please enter your 12-digit Aadhaar UID Number.');
       return;
     }
 
@@ -163,14 +165,29 @@ export const AadhaarBiometricAuthModal: React.FC<Props> = ({
 
   const handleOfficerLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    const cleanDigits = (officerAadhaar || '').replace(/[^0-9]/g, '');
+    const cleanEmail = (officerEmail || '').toLowerCase().trim();
+
+    if (!cleanEmail) {
+      setErrorMsg('Please enter your Official Government Email ID.');
+      return;
+    }
+
+    if (cleanDigits.length !== 12) {
+      setErrorMsg('Please enter a valid 12-digit Officer Aadhaar UID.');
+      return;
+    }
+
+    setErrorMsg('');
     setStep('LOGGING_IN');
+
     try {
       const res = await fetch('/api/auth/officer-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          aadhaarNumber: aadhaarInput,
-          officerId: 'off-101'
+          aadhaarNumber: cleanDigits,
+          email: cleanEmail
         })
       });
       const data = await res.json();
@@ -178,14 +195,14 @@ export const AadhaarBiometricAuthModal: React.FC<Props> = ({
         setTimeout(() => {
           onOfficerAuthenticated(data.officer);
           if (onClose) onClose();
-        }, 800);
+        }, 600);
       } else {
         setStep('CREDENTIALS');
-        setErrorMsg(data.error || 'Officer authorization failed.');
+        setErrorMsg(data.error || 'Officer authorization failed. Email and Aadhaar mismatch or unlisted.');
       }
     } catch (err) {
       setStep('CREDENTIALS');
-      setErrorMsg('Officer authorization timeout.');
+      setErrorMsg('Could not connect to Maharashtra Officer Verification Server.');
     }
   };
 
@@ -300,7 +317,7 @@ export const AadhaarBiometricAuthModal: React.FC<Props> = ({
                   maxLength={14}
                   value={aadhaarInput}
                   onChange={(e) => handleAadhaarChange(e.target.value)}
-                  placeholder="9876 5432 1098"
+                  placeholder="Enter 12-digit Aadhaar UID"
                   className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:bg-white focus:border-black rounded-2xl text-base font-mono font-extrabold tracking-wider text-black focus:outline-none transition-all placeholder:text-gray-300"
                 />
               </div>
@@ -420,25 +437,66 @@ export const AadhaarBiometricAuthModal: React.FC<Props> = ({
 
           {step === 'CREDENTIALS' && authMode === 'officer' && (
             <form onSubmit={handleOfficerLogin} className="space-y-4">
+              {/* Officer Aadhaar UID Input */}
               <div>
-                <label className="block text-xs font-bold text-gray-800 mb-1.5">
-                  Officer Aadhaar / Service ID
+                <label className="block text-xs font-bold text-gray-800 mb-1.5 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <Fingerprint className="w-3.5 h-3.5 text-emerald-700" />
+                    <span>Officer Aadhaar UID</span>
+                  </span>
+                  <span className="text-[10px] text-gray-400 font-mono">12 Digits</span>
                 </label>
                 <input
+                  id="input-officer-aadhaar"
                   type="text"
                   required
-                  value={aadhaarInput}
-                  onChange={(e) => handleAadhaarChange(e.target.value)}
-                  placeholder="Enter Officer Aadhaar UID"
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-bold text-black focus:outline-none"
+                  maxLength={14}
+                  value={officerAadhaar}
+                  onChange={(e) => {
+                    const digits = (e.target.value || '').replace(/[^0-9]/g, '').slice(0, 12);
+                    let formatted = '';
+                    for (let i = 0; i < digits.length; i++) {
+                      if (i > 0 && i % 4 === 0) formatted += ' ';
+                      formatted += digits[i];
+                    }
+                    setOfficerAadhaar(formatted);
+                    setErrorMsg('');
+                  }}
+                  placeholder="Enter 12-digit Aadhaar UID"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:bg-white focus:border-black rounded-2xl text-base font-mono font-extrabold tracking-wider text-black focus:outline-none transition-all placeholder:text-gray-400"
+                />
+              </div>
+
+              {/* Official Email Input */}
+              <div>
+                <label className="block text-xs font-bold text-gray-800 mb-1.5 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <Lock className="w-3.5 h-3.5 text-emerald-700" />
+                    <span>Official Email ID</span>
+                  </span>
+                  <span className="text-[10px] text-gray-400 font-mono">Registered Email</span>
+                </label>
+                <input
+                  id="input-officer-email"
+                  type="email"
+                  required
+                  value={officerEmail}
+                  onChange={(e) => {
+                    setOfficerEmail(e.target.value);
+                    setErrorMsg('');
+                  }}
+                  placeholder="e.g. abhijittikone0@gmail.com"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:bg-white focus:border-black rounded-2xl text-sm font-medium text-black focus:outline-none transition-all placeholder:text-gray-400"
                 />
               </div>
 
               <button
+                id="btn-authorize-officer"
                 type="submit"
-                className="w-full py-3.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3.5 bg-gray-900 hover:bg-black text-white font-bold text-sm rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer mt-2"
               >
-                <span>Authorize Officer Portal</span>
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span>Verify & Login</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </form>
@@ -453,8 +511,12 @@ export const AadhaarBiometricAuthModal: React.FC<Props> = ({
                 </div>
               </div>
               <div className="space-y-1">
-                <h4 className="text-sm font-bold text-black">Authenticating via Google SSO...</h4>
-                <p className="text-xs text-gray-500">Retrieving profile and connecting to Supabase</p>
+                <h4 className="text-sm font-bold text-black">
+                  {authMode === 'officer' ? 'Verifying Officer Credentials in Supabase...' : 'Authenticating via Google SSO...'}
+                </h4>
+                <p className="text-xs text-gray-500">
+                  {authMode === 'officer' ? 'Validating Aadhaar UID & Official Email against Administrative Registry' : 'Retrieving citizen profile and connecting to Supabase'}
+                </p>
               </div>
             </div>
           )}

@@ -22,7 +22,14 @@ import {
   FileText,
   HelpCircle,
   Check,
-  X
+  X,
+  User,
+  PenLine,
+  MapPin,
+  Landmark,
+  CreditCard,
+  Layers,
+  Sparkles
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CitizenUser, ServiceDefinition, ConsentRecord, ApplicationRecord } from '../types.ts';
@@ -72,7 +79,7 @@ export const CitizenPortal: React.FC<Props> = ({
 
   // My Applications list
   const [myApplications, setMyApplications] = useState<ApplicationRecord[]>([]);
-  const [activeAppTab, setActiveAppTab] = useState<'catalogue' | 'my_apps'>('catalogue');
+  const [activeAppTab, setActiveAppTab] = useState<'catalogue' | 'my_apps' | 'profile'>('catalogue');
 
   // AI explainer modal state
   const [explainingStatus, setExplainingStatus] = useState<string | null>(null);
@@ -291,11 +298,16 @@ export const CitizenPortal: React.FC<Props> = ({
     <div className="space-y-6">
       {/* Top Welcome Banner */}
       <div className="bg-white/75 backdrop-blur-xl border border-black/8 rounded-3xl p-6 sm:p-7 shadow-[0_18px_44px_-26px_rgba(0,0,0,0.10)] relative overflow-hidden">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white text-[#111111] text-xs font-semibold mb-2 border border-black/8 shadow-xs">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
               <span>AADHAAR VERIFIED: {citizen.maskedAadhaar}</span>
+              {citizen.category && (
+                <span className="ml-1 pl-2 border-l border-black/10 text-[#5c5c5c] font-normal">
+                  {citizen.category} • {citizen.address?.district || 'Maharashtra'}
+                </span>
+              )}
             </div>
             <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#111111]">
               {citizen.name ? (language === 'mr' ? `नमस्कार, ${citizen.nameMr || citizen.name}!` : `Welcome, ${citizen.name}!`) : 'Identity Verified (Aadhaar Authenticated)'}
@@ -305,7 +317,7 @@ export const CitizenPortal: React.FC<Props> = ({
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5">
             <div className="inline-flex p-1 bg-black/5 rounded-xl border border-black/5 text-xs font-medium">
               <button
                 type="button"
@@ -332,6 +344,19 @@ export const CitizenPortal: React.FC<Props> = ({
                   {myApplications.length}
                 </span>
               </button>
+              <button
+                id="btn-tab-edit-profile"
+                type="button"
+                onClick={() => setActiveAppTab('profile')}
+                className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 ${
+                  activeAppTab === 'profile'
+                    ? 'bg-[#141414] text-white shadow-xs'
+                    : 'text-[#5c5c5c] hover:text-[#111111]'
+                }`}
+              >
+                <PenLine className="w-3.5 h-3.5 text-amber-500" />
+                <span>{t.editProfile || 'Edit Profile'}</span>
+              </button>
             </div>
           </div>
         </div>
@@ -350,8 +375,55 @@ export const CitizenPortal: React.FC<Props> = ({
       ) : (
         <>
           {/* Main Content View */}
-      {activeAppTab === 'catalogue' ? (
-        <div>
+      {activeAppTab === 'profile' ? (
+        <UnifiedProfileForm
+          citizen={citizen}
+          language={language}
+          onCancel={() => setActiveAppTab('catalogue')}
+          onProfileSaved={(updatedCitizen) => {
+            if (onUpdateCitizen) onUpdateCitizen(updatedCitizen);
+            loadData();
+            setActiveAppTab('catalogue');
+          }}
+        />
+      ) : activeAppTab === 'catalogue' ? (
+        <div className="space-y-6">
+          {/* Quick Unified Profile Summary Card */}
+          {activeWorkflowStep === 'SELECT' && (
+            <div className="bg-white/80 backdrop-blur-xl border border-black/8 rounded-3xl p-5 shadow-[0_12px_36px_-20px_rgba(0,0,0,0.08)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-2xl bg-amber-400/20 border border-amber-400/30 text-amber-900 flex items-center justify-center shrink-0">
+                  <User className="w-5 h-5 text-amber-700" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-[#111111]">{citizen.name || 'Citizen User'}</span>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                      {citizen.category || 'OBC'}
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-black/5 text-[#5c5c5c] text-[10px] font-mono">
+                      ₹{(citizen.annualIncome || 0).toLocaleString('en-IN')}/yr
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-[#5c5c5c] flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
+                    <span><strong>7/12 Land:</strong> {citizen.landHolding?.gatNumber || 'MH-712-GAT-101'} ({citizen.landHolding?.areaInAcres || 2.5} Acres)</span>
+                    <span>•</span>
+                    <span><strong>DBT Bank:</strong> {citizen.dbtBankDetails?.bankName || 'SBI'} (A/C: {citizen.dbtBankDetails?.accountNumber ? `••••${citizen.dbtBankDetails.accountNumber.slice(-4)}` : '••••5512'})</span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setActiveAppTab('profile')}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-black/5 hover:bg-black/10 text-[#111111] text-xs font-semibold border border-black/8 hover:border-black/20 transition-all shrink-0 cursor-pointer"
+              >
+                <PenLine className="w-3.5 h-3.5 text-amber-600" />
+                <span>{t.editProfile || 'Edit Profile'}</span>
+              </button>
+            </div>
+          )}
+
           {/* If an active workflow is selected */}
           {activeWorkflowStep !== 'SELECT' && selectedService && (
             <div className="bg-white/85 backdrop-blur-xl border border-black/8 rounded-3xl shadow-[0_18px_44px_-26px_rgba(0,0,0,0.12)] overflow-hidden mb-6 text-[#111111]">

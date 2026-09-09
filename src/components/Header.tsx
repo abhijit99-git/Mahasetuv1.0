@@ -174,91 +174,192 @@ export const Header: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* Tab Navigation */}
+        {/* Role-Aware Tab Navigation */}
         <nav className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto py-2 no-scrollbar text-xs font-medium">
-          <button
-            id="tab-nav-schemes"
-            onClick={() => setActiveTab('schemes')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
-              activeTab === 'schemes'
-                ? 'bg-[#141414] text-white font-semibold shadow-xs'
-                : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
-            }`}
-          >
-            <BookOpen className="w-3.5 h-3.5 text-amber-500" />
-            <span>{t.navSchemes || 'All Schemes (4,709+)'}</span>
-            <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${activeTab === 'schemes' ? 'bg-amber-500 text-white' : 'bg-amber-100 text-amber-800'}`}>
-              4.7k
-            </span>
-          </button>
+          {/* If Logged in as Officer: Show Officer Workbench & Administrative Tools */}
+          {currentUser?.role === 'officer' ? (
+            <>
+              <button
+                id="tab-nav-officer"
+                onClick={() => setActiveTab('officer')}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
+                  activeTab === 'officer'
+                    ? 'bg-[#141414] text-white font-semibold shadow-xs'
+                    : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
+                }`}
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Officer Workspace</span>
+                <span className="text-[9px] bg-emerald-700 text-white px-1.5 py-0.5 rounded-full font-bold">
+                  Active
+                </span>
+              </button>
 
-          <button
-            id="tab-nav-citizen"
-            onClick={() => setActiveTab('citizen')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
-              activeTab === 'citizen'
-                ? 'bg-[#141414] text-white font-semibold shadow-xs'
-                : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
-            }`}
-          >
-            <Building2 className="w-3.5 h-3.5" />
-            <span>{t.navCitizen}</span>
-          </button>
+              <button
+                id="tab-nav-schemes"
+                onClick={() => setActiveTab('schemes')}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
+                  activeTab === 'schemes'
+                    ? 'bg-[#141414] text-white font-semibold shadow-xs'
+                    : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
+                }`}
+              >
+                <BookOpen className="w-3.5 h-3.5 text-amber-500" />
+                <span>Schemes Directory</span>
+              </button>
 
-          <button
-            id="tab-nav-consent"
-            onClick={() => setActiveTab('consent')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
-              activeTab === 'consent'
-                ? 'bg-[#141414] text-white font-semibold shadow-xs'
-                : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
-            }`}
-          >
-            <FileCheck2 className="w-3.5 h-3.5" />
-            <span>{t.navConsent}</span>
-          </button>
+              <button
+                id="tab-nav-audit"
+                onClick={() => setActiveTab('audit')}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
+                  activeTab === 'audit'
+                    ? 'bg-[#141414] text-white font-semibold shadow-xs'
+                    : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
+                }`}
+              >
+                <ScrollText className="w-3.5 h-3.5" />
+                <span>Inter-Dept Audit Ledger</span>
+              </button>
 
-          <button
-            id="tab-nav-audit"
-            onClick={() => setActiveTab('audit')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
-              activeTab === 'audit'
-                ? 'bg-[#141414] text-white font-semibold shadow-xs'
-                : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
-            }`}
-          >
-            <ScrollText className="w-3.5 h-3.5" />
-            <span>{t.navAudit}</span>
-          </button>
+              <button
+                id="tab-nav-ai"
+                onClick={() => setActiveTab('ai')}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
+                  activeTab === 'ai'
+                    ? 'bg-[#141414] text-white font-semibold shadow-xs'
+                    : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
+                }`}
+              >
+                <Bot className="w-3.5 h-3.5" />
+                <span>AI Sahayak</span>
+                <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${activeTab === 'ai' ? 'bg-white/20 text-white' : 'bg-black/5 text-[#5c5c5c]'}`}>
+                  Gemini
+                </span>
+              </button>
+            </>
+          ) : currentUser?.role === 'citizen' ? (
+            /* If Logged in as Citizen: Show Citizen Portal, Consents & Applications */
+            <>
+              <button
+                id="tab-nav-citizen"
+                onClick={() => setActiveTab('citizen')}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
+                  activeTab === 'citizen'
+                    ? 'bg-[#141414] text-white font-semibold shadow-xs'
+                    : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
+                }`}
+              >
+                <Building2 className="w-3.5 h-3.5" />
+                <span>{t.navCitizen}</span>
+              </button>
 
-          <button
-            id="tab-nav-ai"
-            onClick={() => setActiveTab('ai')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
-              activeTab === 'ai'
-                ? 'bg-[#141414] text-white font-semibold shadow-xs'
-                : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
-            }`}
-          >
-            <Bot className="w-3.5 h-3.5" />
-            <span>{t.navAiSahayak}</span>
-            <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${activeTab === 'ai' ? 'bg-white/20 text-white' : 'bg-black/5 text-[#5c5c5c]'}`}>
-              Gemini
-            </span>
-          </button>
+              <button
+                id="tab-nav-schemes"
+                onClick={() => setActiveTab('schemes')}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
+                  activeTab === 'schemes'
+                    ? 'bg-[#141414] text-white font-semibold shadow-xs'
+                    : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
+                }`}
+              >
+                <BookOpen className="w-3.5 h-3.5 text-amber-500" />
+                <span>{t.navSchemes || 'All Schemes (4,709+)'}</span>
+                <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${activeTab === 'schemes' ? 'bg-amber-500 text-white' : 'bg-amber-100 text-amber-800'}`}>
+                  4.7k
+                </span>
+              </button>
 
-          <button
-            id="tab-nav-officer"
-            onClick={() => setActiveTab('officer')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
-              activeTab === 'officer'
-                ? 'bg-[#141414] text-white font-semibold shadow-xs'
-                : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
-            }`}
-          >
-            <User className="w-3.5 h-3.5" />
-            <span>{t.navOfficer}</span>
-          </button>
+              <button
+                id="tab-nav-consent"
+                onClick={() => setActiveTab('consent')}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
+                  activeTab === 'consent'
+                    ? 'bg-[#141414] text-white font-semibold shadow-xs'
+                    : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
+                }`}
+              >
+                <FileCheck2 className="w-3.5 h-3.5" />
+                <span>{t.navConsent}</span>
+              </button>
+
+              <button
+                id="tab-nav-audit"
+                onClick={() => setActiveTab('audit')}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
+                  activeTab === 'audit'
+                    ? 'bg-[#141414] text-white font-semibold shadow-xs'
+                    : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
+                }`}
+              >
+                <ScrollText className="w-3.5 h-3.5" />
+                <span>{t.navAudit}</span>
+              </button>
+
+              <button
+                id="tab-nav-ai"
+                onClick={() => setActiveTab('ai')}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
+                  activeTab === 'ai'
+                    ? 'bg-[#141414] text-white font-semibold shadow-xs'
+                    : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
+                }`}
+              >
+                <Bot className="w-3.5 h-3.5" />
+                <span>{t.navAiSahayak}</span>
+                <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${activeTab === 'ai' ? 'bg-white/20 text-white' : 'bg-black/5 text-[#5c5c5c]'}`}>
+                  Gemini
+                </span>
+              </button>
+            </>
+          ) : (
+            /* If Unauthenticated: Public Directory & Discovery Tabs Only */
+            <>
+              <button
+                id="tab-nav-schemes"
+                onClick={() => setActiveTab('schemes')}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
+                  activeTab === 'schemes'
+                    ? 'bg-[#141414] text-white font-semibold shadow-xs'
+                    : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
+                }`}
+              >
+                <BookOpen className="w-3.5 h-3.5 text-amber-500" />
+                <span>{t.navSchemes || 'All Schemes (4,709+)'}</span>
+                <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${activeTab === 'schemes' ? 'bg-amber-500 text-white' : 'bg-amber-100 text-amber-800'}`}>
+                  4.7k
+                </span>
+              </button>
+
+              <button
+                id="tab-nav-ai"
+                onClick={() => setActiveTab('ai')}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
+                  activeTab === 'ai'
+                    ? 'bg-[#141414] text-white font-semibold shadow-xs'
+                    : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
+                }`}
+              >
+                <Bot className="w-3.5 h-3.5" />
+                <span>{t.navAiSahayak}</span>
+                <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${activeTab === 'ai' ? 'bg-white/20 text-white' : 'bg-black/5 text-[#5c5c5c]'}`}>
+                  Gemini
+                </span>
+              </button>
+
+              <button
+                id="tab-nav-audit"
+                onClick={() => setActiveTab('audit')}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
+                  activeTab === 'audit'
+                    ? 'bg-[#141414] text-white font-semibold shadow-xs'
+                    : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
+                }`}
+              >
+                <ScrollText className="w-3.5 h-3.5" />
+                <span>{t.navAudit}</span>
+              </button>
+            </>
+          )}
         </nav>
       </div>
     </header>

@@ -122,6 +122,8 @@ export const MOCK_OFFICERS: OfficerUser[] = [
     aadhaarNumber: '4455 6677 8899',
     maskedAadhaar: 'XXXX-XXXX-8899',
     name: 'Sanjay Deshpande, Tahsildar (Haveli)',
+    email: 'sanjay.deshpande@mahashasan.gov.in',
+    phone: '+91 98220 11234',
     role: 'officer',
     departmentId: 'dept-revenue',
     departmentCode: 'REVENUE',
@@ -134,6 +136,8 @@ export const MOCK_OFFICERS: OfficerUser[] = [
     aadhaarNumber: '2233 4455 6677',
     maskedAadhaar: 'XXXX-XXXX-6677',
     name: 'Dr. Meena Kulkarni, Desk Officer (MahaDBT)',
+    email: 'meena.kulkarni@mahashasan.gov.in',
+    phone: '+91 94231 55678',
     role: 'officer',
     departmentId: 'dept-education',
     departmentCode: 'EDUCATION',
@@ -146,12 +150,28 @@ export const MOCK_OFFICERS: OfficerUser[] = [
     aadhaarNumber: '9988 7766 5544',
     maskedAadhaar: 'XXXX-XXXX-5544',
     name: 'Vikram Joshi, RTO Inspector',
+    email: 'vikram.joshi@mahashasan.gov.in',
+    phone: '+91 97654 88901',
     role: 'officer',
     departmentId: 'dept-rto',
     departmentCode: 'RTO',
     designation: 'Motor Vehicle Inspector (Pune Central)',
     employeeCode: 'MH-RTO-2012-105',
     officeLocation: 'RTO Regional Complex, Sangam Bridge, Pune'
+  },
+  {
+    id: 'off-104',
+    aadhaarNumber: '9876 5432 1098',
+    maskedAadhaar: 'XXXX-XXXX-1098',
+    name: 'Abhijit Tikone, SDO (Administration)',
+    email: 'abhijittikone0@gmail.com',
+    phone: '+91 98230 45678',
+    role: 'officer',
+    departmentId: 'dept-district',
+    departmentCode: 'DISTRICT_ADMIN',
+    designation: 'Sub-Divisional Officer & Direct Benefit Transfer Custodian',
+    employeeCode: 'MH-ADM-2021-001',
+    officeLocation: 'Collectorate Office, Pune Division, Maharashtra'
   }
 ];
 

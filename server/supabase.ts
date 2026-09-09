@@ -238,6 +238,40 @@ export async function syncServicesToSupabase(services: ServiceDefinition[], depa
 }
 
 /**
+ * Upsert officers into Supabase officers table and users table
+ */
+export async function syncOfficersToSupabase(officers: OfficerUser[]) {
+  const client = getSupabaseClient();
+  if (!client) return;
+
+  try {
+    const officerRows = officers.map(o => ({
+      id: toValidUuid(o.id),
+      aadhaar_number: o.aadhaarNumber,
+      masked_aadhaar: o.maskedAadhaar || 'XXXX-XXXX-0000',
+      name: o.name,
+      email: o.email.toLowerCase().trim(),
+      phone: o.phone || '+91 99999 00000',
+      role: 'officer',
+      department_id: toValidUuid(o.departmentId),
+      department_code: o.departmentCode || 'REVENUE',
+      designation: o.designation || 'Authorized Verification Officer',
+      employee_code: o.employeeCode || `MH-OFF-${o.id.slice(0, 4)}`,
+      office_location: o.officeLocation || 'Government of Maharashtra Administrative Office',
+      created_at: new Date().toISOString()
+    }));
+
+    // Try upserting to officers table
+    const { error: offError } = await client.from('officers').upsert(officerRows, { onConflict: 'email' });
+    if (offError && offError.code !== '42P01') {
+      console.warn('Sync officers table notice:', offError.message);
+    }
+  } catch (err: any) {
+    console.warn('Sync officers exception:', err?.message || err);
+  }
+}
+
+/**
  * Upsert users (citizens + officers) into Supabase
  */
 export async function syncUsersToSupabase(citizens: CitizenUser[], officers: OfficerUser[]) {
@@ -251,7 +285,7 @@ export async function syncUsersToSupabase(citizens: CitizenUser[], officers: Off
       aadhaar_masked: c.maskedAadhaar || 'XXXX-XXXX-0000',
       name: c.name,
       phone: c.phone || '',
-      email: c.email || '',
+      email: c.email ? c.email.toLowerCase().trim() : '',
       created_at: c.registeredAt || new Date().toISOString()
     }));
 
@@ -261,14 +295,17 @@ export async function syncUsersToSupabase(citizens: CitizenUser[], officers: Off
       department_id: toValidUuid(o.departmentId),
       aadhaar_masked: o.maskedAadhaar || 'XXXX-XXXX-0000',
       name: o.name,
-      phone: '+91 99999 00000',
-      email: `${o.role}@mahashasan.gov.in`,
+      phone: o.phone || '+91 99999 00000',
+      email: o.email ? o.email.toLowerCase().trim() : `${o.id}@mahashasan.gov.in`,
       created_at: new Date().toISOString()
     }));
 
     const allUsers = [...citizenRows, ...officerRows];
     const { error } = await client.from('users').upsert(allUsers, { onConflict: 'id' });
     if (error) console.warn('Sync users warning:', error.message);
+
+    // Also sync to dedicated officers table
+    await syncOfficersToSupabase(officers);
   } catch (err: any) {
     console.warn('Sync users exception:', err?.message || err);
   }

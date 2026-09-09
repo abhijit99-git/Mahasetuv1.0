@@ -316,10 +316,10 @@ export default function App() {
             />
           )}
 
-          {/* Tab 5: Department Officer Portal */}
+          {/* Tab 5: Department Officer Portal (Strictly for Authenticated Officers) */}
           {activeTab === 'officer' && (
             <OfficerPortal
-              officer={currentUser && 'department' in currentUser ? (currentUser as OfficerUser) : null}
+              officer={currentUser && currentUser.role === 'officer' ? (currentUser as OfficerUser) : null}
               language={language}
               onOpenAuthModal={() => setIsAuthModalOpen(true)}
             />

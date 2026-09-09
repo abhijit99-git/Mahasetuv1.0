@@ -61,7 +61,11 @@ export const TRANSLATIONS = {
     aiSearchPlaceholder: 'आपली समस्या किंवा हवी असलेली सेवा मराठीत विचारा...',
     aiQueryBtn: 'AI सहाय्यकास विचारा',
     detectedService: 'ओळखलेली शासकीय सेवा:',
-    responsibleDept: 'संबंधित विभाग:'
+    responsibleDept: 'संबंधित विभाग:',
+    editProfile: 'डिजिटल प्रोफाईल संपादित करा',
+    myProfile: 'माझी डिजिटल प्रोफाईल',
+    profileUpdated: 'डिजिटल प्रोफाईल यशस्वीरित्या अद्ययावत केली!',
+    backToServices: 'सेवांकडे परत जा'
   },
   hi: {
     portalTitle: 'महासेतु',
@@ -118,7 +122,11 @@ export const TRANSLATIONS = {
     aiSearchPlaceholder: 'अपनी आवश्यकता या वांछित सेवा हिंदी में लिखें...',
     aiQueryBtn: 'AI सहायक से पूछें',
     detectedService: 'पहचानी गई सरकारी सेवा:',
-    responsibleDept: 'संबंधित विभाग:'
+    responsibleDept: 'संबंधित विभाग:',
+    editProfile: 'डिजिटल प्रोफाइल संपादित करें',
+    myProfile: 'मेरी डिजिटल प्रोफाइल',
+    profileUpdated: 'डिजिटल प्रोफाइल सफलतापूर्वक अपडेट हुई!',
+    backToServices: 'सेवाओं पर वापस जाएं'
   },
   en: {
     portalTitle: 'Mahasetu',
@@ -175,6 +183,10 @@ export const TRANSLATIONS = {
     aiSearchPlaceholder: 'Ask in Marathi, Hindi, or English (e.g., "I need a scholarship for engineering")...',
     aiQueryBtn: 'Ask AI Sahayak',
     detectedService: 'Identified Government Service:',
-    responsibleDept: 'Responsible Department:'
+    responsibleDept: 'Responsible Department:',
+    editProfile: 'Edit Unified Digital Profile',
+    myProfile: 'My Unified Digital Profile',
+    profileUpdated: 'Unified Digital Profile updated successfully!',
+    backToServices: 'Back to Services'
   }
 };
