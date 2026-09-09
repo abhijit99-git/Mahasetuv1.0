@@ -279,11 +279,22 @@ export async function syncUsersToSupabase(citizens: CitizenUser[], officers: Off
   if (!client) return;
 
   try {
-    const citizenRows = citizens.map(c => ({
+    const citizenRowsWithProfile = citizens.map(c => ({
       id: toValidUuid(c.id),
       role: 'citizen',
       aadhaar_masked: c.maskedAadhaar || 'XXXX-XXXX-0000',
-      name: c.name,
+      name: c.name || '',
+      phone: c.phone || '',
+      email: c.email ? c.email.toLowerCase().trim() : '',
+      created_at: c.registeredAt || new Date().toISOString(),
+      profile_data: c
+    }));
+
+    const citizenRowsBasic = citizens.map(c => ({
+      id: toValidUuid(c.id),
+      role: 'citizen',
+      aadhaar_masked: c.maskedAadhaar || 'XXXX-XXXX-0000',
+      name: c.name || '',
       phone: c.phone || '',
       email: c.email ? c.email.toLowerCase().trim() : '',
       created_at: c.registeredAt || new Date().toISOString()
@@ -294,15 +305,21 @@ export async function syncUsersToSupabase(citizens: CitizenUser[], officers: Off
       role: 'officer',
       department_id: toValidUuid(o.departmentId),
       aadhaar_masked: o.maskedAadhaar || 'XXXX-XXXX-0000',
-      name: o.name,
+      name: o.name || '',
       phone: o.phone || '+91 99999 00000',
       email: o.email ? o.email.toLowerCase().trim() : `${o.id}@mahashasan.gov.in`,
       created_at: new Date().toISOString()
     }));
 
-    const allUsers = [...citizenRows, ...officerRows];
-    const { error } = await client.from('users').upsert(allUsers, { onConflict: 'id' });
-    if (error) console.warn('Sync users warning:', error.message);
+    // First try with profile_data column
+    let { error } = await client.from('users').upsert([...citizenRowsWithProfile, ...officerRows], { onConflict: 'id' });
+    if (error && (error.message.includes('profile_data') || error.code === 'PGRST204' || error.message.includes('column'))) {
+      console.log('[SUPABASE] profile_data column not found in users table, falling back to basic columns...');
+      const { error: fallbackError } = await client.from('users').upsert([...citizenRowsBasic, ...officerRows], { onConflict: 'id' });
+      if (fallbackError) console.warn('Sync users basic columns warning:', fallbackError.message);
+    } else if (error) {
+      console.warn('Sync users warning:', error.message);
+    }
 
     // Also sync to dedicated officers table
     await syncOfficersToSupabase(officers);

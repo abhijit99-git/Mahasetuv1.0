@@ -878,11 +878,47 @@ async function startServer() {
   });
 
   // Officer triggers DBT Direct Benefit Transfer Disbursement
-  app.post('/api/applications/:id/dbt-disburse', (req: Request, res: Response) => {
+  app.post('/api/applications/:id/dbt-disburse', async (req: Request, res: Response) => {
     const { id } = req.params;
     const { officerId, amount, schemeCode } = req.body;
 
-    const appRecord = db.applications.find(a => a.id === id);
+    let appRecord = db.applications.find(a => a.id === id);
+    const supabase = getSupabaseClient();
+
+    if (!appRecord && supabase) {
+      try {
+        const { data: sbApp, error: sbErr } = await supabase
+          .from('applications')
+          .select('*')
+          .eq('id', toValidUuid(id))
+          .single();
+
+        if (!sbErr && sbApp) {
+          const fd = sbApp.form_data || {};
+          appRecord = {
+            id: sbApp.id,
+            applicationNumber: fd.applicationNumber || `MH-APP-${sbApp.id.slice(0, 8).toUpperCase()}`,
+            citizenId: sbApp.citizen_id,
+            citizenName: fd.citizenName || 'Citizen Applicant',
+            citizenAadhaarMasked: fd.citizenAadhaarMasked || 'XXXX-XXXX-0000',
+            serviceId: sbApp.service_id,
+            serviceName: fd.serviceName || 'State Government Service',
+            departmentCode: fd.departmentCode || 'REVENUE',
+            status: sbApp.status || 'SUBMITTED',
+            formData: fd.formData || {},
+            verifiedProofs: fd.verifiedProofs || [],
+            consentId: fd.consentId || '',
+            createdAt: sbApp.created_at || new Date().toISOString(),
+            updatedAt: sbApp.updated_at || new Date().toISOString(),
+            trackingRemarks: fd.trackingRemarks || 'Recorded in Supabase PostgreSQL'
+          };
+          db.applications.push(appRecord);
+        }
+      } catch (err) {
+        console.warn('Error fetching single application for DBT from Supabase:', err);
+      }
+    }
+
     if (!appRecord) {
       res.status(404).json({ success: false, error: 'Application record not found' });
       return;
@@ -1305,7 +1341,43 @@ async function startServer() {
     const { id } = req.params;
     const { status, remarks, officerId } = req.body;
 
-    const appRecord = db.applications.find(a => a.id === id);
+    let appRecord = db.applications.find(a => a.id === id);
+    const supabase = getSupabaseClient();
+
+    if (!appRecord && supabase) {
+      try {
+        const { data: sbApp, error: sbErr } = await supabase
+          .from('applications')
+          .select('*')
+          .eq('id', toValidUuid(id))
+          .single();
+
+        if (!sbErr && sbApp) {
+          const fd = sbApp.form_data || {};
+          appRecord = {
+            id: sbApp.id,
+            applicationNumber: fd.applicationNumber || `MH-APP-${sbApp.id.slice(0, 8).toUpperCase()}`,
+            citizenId: sbApp.citizen_id,
+            citizenName: fd.citizenName || 'Citizen Applicant',
+            citizenAadhaarMasked: fd.citizenAadhaarMasked || 'XXXX-XXXX-0000',
+            serviceId: sbApp.service_id,
+            serviceName: fd.serviceName || 'State Government Service',
+            departmentCode: fd.departmentCode || 'REVENUE',
+            status: sbApp.status || 'SUBMITTED',
+            formData: fd.formData || {},
+            verifiedProofs: fd.verifiedProofs || [],
+            consentId: fd.consentId || '',
+            createdAt: sbApp.created_at || new Date().toISOString(),
+            updatedAt: sbApp.updated_at || new Date().toISOString(),
+            trackingRemarks: fd.trackingRemarks || 'Recorded in Supabase PostgreSQL'
+          };
+          db.applications.push(appRecord);
+        }
+      } catch (err) {
+        console.warn('Error fetching single application from Supabase:', err);
+      }
+    }
+
     if (!appRecord) {
       res.status(404).json({ success: false, error: 'Application not found' });
       return;
@@ -1512,6 +1584,7 @@ CREATE TABLE IF NOT EXISTS users (
   name TEXT NOT NULL,
   phone TEXT,
   email TEXT UNIQUE,
+  profile_data JSONB,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -1693,6 +1766,89 @@ CREATE POLICY citizen_see_own_applications ON applications
         (c.email && c.email.toLowerCase().trim() === normalizedEmail) ||
         (cleanUid.length === 12 && c.aadhaarNumber.replace(/[^0-9]/g, '') === cleanUid)
       );
+
+      const supabase = getSupabaseClient();
+      if (!citizen && supabase) {
+        try {
+          const { data: sbUser, error: sbUserErr } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', normalizedEmail)
+            .limit(1);
+
+          if (!sbUserErr && sbUser && sbUser.length > 0) {
+            const row = sbUser[0];
+            if (row.profile_data) {
+              citizen = row.profile_data;
+            } else {
+              // Reconstruct citizen from table columns and optionally submitted applications
+              const { data: apps } = await supabase
+                .from('applications')
+                .select('*')
+                .eq('citizen_id', row.id)
+                .order('created_at', { ascending: false });
+
+              let address = { street: '', villageOrCity: '', taluka: '', district: '', state: 'Maharashtra', pincode: '' };
+              let category = 'OBC';
+              let annualIncome = 72000;
+              let rationCardType = 'ORANGE';
+              let landHolding = { gatNumber: 'MH-REV-712-GAT-101', areaInAcres: 2.5, irrigationType: 'Seasonal Rainfed' };
+              let dbtBankDetails = { bankName: 'State Bank of India', accountNumber: '309981245512', ifscCode: 'SBIN0001234', isAadhaarSeeded: true };
+              let disabilityStatus = 'NO';
+              let documents: any[] = [];
+              let isProfileComplete = false;
+
+              if (apps && apps.length > 0) {
+                const latestApp = apps[0];
+                const fd = latestApp.form_data || {};
+                const cData = fd.formData || {};
+                if (cData) {
+                  address = cData.address || address;
+                  category = cData.category || category;
+                  annualIncome = cData.annualIncome !== undefined ? Number(cData.annualIncome) : annualIncome;
+                  rationCardType = cData.rationCardType || rationCardType;
+                  landHolding = cData.landHolding || landHolding;
+                  dbtBankDetails = cData.dbtBankDetails || dbtBankDetails;
+                  disabilityStatus = cData.disabilityStatus || disabilityStatus;
+                  documents = fd.verifiedProofs || [];
+                  isProfileComplete = true;
+                }
+              }
+
+              citizen = {
+                id: row.id,
+                aadhaarNumber: cleanUid.length === 12 ? `${cleanUid.slice(0, 4)} ${cleanUid.slice(4, 8)} ${cleanUid.slice(8, 12)}` : 'XXXX XXXX 0000',
+                maskedAadhaar: row.aadhaar_masked || 'XXXX-XXXX-0000',
+                name: row.name,
+                nameMr: '',
+                nameHi: '',
+                gender: 'MALE',
+                dob: '1995-05-20',
+                phone: row.phone || '',
+                email: row.email,
+                address,
+                role: 'citizen',
+                photoUrl: photoUrl || '',
+                biometricRegistered: true,
+                registeredAt: row.created_at || new Date().toISOString(),
+                isProfileComplete,
+                category,
+                annualIncome,
+                rationCardType,
+                landHolding,
+                dbtBankDetails,
+                disabilityStatus,
+                documents
+              } as any;
+            }
+            if (citizen) {
+              db.citizens.push(citizen);
+            }
+          }
+        } catch (ex) {
+          console.warn('[SUPABASE] Error restoring citizen user on login:', ex);
+        }
+      }
 
       let isNewProfile = false;
 

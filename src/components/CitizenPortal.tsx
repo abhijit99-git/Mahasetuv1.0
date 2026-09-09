@@ -79,7 +79,17 @@ export const CitizenPortal: React.FC<Props> = ({
 
   // My Applications list
   const [myApplications, setMyApplications] = useState<ApplicationRecord[]>([]);
-  const [activeAppTab, setActiveAppTab] = useState<'catalogue' | 'my_apps' | 'profile'>('catalogue');
+  const [activeAppTab, setActiveAppTab] = useState<'catalogue' | 'my_apps' | 'profile'>(
+    (!citizen.name || citizen.isProfileComplete === false) ? 'profile' : 'catalogue'
+  );
+
+  useEffect(() => {
+    if (!citizen.name || citizen.isProfileComplete === false) {
+      setActiveAppTab('profile');
+    } else {
+      setActiveAppTab('catalogue');
+    }
+  }, [citizen.id, citizen.isProfileComplete, citizen.name]);
 
   // AI explainer modal state
   const [explainingStatus, setExplainingStatus] = useState<string | null>(null);
@@ -362,18 +372,6 @@ export const CitizenPortal: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* If profile is incomplete or blank, force display of Unified Profile Builder Form */}
-      {(!citizen.name || citizen.isProfileComplete === false) ? (
-        <UnifiedProfileForm
-          citizen={citizen}
-          language={language}
-          onProfileSaved={(updatedCitizen) => {
-            if (onUpdateCitizen) onUpdateCitizen(updatedCitizen);
-            loadData();
-          }}
-        />
-      ) : (
-        <>
           {/* Main Content View */}
       {activeAppTab === 'profile' ? (
         <UnifiedProfileForm
@@ -1058,8 +1056,6 @@ export const CitizenPortal: React.FC<Props> = ({
           </div>
         )}
       </AnimatePresence>
-        </>
-      )}
     </div>
   );
 };

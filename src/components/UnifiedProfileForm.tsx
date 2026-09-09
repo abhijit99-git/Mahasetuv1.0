@@ -53,57 +53,57 @@ export const UnifiedProfileForm: React.FC<Props> = ({
   // Form Fields
   const [fullName, setFullName] = useState(citizen.name || '');
   const [fullNameMr, setFullNameMr] = useState(citizen.nameMr || '');
-  const [dob, setDob] = useState(citizen.dob || '1995-05-20');
+  const [dob, setDob] = useState(citizen.dob || '');
   const [gender, setGender] = useState<'MALE' | 'FEMALE' | 'OTHER'>(citizen.gender || 'MALE');
-  const [phone, setPhone] = useState(citizen.phone || '+91 98220 12345');
-  const [email, setEmail] = useState(citizen.email || 'citizen@mahashasan.gov.in');
+  const [phone, setPhone] = useState(citizen.phone || '');
+  const [email, setEmail] = useState(citizen.email || '');
 
   // Address
-  const [street, setStreet] = useState(citizen.address?.street || 'Gat No. 101, Shetkari Nagar');
-  const [village, setVillage] = useState(citizen.address?.villageOrCity || 'Haveli');
-  const [taluka, setTaluka] = useState(citizen.address?.taluka || 'Haveli');
-  const [district, setDistrict] = useState(citizen.address?.district || 'Pune');
-  const [pincode, setPincode] = useState(citizen.address?.pincode || '411024');
+  const [street, setStreet] = useState(citizen.address?.street || '');
+  const [village, setVillage] = useState(citizen.address?.villageOrCity || '');
+  const [taluka, setTaluka] = useState(citizen.address?.taluka || '');
+  const [district, setDistrict] = useState(citizen.address?.district || '');
+  const [pincode, setPincode] = useState(citizen.address?.pincode || '');
 
   // Socio-Economic
   const [category, setCategory] = useState<'GENERAL' | 'OBC' | 'SC' | 'ST' | 'VJNT'>(citizen.category || 'OBC');
-  const [annualIncome, setAnnualIncome] = useState<number>(citizen.annualIncome || 72000);
+  const [annualIncome, setAnnualIncome] = useState<number>(citizen.annualIncome || 0);
   const [rationCardType, setRationCardType] = useState<'YELLOW_BPL' | 'ORANGE' | 'WHITE'>(citizen.rationCardType || 'ORANGE');
   const [disabilityStatus, setDisabilityStatus] = useState<'NO' | 'YES'>(citizen.disabilityStatus || 'NO');
 
   // Land Details
-  const [gatNumber, setGatNumber] = useState(citizen.landHolding?.gatNumber || 'MH-REV-712-GAT-101');
-  const [areaInAcres, setAreaInAcres] = useState<number>(citizen.landHolding?.areaInAcres || 2.5);
-  const [irrigationType, setIrrigationType] = useState<string>(citizen.landHolding?.irrigationType || 'Seasonal Rainfed');
+  const [gatNumber, setGatNumber] = useState(citizen.landHolding?.gatNumber || '');
+  const [areaInAcres, setAreaInAcres] = useState<number>(citizen.landHolding?.areaInAcres || 0);
+  const [irrigationType, setIrrigationType] = useState<string>(citizen.landHolding?.irrigationType || '');
 
   // DBT Bank Account
-  const [bankName, setBankName] = useState(citizen.dbtBankDetails?.bankName || 'State Bank of India');
-  const [accountNumber, setAccountNumber] = useState(citizen.dbtBankDetails?.accountNumber || '309981245512');
-  const [ifscCode, setIfscCode] = useState(citizen.dbtBankDetails?.ifscCode || 'SBIN0001234');
+  const [bankName, setBankName] = useState(citizen.dbtBankDetails?.bankName || '');
+  const [accountNumber, setAccountNumber] = useState(citizen.dbtBankDetails?.accountNumber || '');
+  const [ifscCode, setIfscCode] = useState(citizen.dbtBankDetails?.ifscCode || '');
 
   // Reset fields when citizen object changes
   useEffect(() => {
     setFullName(citizen.name || '');
     setFullNameMr(citizen.nameMr || '');
-    setDob(citizen.dob || '1995-05-20');
+    setDob(citizen.dob || '');
     setGender(citizen.gender || 'MALE');
-    setPhone(citizen.phone || '+91 98220 12345');
-    setEmail(citizen.email || 'citizen@mahashasan.gov.in');
-    setStreet(citizen.address?.street || 'Gat No. 101, Shetkari Nagar');
-    setVillage(citizen.address?.villageOrCity || 'Haveli');
-    setTaluka(citizen.address?.taluka || 'Haveli');
-    setDistrict(citizen.address?.district || 'Pune');
-    setPincode(citizen.address?.pincode || '411024');
+    setPhone(citizen.phone || '');
+    setEmail(citizen.email || '');
+    setStreet(citizen.address?.street || '');
+    setVillage(citizen.address?.villageOrCity || '');
+    setTaluka(citizen.address?.taluka || '');
+    setDistrict(citizen.address?.district || '');
+    setPincode(citizen.address?.pincode || '');
     setCategory(citizen.category || 'OBC');
-    setAnnualIncome(citizen.annualIncome || 72000);
+    setAnnualIncome(citizen.annualIncome || 0);
     setRationCardType(citizen.rationCardType || 'ORANGE');
     setDisabilityStatus(citizen.disabilityStatus || 'NO');
-    setGatNumber(citizen.landHolding?.gatNumber || 'MH-REV-712-GAT-101');
-    setAreaInAcres(citizen.landHolding?.areaInAcres || 2.5);
-    setIrrigationType(citizen.landHolding?.irrigationType || 'Seasonal Rainfed');
-    setBankName(citizen.dbtBankDetails?.bankName || 'State Bank of India');
-    setAccountNumber(citizen.dbtBankDetails?.accountNumber || '309981245512');
-    setIfscCode(citizen.dbtBankDetails?.ifscCode || 'SBIN0001234');
+    setGatNumber(citizen.landHolding?.gatNumber || '');
+    setAreaInAcres(citizen.landHolding?.areaInAcres || 0);
+    setIrrigationType(citizen.landHolding?.irrigationType || '');
+    setBankName(citizen.dbtBankDetails?.bankName || '');
+    setAccountNumber(citizen.dbtBankDetails?.accountNumber || '');
+    setIfscCode(citizen.dbtBankDetails?.ifscCode || '');
   }, [citizen]);
 
   // Documents state with optional manual upload toggle
