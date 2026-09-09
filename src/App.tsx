@@ -87,14 +87,36 @@ export default function App() {
         search.includes('verify_aadhaar=')
       ) {
         const params = new URLSearchParams(hash.replace(/^#/, '') || search.replace(/^\?/, ''));
-        const accessToken = params.get('access_token');
-        const email = params.get('email') || params.get('verify_email');
+        let accessToken = params.get('access_token');
+        let email = params.get('email') || params.get('verify_email');
+        let name = params.get('name');
+        let photoUrl = params.get('photo_url');
         
         let aadhaarNumber = params.get('aadhaar') || params.get('verify_aadhaar');
         if (!aadhaarNumber) {
           try {
             aadhaarNumber = localStorage.getItem('mahasetu_pending_aadhaar') || '';
           } catch (e) {}
+        }
+
+        // Try getting Supabase public config
+        try {
+          const cfgRes = await fetch('/api/config/public');
+          const cfg = await cfgRes.json();
+          if (cfg?.supabaseUrl && cfg?.supabaseAnonKey) {
+            const cleanUrl = cfg.supabaseUrl.trim().replace(/\/rest\/v1\/?$/i, '').replace(/\/+$/, '');
+            const { createClient } = await import('@supabase/supabase-js');
+            const client = createClient(cleanUrl, cfg.supabaseAnonKey);
+            const { data: { session } } = await client.auth.getSession();
+            if (session?.user) {
+              accessToken = session.access_token;
+              email = session.user.email || email;
+              name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || name;
+              photoUrl = session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture || photoUrl;
+            }
+          }
+        } catch (e) {
+          console.warn('Supabase JS callback session check note:', e);
         }
 
         if (accessToken || email || aadhaarNumber) {
@@ -104,6 +126,8 @@ export default function App() {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 email,
+                name,
+                photoUrl,
                 aadhaarNumber,
                 accessToken
               })

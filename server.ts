@@ -43,9 +43,17 @@ import {
 dotenv.config({ path: path.join(process.cwd(), '.env'), override: true });
 dotenv.config({ path: path.join(process.cwd(), '.env.example') });
 
+process.on('unhandledRejection', (reason) => {
+  console.warn('[SERVER WARNING] Unhandled Rejection:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('[SERVER ERROR] Uncaught Exception:', err);
+});
+
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = process.env.PORT && !isNaN(parseInt(process.env.PORT, 10)) ? parseInt(process.env.PORT, 10) : 3000;
 
   app.use(express.json());
 
@@ -1332,8 +1340,10 @@ CREATE POLICY citizen_see_own_applications ON applications
 
   // Get public Supabase configuration for client-side OAuth
   app.get('/api/config/public', (req: Request, res: Response) => {
+    const rawUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
+    const cleanUrl = rawUrl.trim().replace(/\/rest\/v1\/?$/i, '').replace(/\/+$/, '');
     res.json({
-      supabaseUrl: process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '',
+      supabaseUrl: cleanUrl,
       supabaseAnonKey: process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || ''
     });
   });
@@ -1341,9 +1351,28 @@ CREATE POLICY citizen_see_own_applications ON applications
   // Google OAuth + Aadhaar Single Sign-On Endpoint
   app.post('/api/auth/google-aadhaar-login', async (req: Request, res: Response) => {
     try {
-      const { aadhaarNumber, email, name, googleId, photoUrl } = req.body || {};
-      const normalizedEmail = (email || '').toLowerCase().trim();
+      let { aadhaarNumber, email, name, googleId, photoUrl, accessToken } = req.body || {};
       const cleanUid = (aadhaarNumber || '').replace(/[^0-9]/g, '');
+
+      // Verify token with Supabase if token provided and missing email
+      if (accessToken && getSupabaseClient()) {
+        try {
+          const supabase = getSupabaseClient();
+          if (supabase) {
+            const { data: { user } } = await supabase.auth.getUser(accessToken);
+            if (user) {
+              if (!email && user.email) email = user.email;
+              if (!name && user.user_metadata?.full_name) name = user.user_metadata.full_name;
+              if (!photoUrl && user.user_metadata?.avatar_url) photoUrl = user.user_metadata.avatar_url;
+              if (!googleId) googleId = user.id;
+            }
+          }
+        } catch (tokenErr) {
+          console.warn('[AUTH] Token verification note:', tokenErr);
+        }
+      }
+
+      const normalizedEmail = (email || '').toLowerCase().trim();
 
       if (!normalizedEmail || !normalizedEmail.includes('@')) {
         res.status(400).json({ success: false, error: 'Valid Google email address is required.' });
