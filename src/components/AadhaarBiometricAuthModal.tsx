@@ -139,10 +139,16 @@ export const AadhaarBiometricAuthModal: React.FC<Props> = ({
           email: emailInput
         })
       });
-      const data = await res.json();
+      
+      let data: any = {};
+      try {
+        data = await res.json();
+      } catch (jsonErr) {
+        data = { success: false, error: `Server error (${res.status} ${res.statusText})` };
+      }
 
       setTimeout(() => {
-        if (data.success) {
+        if (res.ok && data.success) {
           setTxnId(data.txnId || `UIDAI-OTP-${Date.now()}`);
           setDemoOtpCode(data.demoOtp || '');
           setIsEmailSent(!!data.emailSent);
@@ -162,12 +168,12 @@ export const AadhaarBiometricAuthModal: React.FC<Props> = ({
           setStep('OTP');
         } else {
           setStep('CREDENTIALS');
-          setErrorMsg(data.error || 'Failed to send Aadhaar OTP. Please check your credentials.');
+          setErrorMsg(data.error || `Server returned error status (${res.status}). Please try again.`);
         }
       }, 900);
-    } catch (err) {
+    } catch (err: any) {
       setStep('CREDENTIALS');
-      setErrorMsg('Communication error with Mahasetu Auth Gateway. Please retry.');
+      setErrorMsg(err?.message ? `Gateway Error: ${err.message}` : 'Communication error with Mahasetu Auth Gateway. Please retry.');
     }
   };
 
@@ -193,10 +199,16 @@ export const AadhaarBiometricAuthModal: React.FC<Props> = ({
             txnId
           })
         });
-        const data = await res.json();
+        
+        let data: any = {};
+        try {
+          data = await res.json();
+        } catch (jErr) {
+          data = { success: false, error: `Server response error (${res.status})` };
+        }
 
         setTimeout(() => {
-          if (data.success && data.citizen) {
+          if (res.ok && data.success && data.citizen) {
             onCitizenAuthenticated(data.citizen);
             if (onClose) onClose();
           } else {

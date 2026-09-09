@@ -89,24 +89,25 @@ async function startServer() {
 
   // Step 1: Send Aadhaar OTP to linked Email
   app.post('/api/auth/send-aadhaar-otp', async (req: Request, res: Response) => {
-    const { aadhaarNumber, email } = req.body;
-    const cleanUid = (aadhaarNumber || '').replace(/[^0-9]/g, '');
+    try {
+      const { aadhaarNumber, email } = req.body || {};
+      const cleanUid = (aadhaarNumber || '').replace(/[^0-9]/g, '');
 
-    if (cleanUid.length !== 12) {
-      res.status(400).json({
-        success: false,
-        error: 'Aadhaar Number must be exactly 12 numeric digits.'
-      });
-      return;
-    }
+      if (cleanUid.length !== 12) {
+        res.status(400).json({
+          success: false,
+          error: 'Aadhaar Number must be exactly 12 numeric digits.'
+        });
+        return;
+      }
 
-    if (!email || !email.includes('@')) {
-      res.status(400).json({
-        success: false,
-        error: 'Please enter a valid email address linked to your Aadhaar.'
-      });
-      return;
-    }
+      if (!email || !email.includes('@')) {
+        res.status(400).json({
+          success: false,
+          error: 'Please enter a valid email address linked to your Aadhaar.'
+        });
+        return;
+      }
 
     // Generate random 6-digit OTP code
     const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -256,6 +257,13 @@ async function startServer() {
                     ? `Supabase Auth note: ${supabaseErrorMsg}. Active OTP code is ${generatedOtp}.`
                     : `Active OTP code for ${normalizedEmail} is ${generatedOtp}.`)))
     });
+    } catch (routeErr: any) {
+      console.error('[MAHASETU AUTH GATEWAY] Error sending Aadhaar OTP:', routeErr);
+      res.status(500).json({
+        success: false,
+        error: routeErr?.message || 'Server encountered an error while processing Aadhaar OTP dispatch.'
+      });
+    }
   });
 
   // Step 2: Verify Aadhaar Email OTP Code
