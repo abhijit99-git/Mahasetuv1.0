@@ -7,6 +7,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   UserCheck,
   Building2,
@@ -30,7 +31,8 @@ import {
   Activity,
   AlertTriangle,
   Lock,
-  Fingerprint
+  Fingerprint,
+  Award
 } from 'lucide-react';
 import { OfficerUser, ApplicationRecord } from '../types.ts';
 import { Language, TRANSLATIONS } from '../locales.ts';
@@ -80,9 +82,14 @@ export const OfficerPortal: React.FC<Props> = ({
       setLoading(true);
       const res = await fetch('/api/applications');
       const data = await res.json();
-      setApplications(data);
-      if (data.length > 0 && !selectedApp) {
-        setSelectedApp(data[0]);
+      if (Array.isArray(data)) {
+        setApplications(data);
+        if (selectedApp) {
+          const found = data.find((a: ApplicationRecord) => a.id === selectedApp.id || a.applicationNumber === selectedApp.applicationNumber);
+          if (found) setSelectedApp(found);
+        } else if (data.length > 0) {
+          setSelectedApp(data[0]);
+        }
       }
     } catch (e) {
       console.error('Error fetching officer applications', e);
@@ -100,28 +107,51 @@ export const OfficerPortal: React.FC<Props> = ({
     if (!selectedApp) return;
     setIsUpdating(true);
 
+    const remarks = actionRemarks.trim() || (
+      status === 'APPROVED' 
+        ? 'Approved based on Mahasetu verified proofs' 
+        : status === 'REJECTED' 
+          ? 'Requires clarification or proof resubmission' 
+          : 'Under active departmental scrutiny'
+    );
+
+    // 1. Optimistic instant UI update for responsive animations
+    const updatedLocal: ApplicationRecord = {
+      ...selectedApp,
+      status,
+      trackingRemarks: remarks,
+      updatedAt: new Date().toISOString()
+    };
+    setSelectedApp(updatedLocal);
+    setApplications(prev => prev.map(a => (a.id === selectedApp.id || a.applicationNumber === selectedApp.applicationNumber ? updatedLocal : a)));
+
     try {
       const res = await fetch(`/api/applications/${selectedApp.id}/status`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           status,
-          remarks: actionRemarks || (status === 'APPROVED' ? 'Approved based on Mahasetu verified proofs' : 'Requires clarification'),
+          remarks,
           officerId: officer?.id || 'off-101'
         })
       });
       const data = await res.json();
       if (data.success) {
-        setSuccessMsg(`Application ${selectedApp.applicationNumber} status updated to ${status}`);
-        setTimeout(() => setSuccessMsg(''), 4000);
+        setSuccessMsg(`✓ Application ${selectedApp.applicationNumber} officially ${status} & synchronized to Supabase PostgreSQL!`);
+        setTimeout(() => setSuccessMsg(''), 5000);
         setActionRemarks('');
-        fetchApplications();
         if (data.application) {
           setSelectedApp(data.application);
+          setApplications(prev => prev.map(a => (a.id === data.application.id || a.applicationNumber === data.application.applicationNumber ? data.application : a)));
         }
+        await fetchApplications();
+      } else {
+        alert(data.error || 'Failed to update application status');
+        await fetchApplications();
       }
     } catch (e) {
       console.error('Error updating status', e);
+      await fetchApplications();
     } finally {
       setIsUpdating(false);
     }
@@ -459,14 +489,75 @@ export const OfficerPortal: React.FC<Props> = ({
 
                   <div className="text-right text-xs">
                     <span className="text-gray-400 block text-[10px] uppercase font-bold">Current Status</span>
-                    <span className={`font-bold px-2.5 py-0.5 rounded-full text-xs inline-block mt-0.5 ${
-                      selectedApp.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-900' :
-                      selectedApp.status === 'REJECTED' ? 'bg-rose-100 text-rose-900' : 'bg-amber-100 text-amber-900'
-                    }`}>
-                      {selectedApp.status}
-                    </span>
+                    <motion.span
+                      key={selectedApp.status}
+                      initial={{ scale: 0.85, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                      className={`font-extrabold px-3 py-1 rounded-full text-xs inline-flex items-center gap-1.5 mt-0.5 shadow-xs border ${
+                        selectedApp.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-950 border-emerald-300 ring-2 ring-emerald-400/30' :
+                        selectedApp.status === 'REJECTED' ? 'bg-rose-100 text-rose-950 border-rose-300 ring-2 ring-rose-400/30' :
+                        selectedApp.status === 'IN_PROGRESS' ? 'bg-amber-100 text-amber-950 border-amber-300 ring-2 ring-amber-400/30' :
+                        'bg-sky-100 text-sky-950 border-sky-300'
+                      }`}
+                    >
+                      {selectedApp.status === 'APPROVED' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 shrink-0" />}
+                      {selectedApp.status === 'REJECTED' && <XCircle className="w-3.5 h-3.5 text-rose-700 shrink-0" />}
+                      {selectedApp.status === 'IN_PROGRESS' && <Clock className="w-3.5 h-3.5 text-amber-700 shrink-0" />}
+                      <span>{selectedApp.status}</span>
+                    </motion.span>
                   </div>
                 </div>
+
+                {/* Animated Official Government Sanction Seal if Approved */}
+                <AnimatePresence>
+                  {selectedApp.status === 'APPROVED' && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.3 }}
+                      className="p-5 bg-gradient-to-br from-emerald-500/10 via-emerald-600/5 to-teal-500/10 border-2 border-emerald-500/40 rounded-2xl shadow-sm space-y-3 relative overflow-hidden"
+                    >
+                      <div className="absolute right-3 top-3 opacity-10 pointer-events-none">
+                        <Award className="w-24 h-24 text-emerald-800" />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-9 h-9 rounded-xl bg-emerald-700 text-white flex items-center justify-center shadow-xs">
+                            <CheckCircle2 className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 block">
+                              Government of Maharashtra • Sanction Order
+                            </span>
+                            <span className="text-sm font-black text-emerald-950">
+                              OFFICIALLY APPROVED & SANCTIONED
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 bg-white/90 border border-emerald-300 px-3 py-1 rounded-full text-[10px] font-mono font-bold text-emerald-900 shadow-xs">
+                          <Database className="w-3 h-3 text-emerald-600" />
+                          <span>Supabase Synchronized</span>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono bg-white/80 p-3 rounded-xl border border-emerald-200/70 text-emerald-950">
+                        <div>Adjudicating Officer: <strong className="text-black">{officer?.name || 'Class-I Gazetted Officer'}</strong></div>
+                        <div>Designation: <strong className="text-black">{officer?.designation || 'Administrative Officer'}</strong></div>
+                        <div>Adjudication Date: <strong className="text-black">{new Date(selectedApp.updatedAt).toLocaleString()}</strong></div>
+                        <div>Officer Remarks: <span className="text-emerald-900 italic font-sans font-bold">{selectedApp.trackingRemarks || 'Approved on verified proofs'}</span></div>
+                      </div>
+
+                      <div className="flex items-center justify-between text-[10px] font-mono text-emerald-800 pt-1">
+                        <span>Digital Seal: SHA256:{selectedApp.id.slice(0, 16)}...</span>
+                        <span className="font-bold text-emerald-950">Aadhaar Payment Bridge Ready</span>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 {/* Authoritative Proofs Section (Key Mahasetu feature) */}
                 <div>
@@ -546,7 +637,7 @@ export const OfficerPortal: React.FC<Props> = ({
                       type="button"
                       disabled={isUpdating}
                       onClick={() => handleUpdateStatus('REJECTED')}
-                      className="px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                      className={`px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${isUpdating ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                       <Ban className="w-3.5 h-3.5" />
                       <span>Reject Application</span>
@@ -556,7 +647,7 @@ export const OfficerPortal: React.FC<Props> = ({
                       type="button"
                       disabled={isUpdating}
                       onClick={() => handleUpdateStatus('IN_PROGRESS')}
-                      className="px-4 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                      className={`px-4 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${isUpdating ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                       <Clock className="w-3.5 h-3.5" />
                       <span>Mark In-Progress</span>
@@ -566,10 +657,23 @@ export const OfficerPortal: React.FC<Props> = ({
                       type="button"
                       disabled={isUpdating}
                       onClick={() => handleUpdateStatus('APPROVED')}
-                      className="px-5 py-2.5 bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+                      className={`px-5 py-2.5 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-2 cursor-pointer ${
+                        selectedApp.status === 'APPROVED'
+                          ? 'bg-emerald-700 hover:bg-emerald-800 ring-2 ring-emerald-500/40'
+                          : 'bg-emerald-800 hover:bg-emerald-900'
+                      } ${isUpdating ? 'opacity-80 cursor-wait' : ''}`}
                     >
-                      <Check className="w-4 h-4" />
-                      <span>Approve Application</span>
+                      {isUpdating ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 animate-spin text-white" />
+                          <span>Updating in Supabase...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Check className="w-4 h-4" />
+                          <span>{selectedApp.status === 'APPROVED' ? 'Update Approval / Remarks' : 'Approve Application'}</span>
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>

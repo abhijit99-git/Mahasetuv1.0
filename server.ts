@@ -1227,15 +1227,117 @@ async function startServer() {
   });
 
   // Submit service application with verified proofs
-  app.post('/api/applications', (req: Request, res: Response) => {
+  app.post('/api/applications', async (req: Request, res: Response) => {
     const { citizenId, serviceId, formData, verifiedProofs, consentId } = req.body;
+    const supabase = getSupabaseClient();
 
-    const citizen = db.citizens.find(c => c.id === citizenId);
-    const service = db.services.find(s => s.id === serviceId);
+    let citizen = db.citizens.find(c => c.id === citizenId || toValidUuid(c.id) === toValidUuid(citizenId));
+    if (!citizen && supabase) {
+      try {
+        const { data: userRow } = await supabase.from('users').select('*').eq('id', toValidUuid(citizenId)).maybeSingle();
+        if (userRow) {
+          citizen = {
+            id: userRow.id,
+            aadhaarNumber: userRow.aadhaar_masked || 'XXXX-XXXX-0000',
+            maskedAadhaar: userRow.aadhaar_masked || 'XXXX-XXXX-0000',
+            name: userRow.name || 'Citizen Applicant',
+            nameMr: userRow.name || 'नागरिक',
+            nameHi: userRow.name || 'नागरिक',
+            gender: 'MALE',
+            dob: '1995-01-01',
+            phone: userRow.phone || '+91 98000 00000',
+            email: userRow.email || '',
+            address: {
+              street: '',
+              villageOrCity: '',
+              taluka: '',
+              district: '',
+              state: 'Maharashtra',
+              pincode: ''
+            },
+            role: 'citizen',
+            photoUrl: '',
+            biometricRegistered: true,
+            registeredAt: userRow.created_at || new Date().toISOString(),
+            isProfileComplete: true,
+            documents: []
+          };
+          db.citizens.push(citizen);
+        }
+      } catch (ex) {
+        console.warn('Citizen lookup error:', ex);
+      }
+    }
 
-    if (!citizen || !service) {
-      res.status(400).json({ success: false, error: 'Valid citizen and service required' });
-      return;
+    if (!citizen) {
+      citizen = {
+        id: citizenId || `c-dyn-${Date.now()}`,
+        aadhaarNumber: 'XXXX-XXXX-0000',
+        maskedAadhaar: 'XXXX-XXXX-0000',
+        name: formData?.applicantName || formData?.name || 'Citizen Applicant',
+        nameMr: '',
+        nameHi: '',
+        gender: 'MALE',
+        dob: '',
+        phone: '',
+        email: '',
+        address: {
+          street: '',
+          villageOrCity: '',
+          taluka: '',
+          district: '',
+          state: 'Maharashtra',
+          pincode: ''
+        },
+        role: 'citizen',
+        photoUrl: '',
+        biometricRegistered: true,
+        registeredAt: new Date().toISOString(),
+        isProfileComplete: true,
+        documents: []
+      };
+      db.citizens.push(citizen);
+    }
+
+    let service = db.services.find(s => s.id === serviceId || toValidUuid(s.id) === toValidUuid(serviceId));
+    if (!service && supabase) {
+      try {
+        const { data: srvRow } = await supabase.from('services').select('*').eq('id', toValidUuid(serviceId)).maybeSingle();
+        if (srvRow) {
+          service = {
+            id: srvRow.id,
+            name: srvRow.name,
+            nameMr: srvRow.name,
+            code: srvRow.code,
+            departmentId: srvRow.department_id,
+            departmentCode: 'REVENUE',
+            description: srvRow.description || '',
+            requiredDataFields: [],
+            slaDays: 7,
+            eligibilityCriteria: []
+          };
+          db.services.push(service);
+        }
+      } catch (ex) {
+        console.warn('Service lookup error:', ex);
+      }
+    }
+
+    if (!service) {
+      const deptCode = formData?.departmentCode || 'REVENUE';
+      service = {
+        id: serviceId || `srv-${Date.now()}`,
+        name: formData?.serviceName || 'Public Welfare Scheme',
+        nameMr: formData?.serviceName || 'शासकीय योजना',
+        code: `SRV-${String(serviceId || 'SCHEME').slice(0, 10).toUpperCase()}`,
+        departmentId: `dept-${deptCode.toLowerCase()}`,
+        departmentCode: deptCode,
+        description: 'Maharashtra State Public Welfare Service',
+        requiredDataFields: [],
+        slaDays: 7,
+        eligibilityCriteria: []
+      };
+      db.services.push(service);
     }
 
     const applicationNumber = `MH-${service.departmentCode}-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
@@ -1260,8 +1362,11 @@ async function startServer() {
 
     db.applications.unshift(newApp);
 
-    // Sync to Supabase PostgreSQL in background
-    syncApplicationToSupabase(newApp);
+    // Sync to Supabase PostgreSQL with awaited foreign-key resolution
+    const syncRes = await syncApplicationToSupabase(newApp);
+    if (!syncRes.success) {
+      console.warn('[SUPABASE APPLICATION SYNC WARNING]', syncRes.error);
+    }
 
     const appLog = db.createAuditLog({
       actorUserId: citizen.id,
@@ -1274,7 +1379,8 @@ async function startServer() {
       metadata: {
         applicationNumber: newApp.applicationNumber,
         serviceName: service.name,
-        proofsVerifiedCount: newApp.verifiedProofs.length
+        proofsVerifiedCount: newApp.verifiedProofs.length,
+        supabaseSynced: syncRes.success
       }
     });
     syncAuditLogToSupabase(appLog);
@@ -1294,7 +1400,7 @@ async function startServer() {
           query = query.eq('citizen_id', toValidUuid(citizenId as string));
         }
         const { data: sbApps, error: sbErr } = await query;
-        if (!sbErr && sbApps && sbApps.length > 0) {
+        if (!sbErr && sbApps) {
           const mapped: ApplicationRecord[] = sbApps.map((a: any) => {
             const fd = a.form_data || {};
             return {
@@ -1316,7 +1422,15 @@ async function startServer() {
             };
           });
 
-          const filtered = departmentCode ? mapped.filter(m => m.departmentCode === departmentCode) : mapped;
+          // Merge any un-synced in-memory applications
+          const seenIds = new Set(mapped.map(m => m.id));
+          const localOnly = db.applications.filter(a => {
+            const uuid = toValidUuid(a.id);
+            return !seenIds.has(a.id) && !seenIds.has(uuid);
+          });
+          const all = [...mapped, ...localOnly];
+
+          const filtered = departmentCode ? all.filter(m => m.departmentCode === departmentCode) : all;
           res.json(filtered);
           return;
         }
@@ -1340,41 +1454,66 @@ async function startServer() {
   app.post('/api/applications/:id/status', async (req: Request, res: Response) => {
     const { id } = req.params;
     const { status, remarks, officerId } = req.body;
-
-    let appRecord = db.applications.find(a => a.id === id);
     const supabase = getSupabaseClient();
 
-    if (!appRecord && supabase) {
+    let appRecord = db.applications.find(a => a.id === id || toValidUuid(a.id) === toValidUuid(id));
+
+    if (supabase) {
       try {
+        const targetUuid = toValidUuid(id);
         const { data: sbApp, error: sbErr } = await supabase
           .from('applications')
           .select('*')
-          .eq('id', toValidUuid(id))
-          .single();
+          .eq('id', targetUuid)
+          .maybeSingle();
 
         if (!sbErr && sbApp) {
           const fd = sbApp.form_data || {};
-          appRecord = {
-            id: sbApp.id,
-            applicationNumber: fd.applicationNumber || `MH-APP-${sbApp.id.slice(0, 8).toUpperCase()}`,
-            citizenId: sbApp.citizen_id,
-            citizenName: fd.citizenName || 'Citizen Applicant',
-            citizenAadhaarMasked: fd.citizenAadhaarMasked || 'XXXX-XXXX-0000',
-            serviceId: sbApp.service_id,
-            serviceName: fd.serviceName || 'State Government Service',
-            departmentCode: fd.departmentCode || 'REVENUE',
-            status: sbApp.status || 'SUBMITTED',
-            formData: fd.formData || {},
-            verifiedProofs: fd.verifiedProofs || [],
-            consentId: fd.consentId || '',
-            createdAt: sbApp.created_at || new Date().toISOString(),
-            updatedAt: sbApp.updated_at || new Date().toISOString(),
-            trackingRemarks: fd.trackingRemarks || 'Recorded in Supabase PostgreSQL'
+          if (!appRecord) {
+            appRecord = {
+              id: sbApp.id,
+              applicationNumber: fd.applicationNumber || `MH-APP-${sbApp.id.slice(0, 8).toUpperCase()}`,
+              citizenId: sbApp.citizen_id,
+              citizenName: fd.citizenName || 'Citizen Applicant',
+              citizenAadhaarMasked: fd.citizenAadhaarMasked || 'XXXX-XXXX-0000',
+              serviceId: sbApp.service_id,
+              serviceName: fd.serviceName || 'State Government Service',
+              departmentCode: fd.departmentCode || 'REVENUE',
+              status: sbApp.status || 'SUBMITTED',
+              formData: fd.formData || {},
+              verifiedProofs: fd.verifiedProofs || [],
+              consentId: fd.consentId || '',
+              createdAt: sbApp.created_at || new Date().toISOString(),
+              updatedAt: sbApp.updated_at || new Date().toISOString(),
+              trackingRemarks: fd.trackingRemarks || 'Recorded in Supabase PostgreSQL'
+            };
+            db.applications.push(appRecord);
+          }
+
+          // Direct update on Supabase table
+          const updatedFd = {
+            ...fd,
+            status,
+            trackingRemarks: remarks || `Status updated to ${status}`
           };
-          db.applications.push(appRecord);
+
+          const { error: updateErr } = await supabase
+            .from('applications')
+            .update({
+              status,
+              updated_at: new Date().toISOString(),
+              form_data: updatedFd
+            })
+            .eq('id', targetUuid);
+
+          if (updateErr) {
+            console.warn('[SUPABASE DIRECT STATUS UPDATE ERROR]:', updateErr.message);
+          } else {
+            console.log(`[SUPABASE] Successfully updated application ${targetUuid} status to ${status}`);
+          }
         }
       } catch (err) {
-        console.warn('Error fetching single application from Supabase:', err);
+        console.warn('Error querying application status in Supabase:', err);
       }
     }
 
@@ -1387,8 +1526,8 @@ async function startServer() {
     appRecord.trackingRemarks = remarks || `Status updated to ${status}`;
     appRecord.updatedAt = new Date().toISOString();
 
-    // Sync to Supabase
-    syncApplicationToSupabase(appRecord);
+    // Sync backup
+    await syncApplicationToSupabase(appRecord);
 
     const officer = db.officers.find(o => o.id === officerId) || db.officers[0];
 

@@ -390,17 +390,65 @@ export async function syncDataRequestToSupabase(dataReq: DataRequestRecord, depa
 }
 
 /**
- * Write an application record into Supabase
+ * Write an application record into Supabase with automatic foreign-key resolution
  */
-export async function syncApplicationToSupabase(app: ApplicationRecord) {
+export async function syncApplicationToSupabase(app: ApplicationRecord): Promise<{ success: boolean; error?: string }> {
   const client = getSupabaseClient();
-  if (!client) return;
+  if (!client) return { success: false, error: 'Supabase client not configured' };
 
   try {
+    const appUuid = toValidUuid(app.id);
+    const citizenUuid = toValidUuid(app.citizenId);
+    const serviceUuid = toValidUuid(app.serviceId);
+    const deptCode = app.departmentCode || 'REVENUE';
+    const deptUuid = toValidUuid(`dept-${deptCode.toLowerCase()}`);
+
+    // 1. Ensure citizen user exists in Supabase users table
+    const { data: existingUser } = await client.from('users').select('id').eq('id', citizenUuid).maybeSingle();
+    if (!existingUser) {
+      await client.from('users').upsert([{
+        id: citizenUuid,
+        role: 'citizen',
+        aadhaar_masked: app.citizenAadhaarMasked || 'XXXX-XXXX-0000',
+        name: app.citizenName || 'Citizen Applicant',
+        phone: '+91 98000 00000',
+        email: `${citizenUuid.slice(0, 8)}@citizen.mahashasan.gov.in`,
+        created_at: new Date().toISOString()
+      }], { onConflict: 'id' });
+    }
+
+    // 2. Ensure department exists in Supabase departments table
+    const { data: existingDept } = await client.from('departments').select('id').eq('id', deptUuid).maybeSingle();
+    if (!existingDept) {
+      await client.from('departments').upsert([{
+        id: deptUuid,
+        code: deptCode,
+        name: `${deptCode} Department`,
+        api_base_url: `/api/adapters/${deptCode.toLowerCase()}`,
+        description: `Maharashtra Government ${deptCode} Administrative Department`,
+        created_at: new Date().toISOString()
+      }], { onConflict: 'id' });
+    }
+
+    // 3. Ensure service exists in Supabase services table
+    const { data: existingService } = await client.from('services').select('id').eq('id', serviceUuid).maybeSingle();
+    if (!existingService) {
+      await client.from('services').upsert([{
+        id: serviceUuid,
+        department_id: deptUuid,
+        name: app.serviceName || 'Public Welfare Scheme',
+        code: `SRV_${app.serviceId.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()}`.slice(0, 30),
+        description: app.serviceName || 'Maharashtra State Public Welfare Service',
+        required_data_fields: [],
+        created_at: new Date().toISOString()
+      }], { onConflict: 'id' });
+    }
+
+    // 4. Upsert application record with all metadata in form_data JSONB
     const row = {
-      id: toValidUuid(app.id),
-      citizen_id: toValidUuid(app.citizenId),
-      service_id: toValidUuid(app.serviceId),
+      id: appUuid,
+      citizen_id: citizenUuid,
+      service_id: serviceUuid,
       status: app.status || 'SUBMITTED',
       form_data: {
         applicationNumber: app.applicationNumber,
@@ -418,9 +466,15 @@ export async function syncApplicationToSupabase(app: ApplicationRecord) {
     };
 
     const { error } = await client.from('applications').upsert([row], { onConflict: 'id' });
-    if (error) console.warn('Sync application warning:', error.message);
+    if (error) {
+      console.warn('[SUPABASE] Sync application error:', error.message);
+      return { success: false, error: error.message };
+    }
+    console.log(`[SUPABASE] Successfully saved application ${app.applicationNumber} (${appUuid}) with status ${app.status}`);
+    return { success: true };
   } catch (err: any) {
-    console.warn('Sync application exception:', err?.message || err);
+    console.warn('[SUPABASE] Sync application exception:', err?.message || err);
+    return { success: false, error: err?.message || String(err) };
   }
 }
 
