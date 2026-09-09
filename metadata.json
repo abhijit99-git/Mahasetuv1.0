@@ -1,0 +1,7 @@
+{
+  "name": "Mahasetu",
+  "description": "Maharashtra Government Federated Interoperability & Consent Layer with Aadhaar Biometric Authentication and Canonical Department Adapters.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
