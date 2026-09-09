@@ -65,6 +65,7 @@ export default function App() {
         if (parsed && parsed.id) {
           setCurrentUser(parsed);
           setActiveTab(parsed.role === 'officer' ? 'officer' : 'citizen');
+          setIsWelcomeModalOpen(false);
         }
       }
     } catch (e) {
@@ -125,8 +126,16 @@ export default function App() {
     try {
       localStorage.setItem('mahasetu_active_user', JSON.stringify(citizen));
     } catch (e) {}
+    setIsWelcomeModalOpen(false);
     setIsAuthModalOpen(false);
     setActiveTab('citizen');
+
+    setTimeout(() => {
+      const workspace = document.getElementById('portal-workspace');
+      if (workspace) {
+        workspace.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 150);
   };
 
   const handleOfficerAuthenticated = (officer: OfficerUser) => {

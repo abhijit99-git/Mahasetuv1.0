@@ -405,21 +405,38 @@ async function startServer() {
     });
   });
 
-  // Step 3: Verify Supabase Session from Direct Verification Link
+  // Step 3: Verify Supabase Session from Direct Verification Link or Supabase Auth Callback
   app.post('/api/auth/verify-supabase-session', async (req: Request, res: Response) => {
-    const { email, aadhaarNumber } = req.body;
-    const normalizedEmail = (email || '').toLowerCase().trim();
+    const { email, aadhaarNumber, accessToken } = req.body;
+    let normalizedEmail = (email || '').toLowerCase().trim();
+    let cleanUid = (aadhaarNumber || '').replace(/[^0-9]/g, '');
+
+    // Extract user info from Supabase Access Token if provided
+    if (accessToken) {
+      try {
+        const supabase = getSupabaseClient();
+        if (supabase) {
+          const { data: userData, error: userErr } = await supabase.auth.getUser(accessToken);
+          if (userData?.user?.email) {
+            normalizedEmail = userData.user.email.toLowerCase().trim();
+            if (userData.user.user_metadata?.aadhaarNumber) {
+              cleanUid = String(userData.user.user_metadata.aadhaarNumber).replace(/[^0-9]/g, '');
+            }
+          }
+        }
+      } catch (e: any) {
+        console.warn(`[SUPABASE AUTH] Token verification note:`, e?.message || e);
+      }
+    }
 
     if (!normalizedEmail) {
-      res.status(400).json({ success: false, error: 'Email address is required.' });
+      res.status(400).json({ success: false, error: 'Email address is required for verification.' });
       return;
     }
 
-    const cleanUid = (aadhaarNumber || '').replace(/[^0-9]/g, '');
-
     // Lookup existing citizen by email or Aadhaar
     let citizen = db.citizens.find(c =>
-      c.email.toLowerCase().trim() === normalizedEmail ||
+      (c.email && c.email.toLowerCase().trim() === normalizedEmail) ||
       (cleanUid.length === 12 && c.aadhaarNumber.replace(/[^0-9]/g, '') === cleanUid)
     );
 
