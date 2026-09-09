@@ -73,7 +73,7 @@ export default function App() {
     }
   }, []);
 
-  // Listen for Supabase Magic Link / Auth Callback redirects
+  // Listen for Supabase OAuth / Google Redirect Auth Callback
   useEffect(() => {
     const handleAuthCallback = async () => {
       const hash = window.location.hash;
@@ -89,28 +89,35 @@ export default function App() {
         const params = new URLSearchParams(hash.replace(/^#/, '') || search.replace(/^\?/, ''));
         const accessToken = params.get('access_token');
         const email = params.get('email') || params.get('verify_email');
-        const aadhaarNumber = params.get('aadhaar') || params.get('verify_aadhaar');
-        const otp = params.get('otp');
+        
+        let aadhaarNumber = params.get('aadhaar') || params.get('verify_aadhaar');
+        if (!aadhaarNumber) {
+          try {
+            aadhaarNumber = localStorage.getItem('mahasetu_pending_aadhaar') || '';
+          } catch (e) {}
+        }
 
         if (accessToken || email || aadhaarNumber) {
           try {
-            const res = await fetch('/api/auth/verify-supabase-session', {
+            const res = await fetch('/api/auth/google-aadhaar-login', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 email,
                 aadhaarNumber,
-                otp,
                 accessToken
               })
             });
             const data = await res.json();
             if (data.success && data.citizen) {
               handleCitizenAuthenticated(data.citizen);
+              try {
+                localStorage.removeItem('mahasetu_pending_aadhaar');
+              } catch (e) {}
               window.history.replaceState({}, document.title, window.location.pathname);
             }
           } catch (e) {
-            console.warn('Error handling Supabase callback:', e);
+            console.warn('Error handling Supabase/Google callback:', e);
           }
         }
       }

@@ -1330,9 +1330,105 @@ CREATE POLICY citizen_see_own_applications ON applications
     }
   });
 
-  // Get current Supabase configuration & connection status
-  app.get('/api/supabase/status', (req: Request, res: Response) => {
-    res.json(getSupabaseStatus());
+  // Get public Supabase configuration for client-side OAuth
+  app.get('/api/config/public', (req: Request, res: Response) => {
+    res.json({
+      supabaseUrl: process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '',
+      supabaseAnonKey: process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || ''
+    });
+  });
+
+  // Google OAuth + Aadhaar Single Sign-On Endpoint
+  app.post('/api/auth/google-aadhaar-login', async (req: Request, res: Response) => {
+    try {
+      const { aadhaarNumber, email, name, googleId, photoUrl } = req.body || {};
+      const normalizedEmail = (email || '').toLowerCase().trim();
+      const cleanUid = (aadhaarNumber || '').replace(/[^0-9]/g, '');
+
+      if (!normalizedEmail || !normalizedEmail.includes('@')) {
+        res.status(400).json({ success: false, error: 'Valid Google email address is required.' });
+        return;
+      }
+
+      // Lookup existing citizen by Google Email OR Aadhaar UID
+      let citizen = db.citizens.find(c =>
+        (c.email && c.email.toLowerCase().trim() === normalizedEmail) ||
+        (cleanUid.length === 12 && c.aadhaarNumber.replace(/[^0-9]/g, '') === cleanUid)
+      );
+
+      let isNewProfile = false;
+
+      if (!citizen) {
+        isNewProfile = true;
+        const uid = cleanUid.length === 12 ? cleanUid : Math.floor(100000000000 + Math.random() * 900000000000).toString();
+        const formattedUid = `${uid.slice(0, 4)} ${uid.slice(4, 8)} ${uid.slice(8, 12)}`;
+        citizen = {
+          id: `c-dyn-${uid}`,
+          aadhaarNumber: formattedUid,
+          maskedAadhaar: `XXXX-XXXX-${uid.slice(8, 12)}`,
+          name: name || '',
+          nameMr: '',
+          nameHi: '',
+          gender: 'MALE',
+          dob: '',
+          phone: '',
+          email: normalizedEmail,
+          address: {
+            street: '',
+            villageOrCity: '',
+            taluka: '',
+            district: '',
+            state: 'Maharashtra',
+            pincode: ''
+          },
+          role: 'citizen',
+          photoUrl: photoUrl || '',
+          biometricRegistered: true,
+          registeredAt: new Date().toISOString(),
+          isProfileComplete: false,
+          documents: []
+        };
+        db.citizens.push(citizen);
+        syncUsersToSupabase([citizen], []);
+      } else {
+        if (normalizedEmail) citizen.email = normalizedEmail;
+        if (name && !citizen.name) citizen.name = name;
+        if (photoUrl && !citizen.photoUrl) citizen.photoUrl = photoUrl;
+        syncUsersToSupabase([citizen], []);
+      }
+
+      const txnId = `GOOGLE-SSO-${Date.now()}`;
+      const authLog = db.createAuditLog({
+        actorUserId: citizen.id,
+        actorName: citizen.name || `Aadhaar Citizen (${citizen.maskedAadhaar})`,
+        actorRole: 'citizen',
+        action: 'AUTH_VERIFIED',
+        entityType: 'session',
+        entityId: citizen.id,
+        metadata: {
+          authMethod: 'GOOGLE_OAUTH_AADHAAR',
+          email: normalizedEmail,
+          googleId,
+          isNewProfile
+        }
+      });
+      syncAuditLogToSupabase(authLog);
+
+      res.json({
+        success: true,
+        isNewProfile: !citizen.name || citizen.isProfileComplete === false,
+        citizen,
+        authProof: {
+          txnId,
+          authMethod: 'GOOGLE_OAUTH_AADHAAR',
+          authTimestamp: new Date().toISOString(),
+          kuaAgency: 'Maharashtra Information Technology Corporation (MahaIT)'
+        }
+      });
+    } catch (err: any) {
+      console.error('[GOOGLE AADHAAR AUTH] Login error:', err);
+      res.status(500).json({ success: false, error: err?.message || 'Failed to authenticate via Google.' });
+    }
   });
 
   // Actively test live connection to Supabase instance
