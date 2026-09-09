@@ -407,7 +407,7 @@ export const AadhaarBiometricAuthModal: React.FC<Props> = ({
               </div>
 
               <p className="text-[11px] text-gray-500 leading-relaxed">
-                An authentication OTP code will be sent to your email to verify identity ownership.
+                A secure verification link will be sent to your email to verify identity ownership.
               </p>
 
               <button
@@ -415,7 +415,8 @@ export const AadhaarBiometricAuthModal: React.FC<Props> = ({
                 type="submit"
                 className="w-full py-3.5 bg-[#141414] hover:bg-black text-white font-bold text-xs rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span>Send Aadhaar OTP</span>
+                <Mail className="w-4 h-4 text-emerald-400" />
+                <span>Send Verification Link to Email</span>
                 <ArrowRight className="w-4 h-4 text-emerald-400" />
               </button>
             </form>
@@ -437,57 +438,56 @@ export const AadhaarBiometricAuthModal: React.FC<Props> = ({
             </div>
           )}
 
-          {/* STEP 2: Enter OTP Code */}
+          {/* STEP 2: Waiting for Email Verification */}
           {step === 'OTP' && (
-            <form onSubmit={handleVerifyOtp} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-800 mb-1.5 flex items-center justify-between">
-                  <span className="flex items-center gap-1.5">
-                    <KeyRound className="w-3.5 h-3.5 text-emerald-700" />
-                    <span>Enter 6-Digit Verification OTP *</span>
-                  </span>
-                  <span className="text-[10px] text-gray-400 font-mono">10 min validity</span>
-                </label>
-                <input
-                  id="input-aadhaar-otp"
-                  type="text"
-                  required
-                  maxLength={6}
-                  value={otpInput}
-                  onChange={(e) => setOtpInput(e.target.value.replace(/[^0-9]/g, ''))}
-                  placeholder="------"
-                  className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 focus:bg-white focus:border-black rounded-2xl text-xl font-mono font-extrabold tracking-widest text-center text-black focus:outline-none transition-all placeholder:text-gray-300"
-                />
+            <div className="py-6 space-y-5 text-center">
+              <div className="relative w-16 h-16 mx-auto">
+                <div className="absolute inset-0 rounded-full bg-emerald-100 animate-ping opacity-75" />
+                <div className="relative w-16 h-16 bg-emerald-700 rounded-full flex items-center justify-center text-white shadow-lg mx-auto">
+                  <Mail className="w-8 h-8" />
+                </div>
               </div>
 
-              <div className="flex items-center justify-between text-xs">
+              <div className="space-y-2">
+                <h3 className="text-base font-extrabold text-gray-900">Check Your Email Inbox</h3>
+                <p className="text-xs text-gray-600 leading-relaxed px-4">
+                  We have sent a 1-click verification link to:
+                  <br />
+                  <strong className="text-emerald-800 font-mono text-sm block mt-1 bg-emerald-50 py-1 px-2 rounded-lg border border-emerald-200">{emailInput}</strong>
+                </p>
+              </div>
+
+              <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 text-xs text-left space-y-2.5">
+                <div className="flex items-center gap-2 font-bold text-gray-800">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Next Steps:</span>
+                </div>
+                <ol className="list-decimal list-inside space-y-1.5 text-gray-600 pl-1 text-[11px] leading-relaxed">
+                  <li>Open your email inbox in a new tab or phone.</li>
+                  <li>Click on the <strong>"Verify Email & Log In to Mahasetu"</strong> link.</li>
+                  <li>You will be logged in automatically!</li>
+                </ol>
+              </div>
+
+              <div className="pt-2 flex items-center justify-between text-xs border-t border-gray-100">
                 <button
                   type="button"
                   onClick={() => setStep('CREDENTIALS')}
-                  className="text-gray-500 hover:text-black font-medium flex items-center gap-1"
+                  className="text-gray-500 hover:text-black font-medium flex items-center gap-1 cursor-pointer"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
-                  <span>Change Email</span>
+                  <span>Change Email / Aadhaar</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={handleSendOtp}
-                  className="text-emerald-700 hover:underline font-bold"
+                  className="text-emerald-700 hover:underline font-bold cursor-pointer"
                 >
-                  Resend Code
+                  Resend Verification Email
                 </button>
               </div>
-
-              <button
-                id="btn-verify-aadhaar-otp"
-                type="submit"
-                className="w-full py-3.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Verify OTP & Access Portal</span>
-              </button>
-            </form>
+            </div>
           )}
 
           {/* STEP: Verifying OTP Processing State */}

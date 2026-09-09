@@ -130,7 +130,15 @@ async function startServer() {
     const supabase = getSupabaseClient();
     const supabaseConfigured = !!supabase;
 
-    const siteUrl = (req.headers.origin as string) || (req.headers.referer as string) || process.env.RENDER_EXTERNAL_URL || 'http://localhost:3000';
+    const reqOrigin = (req.headers.origin as string) || (req.headers.referer as string);
+    const renderExternal = process.env.RENDER_EXTERNAL_URL || process.env.PUBLIC_URL;
+    let siteUrl = 'http://localhost:3000';
+    if (renderExternal) {
+      siteUrl = renderExternal.startsWith('http') ? renderExternal : `https://${renderExternal}`;
+    } else if (reqOrigin) {
+      siteUrl = reqOrigin;
+    }
+
     const redirectTarget = `${siteUrl.replace(/\/$/, '')}/?verify_aadhaar=${cleanUid}&verify_email=${encodeURIComponent(normalizedEmail)}&otp=${generatedOtp}`;
 
     // Attempt Supabase Auth OTP / Magic Link dispatch if Supabase client is active
@@ -173,22 +181,19 @@ async function startServer() {
             html: `
               <div style="font-family: Arial, sans-serif; max-width: 550px; margin: 0 auto; padding: 24px; border: 1px solid #e0e0e0; border-radius: 16px; background-color: #ffffff;">
                 <div style="background-color: #111815; padding: 16px; border-radius: 12px; text-align: center; color: #ffffff; margin-bottom: 20px;">
-                  <h2 style="margin: 0; color: #fbbf24; font-size: 20px;">Government of Maharashtra (महासेतू)</h2>
+                  <h2 style="margin: 0; color: #fbbf24; font-size: 20px;">Government of Maharashtra (महाсеतू)</h2>
                   <p style="margin: 4px 0 0 0; font-size: 12px; color: #a7f3d0;">Aadhaar Identity Verification Gateway</p>
                 </div>
                 <p style="font-size: 14px; color: #333333; margin-bottom: 12px;">Namaskar,</p>
                 <p style="font-size: 14px; color: #333333; line-height: 1.5;">
                   Click the button below to verify your email and sign in to your <strong>Mahasetu Citizen Profile</strong> (Aadhaar: <strong>XXXX-XXXX-${cleanUid.slice(8, 12)}</strong>):
                 </p>
-                <div style="text-align: center; margin: 24px 0;">
-                  <a href="${redirectTarget}" style="background-color: #047857; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 15px; display: inline-block; shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                <div style="text-align: center; margin: 28px 0;">
+                  <a href="${redirectTarget}" style="background-color: #047857; color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px; display: inline-block;">
                     ✅ Verify Email & Log In to Mahasetu
                   </a>
                 </div>
-                <p style="font-size: 13px; color: #555555; text-align: center;">
-                  Or enter this 6-digit OTP code manually: <strong style="font-family: monospace; font-size: 16px; color: #047857;">${generatedOtp}</strong>
-                </p>
-                <p style="font-size: 12px; color: #888888; margin-top: 20px; text-align: center;">This verification link and OTP code are valid for 10 minutes.</p>
+                <p style="font-size: 12px; color: #888888; margin-top: 20px; text-align: center;">This verification link is valid for 10 minutes.</p>
                 <hr style="border: none; border-top: 1px solid #eeeeee; margin: 20px 0;" />
                 <p style="font-size: 11px; color: #999999; text-align: center;">MahaIT & Govt of Maharashtra Digital Platform Services</p>
               </div>
@@ -231,15 +236,12 @@ async function startServer() {
                 <p style="font-size: 14px; color: #333333; line-height: 1.5;">
                   Click the button below to verify your email and sign in to your <strong>Mahasetu Citizen Profile</strong> (Aadhaar: <strong>XXXX-XXXX-${cleanUid.slice(8, 12)}</strong>):
                 </p>
-                <div style="text-align: center; margin: 24px 0;">
-                  <a href="${redirectTarget}" style="background-color: #047857; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 15px; display: inline-block;">
+                <div style="text-align: center; margin: 28px 0;">
+                  <a href="${redirectTarget}" style="background-color: #047857; color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px; display: inline-block;">
                     ✅ Verify Email & Log In to Mahasetu
                   </a>
                 </div>
-                <p style="font-size: 13px; color: #555555; text-align: center;">
-                  Or enter this 6-digit OTP code manually: <strong style="font-family: monospace; font-size: 16px; color: #047857;">${generatedOtp}</strong>
-                </p>
-                <p style="font-size: 12px; color: #888888; margin-top: 20px; text-align: center;">This verification link and OTP code are valid for 10 minutes.</p>
+                <p style="font-size: 12px; color: #888888; margin-top: 20px; text-align: center;">This verification link is valid for 10 minutes.</p>
                 <hr style="border: none; border-top: 1px solid #eeeeee; margin: 20px 0;" />
                 <p style="font-size: 11px; color: #999999; text-align: center;">MahaIT & Govt of Maharashtra Digital Platform Services</p>
               </div>
