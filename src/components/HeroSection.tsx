@@ -301,23 +301,20 @@ export const HeroSection: React.FC<Props> = ({
           {/* Logo & Emblem */}
           <div className="flex items-center gap-3">
             <a href="#hero" className="flex items-center gap-3 group text-decoration-none">
-              <div className="w-10 h-10 rounded-xl bg-[#141414] text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-                <svg viewBox="0 0 32 32" fill="none" className="w-6 h-6" aria-hidden="true">
-                  <path d="M16 2.5 29.5 16 16 29.5 2.5 16 16 2.5Z" stroke="#ffffff" strokeWidth="2" strokeLinejoin="round" />
-                  <path d="M16 9.5 22.5 16 16 22.5 9.5 16 16 9.5Z" fill="#ffffff" />
-                </svg>
+              <div className="w-12 h-12 shrink-0 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform">
+                <img
+                  src="/mahasetu-logo.png"
+                  alt="Mahasetu Emblem"
+                  className="w-full h-full object-contain"
+                  referrerPolicy="no-referrer"
+                />
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xl font-bold tracking-tight text-[#111111]">
-                    Mahasetu
-                  </span>
-                  <span className="text-[11px] font-semibold text-emerald-800 bg-emerald-100/90 px-2 py-0.5 rounded-full border border-emerald-300">
-                    DPI Portal
-                  </span>
-                </div>
-                <p className="text-[11px] text-[#5c5c5c] font-medium leading-none mt-0.5">
-                  महाराष्ट्र आंतर-विभागीय इंटरऑपरेबिलिटी मंच
+                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111111] font-marathi-calligraphy leading-tight">
+                  महासेतू
+                </h1>
+                <p className="text-[11px] text-[#5c5c5c] font-semibold leading-none mt-0.5">
+                  महाराष्ट्र शासन • आंतर-विभागीय इंटरऑपरेबिलिटी मंच
                 </p>
               </div>
             </a>
@@ -477,13 +474,6 @@ export const HeroSection: React.FC<Props> = ({
             </button>
             <button
               type="button"
-              onClick={() => handleNavClick('gateway')}
-              className="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold hover:bg-black/5"
-            >
-              Gateway Topology
-            </button>
-            <button
-              type="button"
               onClick={() => handleNavClick('officer')}
               className="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold hover:bg-black/5"
             >
@@ -512,17 +502,6 @@ export const HeroSection: React.FC<Props> = ({
           
           {/* LEFT COLUMN: Mission, Core Slogan, Value Props, Telemetry */}
           <div className="lg:col-span-7 flex flex-col justify-center space-y-6">
-            {/* Government Identifier Pill */}
-            <div className="inline-flex items-center gap-2 self-start px-3.5 py-1.5 rounded-full bg-white/90 border border-black/10 shadow-xs backdrop-blur-md">
-              <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600" />
-              </span>
-              <span className="text-[11.5px] font-semibold tracking-wide text-[#111111]">
-                {language === 'mr' ? 'महाराष्ट्र शासन • डिजिटल सार्वजनिक पायाभूत रचना' : language === 'hi' ? 'महाराष्ट्र शासन • डिजिटल पब्लिक इंफ्रास्ट्रक्चर' : 'Government of Maharashtra • Digital Public Infrastructure'}
-              </span>
-            </div>
-
             {/* Main Headline */}
             <div className="space-y-3">
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#111111] leading-[1.12]">
@@ -599,15 +578,6 @@ export const HeroSection: React.FC<Props> = ({
                 <span>{language === 'mr' ? 'नागरिक पोर्टल' : language === 'hi' ? 'नागरिक पोर्टल' : 'Citizen Portal'}</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform text-emerald-400" />
               </button>
-
-              <button
-                type="button"
-                onClick={() => handleNavClick('gateway')}
-                className="px-4 py-3 rounded-xl bg-white/90 hover:bg-white text-[#111111] text-xs sm:text-sm font-semibold border border-black/10 shadow-xs hover:border-black/20 transition-all flex items-center gap-2"
-              >
-                <Network className="w-4 h-4 text-emerald-700" />
-                <span>{language === 'mr' ? 'गेटवे टोपोलॉजी' : language === 'hi' ? 'गेटवे टोपोलॉजी' : 'Gateway Topology'}</span>
-              </button>
             </div>
 
             {/* Active Citizen Session Bar */}
@@ -632,120 +602,80 @@ export const HeroSection: React.FC<Props> = ({
 
           {/* RIGHT COLUMN: Interactive Live Data Mesh Visualizer & Smart Citizen Sahayak */}
           <div className="lg:col-span-5 space-y-4">
-            {/* Live Mesh Hub & Interactive Topology Card */}
+            {/* Citizen-Friendly How Mahasetu Works Card */}
             <div className="p-5 rounded-3xl bg-white/85 backdrop-blur-xl border border-black/10 shadow-md relative overflow-hidden">
-              <div className="flex items-center justify-between border-b border-black/8 pb-3">
+              <div className="flex items-center justify-between border-b border-black/8 pb-3 mb-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-[#141414] text-white flex items-center justify-center text-xs">
-                    <Activity className="w-3.5 h-3.5 text-emerald-400" />
+                  <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+                    <ShieldCheck className="w-4 h-4 text-emerald-700" />
                   </div>
-                  <span className="text-xs font-bold text-[#111111]">
-                    Live Federated Mesh Simulator
-                  </span>
+                  <div>
+                    <h3 className="text-xs font-bold text-[#111111]">
+                      {language === 'mr' ? 'महासेतू कसे कार्य करते?' : language === 'hi' ? 'महासेतु कैसे काम करता है?' : 'How Mahasetu Works for Citizens'}
+                    </h3>
+                    <p className="text-[10.5px] text-[#5c5c5c]">
+                      {language === 'mr' ? '३ सोप्या पायऱ्यांमध्ये शून्य कागदपत्र सेवा' : language === 'hi' ? '3 आसान चरणों में शून्य दस्तावेज सेवा' : '3 Simple steps to access zero-upload benefits'}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-                  <span>{activeNode.latency}</span>
-                </div>
-              </div>
-
-              {/* Department Node Selector Pills */}
-              <div className="pt-3">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#5c5c5c] block mb-2">
-                  Select Department Node for Live Adapter Proof:
+                <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-bold">
+                  {language === 'mr' ? '१००% मोफत' : language === 'hi' ? '100% मुफ्त' : '100% Free'}
                 </span>
-                <div className="grid grid-cols-3 gap-1.5">
-                  {(departmentNodes || []).slice(0, 3).map(dept => (
-                    <button
-                      key={dept.id}
-                      type="button"
-                      onClick={() => triggerPacketSimulation(dept.id)}
-                      className={`p-2.5 rounded-xl text-left border text-[11px] font-semibold transition-all ${
-                        selectedDeptId === dept.id
-                          ? 'bg-[#141414] text-white border-[#141414] shadow-sm'
-                          : 'bg-white/80 text-[#333333] border-black/8 hover:bg-white hover:border-black/20'
-                      }`}
-                    >
-                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center mb-1 ${
-                        selectedDeptId === dept.id ? 'bg-white/20 text-white' : 'bg-black/5 text-emerald-700'
-                      }`}>
-                        {renderDeptIcon(dept.id, "w-3.5 h-3.5")}
-                      </div>
-                      <span className="truncate block font-medium">
-                        {language === 'mr' ? (dept.nameMr || dept.name || '').split(' ')[0] : (dept.name || '').split(' ')[0]}
-                      </span>
-                    </button>
-                  ))}
+              </div>
+
+              {/* 3 Citizen Steps */}
+              <div className="space-y-2.5">
+                <div className="p-2.5 rounded-2xl bg-black/[0.02] border border-black/5 flex items-start gap-2.5">
+                  <div className="w-6 h-6 rounded-full bg-amber-100 text-amber-800 font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">
+                    1
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-[#111111]">
+                      {language === 'mr' ? 'आधार बायोमेट्रिक पडताळणी' : language === 'hi' ? 'आधार बायोमेट्रिक सत्यापन' : 'Aadhaar Biometric Login'}
+                    </h4>
+                    <p className="text-[11px] text-[#4a4a4a] leading-tight mt-0.5">
+                      {language === 'mr' ? 'कोणताही पासवर्ड किंवा कागदपत्र अपलोड न करता सुरक्षित प्रवेश.' : language === 'hi' ? 'बिना पासवर्ड या दस्तावेज अपलोड किए सुरक्षित लॉगिन।' : 'Instant secure login without passwords or document scans.'}
+                    </p>
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 gap-1.5 mt-1.5">
-                  {(departmentNodes || []).slice(3, 5).map(dept => (
-                    <button
-                      key={dept.id}
-                      type="button"
-                      onClick={() => triggerPacketSimulation(dept.id)}
-                      className={`p-2.5 rounded-xl text-left border text-[11px] font-semibold transition-all ${
-                        selectedDeptId === dept.id
-                          ? 'bg-[#141414] text-white border-[#141414] shadow-sm'
-                          : 'bg-white/80 text-[#333333] border-black/8 hover:bg-white hover:border-black/20'
-                      }`}
-                    >
-                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center mb-1 ${
-                        selectedDeptId === dept.id ? 'bg-white/20 text-white' : 'bg-black/5 text-emerald-700'
-                      }`}>
-                        {renderDeptIcon(dept.id, "w-3.5 h-3.5")}
-                      </div>
-                      <span className="truncate block font-medium">
-                        {language === 'mr' ? (dept.nameMr || dept.name || '').split(' ')[0] : (dept.name || '').split(' ')[0]}
-                      </span>
-                    </button>
-                  ))}
+
+                <div className="p-2.5 rounded-2xl bg-black/[0.02] border border-black/5 flex items-start gap-2.5">
+                  <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">
+                    2
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-[#111111]">
+                      {language === 'mr' ? 'आपोआप माहिती जोडणी' : language === 'hi' ? 'स्वचालित डेटा सत्यापन' : 'Automatic Government Data Fetch'}
+                    </h4>
+                    <p className="text-[11px] text-[#4a4a4a] leading-tight mt-0.5">
+                      {language === 'mr' ? '७/१२ दाखला, उत्पन्न व जात प्रमाणपत्र थेट सरकारी नोंदींमधून येते.' : language === 'hi' ? '7/12 खतौनी, आय और जाति प्रमाण पत्र सीधे सरकारी रिकॉर्ड से आता है।' : 'Land records (7/12), income, and caste records auto-verify from government databases.'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-2.5 rounded-2xl bg-black/[0.02] border border-black/5 flex items-start gap-2.5">
+                  <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-800 font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">
+                    3
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-[#111111]">
+                      {language === 'mr' ? 'पूर्ण संमती व गोपनीयता' : language === 'hi' ? 'पूर्ण सहमति और गोपनीयता' : 'Your Consent, Your Control'}
+                    </h4>
+                    <p className="text-[11px] text-[#4a4a4a] leading-tight mt-0.5">
+                      {language === 'mr' ? 'तुमच्या पूर्वपरवानगीशिवाय कोणताही विभाग तुमची माहिती पाहू शकत नाही.' : language === 'hi' ? 'आपकी अनुमति के बिना कोई भी विभाग आपकी जानकारी नहीं देख सकता।' : 'No department can access your records without your explicit digital consent.'}
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              {/* Selected Department Live Canonical Payload Box */}
-              <div className="mt-3 p-3.5 rounded-2xl bg-black/[0.03] border border-black/8 space-y-2 relative">
-                {isSimulatingPacket && (
-                  <div className="absolute inset-0 bg-white/80 backdrop-blur-xs flex items-center justify-center rounded-2xl z-10">
-                    <div className="flex items-center gap-2 text-xs font-semibold text-emerald-800">
-                      <Zap className="w-4 h-4 animate-spin text-emerald-600" />
-                      <span>Fetching Canonical Proof via Peer Adapter...</span>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center">
-                      {renderDeptIcon(activeNode.id, "w-3.5 h-3.5")}
-                    </div>
-                    <span className="text-xs font-bold text-[#111111]">
-                      {language === 'mr' ? activeNode.nameMr : activeNode.name}
-                    </span>
-                  </div>
-                  <span className="text-[10px] font-mono text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded font-bold">
-                    {activeNode.code}
-                  </span>
-                </div>
-
-                <div className="text-[11px] text-[#4a4a4a] space-y-1">
-                  <div className="flex justify-between text-[10.5px]">
-                    <span className="text-[#5c5c5c]">Schema Standard:</span>
-                    <span className="font-mono text-[#111111] font-semibold">{activeNode.schema}</span>
-                  </div>
-                  <div className="flex justify-between text-[10.5px]">
-                    <span className="text-[#5c5c5c]">Registry Volume:</span>
-                    <span className="text-[#111111] font-semibold">{activeNode.records}</span>
-                  </div>
-                </div>
-
-                <div className="p-2.5 rounded-xl bg-white border border-black/8 text-[11px] text-[#141414]">
-                  <span className="text-[10px] uppercase font-bold text-emerald-800 tracking-wider block mb-0.5">
-                    Live Verified Record:
-                  </span>
-                  <p className="font-mono text-[10.5px] text-[#222222] break-all">
-                    {activeNode.sampleProof}
-                  </p>
-                </div>
+              {/* Connected Departments Badge Strip */}
+              <div className="mt-3 pt-2.5 border-t border-black/8 flex items-center justify-between text-[10.5px]">
+                <span className="text-[#5c5c5c] font-medium">
+                  {language === 'mr' ? 'जोडलेले सरकारी विभाग:' : language === 'hi' ? 'जुड़े सरकारी विभाग:' : 'Connected State Depts:'}
+                </span>
+                <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                  {language === 'mr' ? 'महसूल • शिक्षण • भूमी अभिलेख • परिवहन' : language === 'hi' ? 'राजस्व • शिक्षा • भूमि • परिवहन' : 'Revenue • Education • Land • Transport'}
+                </span>
               </div>
             </div>
 

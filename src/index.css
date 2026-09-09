@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+.font-marathi-calligraphy {
+  font-family: 'Amita', 'Tillana', 'Yatra One', 'Rozha One', 'Kalam', 'Eczar', serif;
+  letter-spacing: 0.02em;
+}
+
 :root {
   --ink: #111111;
   --muted: #5c5c5c;

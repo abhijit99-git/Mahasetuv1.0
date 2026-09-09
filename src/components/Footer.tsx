@@ -35,18 +35,20 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
           {/* Column 1: Brand & State Mission (Span 4) */}
           <div className="lg:col-span-4 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#141414] text-white flex items-center justify-center font-bold text-lg shadow-sm">
-                <ShieldCheck className="w-6 h-6" />
+              <div className="w-12 h-12 shrink-0 flex items-center justify-center overflow-hidden">
+                <img
+                  src="/mahasetu-logo.png"
+                  alt="Mahasetu Logo"
+                  className="w-full h-full object-contain"
+                  referrerPolicy="no-referrer"
+                />
               </div>
               <div>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#5c5c5c] block">
+                <span className="text-[11px] font-medium text-[#5c5c5c] block mb-0.5">
                   Government of Maharashtra
                 </span>
-                <div className="text-xl font-bold tracking-tight text-[#111111] flex items-center gap-2">
-                  <span>Mahasetu</span>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-black/5 border border-black/8 font-normal text-[#5c5c5c]">
-                    महासेतू
-                  </span>
+                <div className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111111] font-marathi-calligraphy">
+                  महासेतू
                 </div>
               </div>
             </div>

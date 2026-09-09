@@ -49,8 +49,13 @@ export const WelcomeGreetingModal: React.FC<Props> = ({
 
             {/* Emblem / Badge */}
             <div className="flex justify-center items-center gap-3 mb-3">
-              <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-md flex items-center justify-center shadow-lg">
-                <span className="text-2xl font-bold text-amber-400">सत्यमेव जयते</span>
+              <div className="w-24 h-24 flex items-center justify-center overflow-hidden">
+                <img
+                  src="/mahasetu-logo.png"
+                  alt="Mahasetu Golden Emblem"
+                  className="w-full h-full object-contain"
+                  referrerPolicy="no-referrer"
+                />
               </div>
             </div>
 
@@ -59,8 +64,9 @@ export const WelcomeGreetingModal: React.FC<Props> = ({
               <span>Government of Maharashtra Digital Portal</span>
             </div>
 
-            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white mt-1">
-              Welcome to <span className="text-amber-400">Mahasetu</span> (महासेतू)
+            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white mt-1 flex items-center justify-center gap-2">
+              <span>Welcome to</span>
+              <span className="text-amber-400 font-marathi-calligraphy text-3xl sm:text-5xl">महासेतू</span>
             </h1>
             <p className="text-xs sm:text-sm text-gray-300 max-w-md mx-auto mt-2 leading-relaxed">
               Unified Digital Interoperability & Identity Gateway for Maharashtra Citizens

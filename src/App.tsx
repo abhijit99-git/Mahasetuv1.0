@@ -27,7 +27,7 @@ import { ShieldCheck, Fingerprint, Sparkles, ArrowUp } from 'lucide-react';
 
 export default function App() {
   const [language, setLanguage] = useState<Language>('en');
-  const [activeTab, setActiveTab] = useState<'schemes' | 'citizen' | 'consent' | 'audit' | 'ai' | 'officer' | 'gateway' | 'supabase'>('schemes');
+  const [activeTab, setActiveTab] = useState<'schemes' | 'citizen' | 'consent' | 'audit' | 'ai' | 'officer'>('schemes');
   
   // Welcome Greeting Overlay state (opens automatically on site load)
   const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState(true);
@@ -324,16 +324,6 @@ export default function App() {
               onOpenAuthModal={() => setIsAuthModalOpen(true)}
             />
           )}
-
-          {/* Tab 6: Interoperability Gateway & Adapters */}
-          {activeTab === 'gateway' && (
-            <GatewayInspector language={language} />
-          )}
-
-          {/* Tab 7: Supabase Hub & Production Architecture */}
-          {activeTab === 'supabase' && (
-            <SupabaseHub language={language} />
-          )}
         </main>
       </div>
 
@@ -355,19 +345,6 @@ export default function App() {
         onOfficerAuthenticated={handleOfficerAuthenticated}
         currentLanguage={language}
       />
-
-      {/* Floating Return to Hero Button */}
-      <div className="fixed bottom-16 right-6 z-40">
-        <button
-          type="button"
-          onClick={handleScrollToHero}
-          className="px-3 py-2 rounded-full bg-white/90 hover:bg-white text-[#111111] border border-black/10 backdrop-blur-md shadow-lg text-xs font-medium flex items-center gap-1.5 transition-all hover:scale-105"
-          title="Return to Hero"
-        >
-          <ArrowUp className="w-3.5 h-3.5 text-[#141414]" />
-          <span className="hidden sm:inline">Hero View</span>
-        </button>
-      </div>
 
       {/* Official Government Standard Frosted Footer */}
       <Footer

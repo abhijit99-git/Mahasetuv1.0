@@ -25,8 +25,8 @@ import { CitizenUser, OfficerUser } from '../types.ts';
 import { Language, TRANSLATIONS } from '../locales.ts';
 
 interface Props {
-  activeTab: 'schemes' | 'citizen' | 'consent' | 'audit' | 'ai' | 'officer' | 'gateway' | 'supabase';
-  setActiveTab: (tab: 'schemes' | 'citizen' | 'consent' | 'audit' | 'ai' | 'officer' | 'gateway' | 'supabase') => void;
+  activeTab: 'schemes' | 'citizen' | 'consent' | 'audit' | 'ai' | 'officer';
+  setActiveTab: (tab: 'schemes' | 'citizen' | 'consent' | 'audit' | 'ai' | 'officer') => void;
   currentUser: CitizenUser | OfficerUser | null;
   onOpenAuthModal: () => void;
   onLogout: () => void;
@@ -54,23 +54,23 @@ export const Header: React.FC<Props> = ({
         <div className="flex items-center justify-between py-3 border-b border-black/5">
           {/* Logo & Identity */}
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-[#141414] rounded-xl flex items-center justify-center text-white shrink-0 shadow-sm">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M12 2.5 L21.5 12 L12 21.5 L2.5 12 Z" />
-              </svg>
+            <div className="w-12 h-12 shrink-0 flex items-center justify-center overflow-hidden">
+              <img
+                src="/mahasetu-logo.png"
+                alt="Mahasetu Logo"
+                className="w-full h-full object-contain hover:scale-105 transition-transform"
+                referrerPolicy="no-referrer"
+              />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#5c5c5c] bg-black/5 px-2 py-0.5 rounded-full border border-black/5">
-                  {t.govDepartment}
-                </span>
-                <span className="text-[11px] text-[#5c5c5c] hidden sm:inline-block">
-                  Digital Public Infrastructure Mesh
+                <span className="text-[11px] text-[#5c5c5c] font-medium hidden sm:inline-block">
+                  Government of Maharashtra • Digital Public Infrastructure
                 </span>
               </div>
               <div className="flex items-baseline gap-2 mt-0.5">
-                <h1 className="text-lg font-semibold tracking-tight text-[#111111]">
-                  {t.portalTitle}
+                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111111] font-marathi-calligraphy">
+                  महासेतू
                 </h1>
                 <span className="text-[10.5px] tracking-wider text-[#5c5c5c] uppercase hidden md:inline-block">
                   v1.0.4
@@ -89,19 +89,6 @@ export const Header: React.FC<Props> = ({
             </div>
 
             {/* Language Switcher */}
-            <button
-              type="button"
-              onClick={() => {
-                const el = document.getElementById('hero');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-                else window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white border border-black/8 text-[11.5px] font-medium text-[#111111] transition-all shadow-xs"
-              title="Return to Hero Screen"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-              <span>Hero</span>
-            </button>
 
             <div className="flex items-center bg-black/5 p-0.5 rounded-xl border border-black/5 text-xs font-medium">
               <button
@@ -271,32 +258,6 @@ export const Header: React.FC<Props> = ({
           >
             <User className="w-3.5 h-3.5" />
             <span>{t.navOfficer}</span>
-          </button>
-
-          <button
-            id="tab-nav-gateway"
-            onClick={() => setActiveTab('gateway')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
-              activeTab === 'gateway'
-                ? 'bg-[#141414] text-white font-semibold shadow-xs'
-                : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
-            }`}
-          >
-            <Layers className="w-3.5 h-3.5" />
-            <span>{t.navGateway}</span>
-          </button>
-
-          <button
-            id="tab-nav-supabase"
-            onClick={() => setActiveTab('supabase')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
-              activeTab === 'supabase'
-                ? 'bg-[#141414] text-white font-semibold shadow-xs'
-                : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
-            }`}
-          >
-            <Database className="w-3.5 h-3.5" />
-            <span>{t.navSupabase}</span>
           </button>
         </nav>
       </div>
