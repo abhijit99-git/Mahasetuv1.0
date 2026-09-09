@@ -130,18 +130,22 @@ async function startServer() {
     const supabase = getSupabaseClient();
     const supabaseConfigured = !!supabase;
 
-    // Attempt Supabase Auth OTP dispatch if Supabase client is active
+    const siteUrl = (req.headers.origin as string) || (req.headers.referer as string) || process.env.RENDER_EXTERNAL_URL || 'http://localhost:3000';
+    const redirectTarget = `${siteUrl.replace(/\/$/, '')}/?verify_aadhaar=${cleanUid}&verify_email=${encodeURIComponent(normalizedEmail)}&otp=${generatedOtp}`;
+
+    // Attempt Supabase Auth OTP / Magic Link dispatch if Supabase client is active
     try {
       if (supabase) {
         const { error: supabaseErr } = await supabase.auth.signInWithOtp({
           email: normalizedEmail,
           options: {
+            emailRedirectTo: redirectTarget,
             data: { aadhaarNumber: cleanUid }
           }
         });
         if (!supabaseErr) {
           emailSent = true;
-          console.log(`[SUPABASE AUTH] Successfully triggered Supabase Auth OTP email to ${normalizedEmail}`);
+          console.log(`[SUPABASE AUTH] Successfully triggered Supabase Auth Magic Link email to ${normalizedEmail}`);
         } else {
           supabaseErrorMsg = supabaseErr.message;
           console.warn(`[SUPABASE AUTH] Supabase Auth OTP note: ${supabaseErr.message}`);
@@ -165,7 +169,7 @@ async function startServer() {
           body: JSON.stringify({
             from: 'onboarding@resend.dev',
             to: [normalizedEmail],
-            subject: 'Your Mahasetu Aadhaar Verification OTP Code',
+            subject: 'Verify your Email to Log In to Mahasetu Platform',
             html: `
               <div style="font-family: Arial, sans-serif; max-width: 550px; margin: 0 auto; padding: 24px; border: 1px solid #e0e0e0; border-radius: 16px; background-color: #ffffff;">
                 <div style="background-color: #111815; padding: 16px; border-radius: 12px; text-align: center; color: #ffffff; margin-bottom: 20px;">
@@ -174,12 +178,17 @@ async function startServer() {
                 </div>
                 <p style="font-size: 14px; color: #333333; margin-bottom: 12px;">Namaskar,</p>
                 <p style="font-size: 14px; color: #333333; line-height: 1.5;">
-                  Your One-Time Password (OTP) for authenticating your Aadhaar (<strong>XXXX-XXXX-${cleanUid.slice(8, 12)}</strong>) on the Mahasetu Interoperability Portal is:
+                  Click the button below to verify your email and sign in to your <strong>Mahasetu Citizen Profile</strong> (Aadhaar: <strong>XXXX-XXXX-${cleanUid.slice(8, 12)}</strong>):
                 </p>
-                <div style="font-size: 32px; font-weight: bold; font-family: monospace; letter-spacing: 8px; color: #047857; background-color: #ecfdf5; border: 2px dashed #a7f3d0; padding: 16px; text-align: center; border-radius: 12px; margin: 20px 0;">
-                  ${generatedOtp}
+                <div style="text-align: center; margin: 24px 0;">
+                  <a href="${redirectTarget}" style="background-color: #047857; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 15px; display: inline-block; shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                    ✅ Verify Email & Log In to Mahasetu
+                  </a>
                 </div>
-                <p style="font-size: 12px; color: #666666;">This code is valid for 10 minutes. Please do not share this OTP with anyone.</p>
+                <p style="font-size: 13px; color: #555555; text-align: center;">
+                  Or enter this 6-digit OTP code manually: <strong style="font-family: monospace; font-size: 16px; color: #047857;">${generatedOtp}</strong>
+                </p>
+                <p style="font-size: 12px; color: #888888; margin-top: 20px; text-align: center;">This verification link and OTP code are valid for 10 minutes.</p>
                 <hr style="border: none; border-top: 1px solid #eeeeee; margin: 20px 0;" />
                 <p style="font-size: 11px; color: #999999; text-align: center;">MahaIT & Govt of Maharashtra Digital Platform Services</p>
               </div>
@@ -211,7 +220,7 @@ async function startServer() {
           await transporter.sendMail({
             from: `"Mahasetu Portal" <${fromAddress}>`,
             to: normalizedEmail,
-            subject: 'Your Mahasetu Aadhaar Verification OTP Code',
+            subject: 'Verify your Email to Log In to Mahasetu Platform',
             html: `
               <div style="font-family: Arial, sans-serif; max-width: 550px; margin: 0 auto; padding: 24px; border: 1px solid #e0e0e0; border-radius: 16px; background-color: #ffffff;">
                 <div style="background-color: #111815; padding: 16px; border-radius: 12px; text-align: center; color: #ffffff; margin-bottom: 20px;">
@@ -220,12 +229,17 @@ async function startServer() {
                 </div>
                 <p style="font-size: 14px; color: #333333; margin-bottom: 12px;">Namaskar,</p>
                 <p style="font-size: 14px; color: #333333; line-height: 1.5;">
-                  Your One-Time Password (OTP) for authenticating your Aadhaar (<strong>XXXX-XXXX-${cleanUid.slice(8, 12)}</strong>) on the Mahasetu Interoperability Portal is:
+                  Click the button below to verify your email and sign in to your <strong>Mahasetu Citizen Profile</strong> (Aadhaar: <strong>XXXX-XXXX-${cleanUid.slice(8, 12)}</strong>):
                 </p>
-                <div style="font-size: 32px; font-weight: bold; font-family: monospace; letter-spacing: 8px; color: #047857; background-color: #ecfdf5; border: 2px dashed #a7f3d0; padding: 16px; text-align: center; border-radius: 12px; margin: 20px 0;">
-                  ${generatedOtp}
+                <div style="text-align: center; margin: 24px 0;">
+                  <a href="${redirectTarget}" style="background-color: #047857; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 15px; display: inline-block;">
+                    ✅ Verify Email & Log In to Mahasetu
+                  </a>
                 </div>
-                <p style="font-size: 12px; color: #666666;">This code is valid for 10 minutes. Please do not share this OTP with anyone.</p>
+                <p style="font-size: 13px; color: #555555; text-align: center;">
+                  Or enter this 6-digit OTP code manually: <strong style="font-family: monospace; font-size: 16px; color: #047857;">${generatedOtp}</strong>
+                </p>
+                <p style="font-size: 12px; color: #888888; margin-top: 20px; text-align: center;">This verification link and OTP code are valid for 10 minutes.</p>
                 <hr style="border: none; border-top: 1px solid #eeeeee; margin: 20px 0;" />
                 <p style="font-size: 11px; color: #999999; text-align: center;">MahaIT & Govt of Maharashtra Digital Platform Services</p>
               </div>

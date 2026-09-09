@@ -155,15 +155,15 @@ export const AadhaarBiometricAuthModal: React.FC<Props> = ({
           setUnconfiguredOtp(data.unconfiguredOtpCode || '');
           setOtpInput(''); // Keep blank so user must enter OTP manually
           if (data.emailSent) {
-            setSuccessMsg(`Verification link & OTP code dispatched to ${emailInput}. Check your inbox.`);
+            setSuccessMsg(`📩 Verification link dispatched to ${emailInput}! Open your inbox and click "Verify Email & Log In" to enter automatically.`);
           } else if (data.resendNotice) {
-            setSuccessMsg(`Resend Free-Tier Restriction: Resend key is linked to monkeyydlufyy3121@gmail.com.`);
+            setSuccessMsg(`Resend Free-Tier Notice: Resend key is registered to monkeyydlufyy3121@gmail.com.`);
           } else if (data.supabaseError && data.supabaseError.toLowerCase().includes('error sending')) {
-            setSuccessMsg(`Supabase SMTP Note: ${data.supabaseError}.`);
+            setSuccessMsg(`Supabase Notice: ${data.supabaseError}. Check your email inbox for verification link.`);
           } else if (data.supabaseError) {
             setSuccessMsg(`Supabase Auth Notice: ${data.supabaseError}`);
           } else {
-            setSuccessMsg(`Aadhaar verification OTP generated for ${emailInput}.`);
+            setSuccessMsg(`Verification email dispatched to ${emailInput}.`);
           }
           setStep('OTP');
         } else {

@@ -56,24 +56,50 @@ export default function App() {
       .catch(() => {});
   }, []);
 
+  // Restore logged-in user session from localStorage on app load
+  useEffect(() => {
+    try {
+      const savedUser = localStorage.getItem('mahasetu_active_user');
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser);
+        if (parsed && parsed.id) {
+          setCurrentUser(parsed);
+          setActiveTab(parsed.role === 'officer' ? 'officer' : 'citizen');
+        }
+      }
+    } catch (e) {
+      console.warn('Could not restore session from localStorage:', e);
+    }
+  }, []);
+
   // Listen for Supabase Magic Link / Auth Callback redirects
   useEffect(() => {
     const handleAuthCallback = async () => {
       const hash = window.location.hash;
       const search = window.location.search;
 
-      if (hash.includes('access_token') || hash.includes('verify-supabase-session') || search.includes('code=')) {
+      if (
+        hash.includes('access_token') ||
+        hash.includes('verify-supabase-session') ||
+        search.includes('code=') ||
+        search.includes('verify_email=') ||
+        search.includes('verify_aadhaar=')
+      ) {
         const params = new URLSearchParams(hash.replace(/^#/, '') || search.replace(/^\?/, ''));
         const accessToken = params.get('access_token');
-        const email = params.get('email');
+        const email = params.get('email') || params.get('verify_email');
+        const aadhaarNumber = params.get('aadhaar') || params.get('verify_aadhaar');
+        const otp = params.get('otp');
 
-        if (accessToken || email) {
+        if (accessToken || email || aadhaarNumber) {
           try {
             const res = await fetch('/api/auth/verify-supabase-session', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 email,
+                aadhaarNumber,
+                otp,
                 accessToken
               })
             });
@@ -96,18 +122,34 @@ export default function App() {
 
   const handleCitizenAuthenticated = (citizen: CitizenUser) => {
     setCurrentUser(citizen);
+    try {
+      localStorage.setItem('mahasetu_active_user', JSON.stringify(citizen));
+    } catch (e) {}
     setIsAuthModalOpen(false);
     setActiveTab('citizen');
   };
 
   const handleOfficerAuthenticated = (officer: OfficerUser) => {
     setCurrentUser(officer);
+    try {
+      localStorage.setItem('mahasetu_active_user', JSON.stringify(officer));
+    } catch (e) {}
     setIsAuthModalOpen(false);
     setActiveTab('officer');
   };
 
+  const handleUpdateUser = (updatedUser: CitizenUser) => {
+    setCurrentUser(updatedUser);
+    try {
+      localStorage.setItem('mahasetu_active_user', JSON.stringify(updatedUser));
+    } catch (e) {}
+  };
+
   const handleLogout = () => {
     setCurrentUser(null);
+    try {
+      localStorage.removeItem('mahasetu_active_user');
+    } catch (e) {}
     setIsAuthModalOpen(true);
   };
 
@@ -206,7 +248,7 @@ export default function App() {
               language={language}
               onViewAudit={() => setActiveTab('audit')}
               onViewConsents={() => setActiveTab('consent')}
-              onUpdateCitizen={(updated) => setCurrentUser(updated)}
+              onUpdateCitizen={(updated) => handleUpdateUser(updated)}
             />
           )}
 
