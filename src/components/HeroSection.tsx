@@ -353,13 +353,6 @@ export const HeroSection: React.FC<Props> = ({
             </button>
             <button
               type="button"
-              onClick={() => handleNavClick('gateway')}
-              className="px-3 py-1.5 rounded-xl text-xs font-semibold text-[#111111] hover:bg-black/5 transition-colors"
-            >
-              Gateway Topology
-            </button>
-            <button
-              type="button"
               onClick={() => handleNavClick('officer')}
               className="px-3 py-1.5 rounded-xl text-xs font-semibold text-[#111111] hover:bg-black/5 transition-colors"
             >
