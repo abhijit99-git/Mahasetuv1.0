@@ -13,12 +13,12 @@ Government of Maharashtra operates dozens of departmental digital platforms (e.g
 
 **Mahasetu (महासेतू)** solves this fragmentation not by building a risky, vulnerable "mega-database" of citizen records, but by introducing a **non-invasive, federated interoperability and consent-driven middleware layer**.
 
-### 🌟 Core Architectural Tenet
+###  Core Architectural Tenet
 > **"Centralize consent, canonical standards, workflow orchestration, and immutable auditability — NEVER centralize every citizen's private records."**
 
 ---
 
-## 🚀 Key Features
+##  Key Features
 
 1. **Aadhaar Biometric Authentication Only**:
    - Strictly authenticates citizens and department officers via 12-digit Aadhaar UID verification.
@@ -103,7 +103,7 @@ Government of Maharashtra operates dozens of departmental digital platforms (e.g
 
 ---
 
-## 🔑 Required Credentials & Setup
+##  Required Credentials & Setup
 
 To run Mahasetu in full production mode:
 
@@ -122,7 +122,7 @@ To run Mahasetu in full production mode:
 
 ---
 
-## 🏆 Smart India Hackathon (SIH26129) Presentation Checklist
+##  Smart India Hackathon (SIH26129) Presentation Checklist
 
 - [x] **Federated Architecture**: Demonstrates cross-department data exchange without copying citizen records into a central database.
 - [x] **Aadhaar Biometric Verification**: Realistic biometric capture interface with quality rating and UIDAI Auth XML 2.5 PID block.
