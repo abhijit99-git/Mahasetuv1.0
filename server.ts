@@ -42,7 +42,6 @@ import {
 } from './server/supabase.ts';
 
 dotenv.config({ path: path.join(process.cwd(), '.env'), override: true });
-dotenv.config({ path: path.join(process.cwd(), '.env.example') });
 
 process.on('unhandledRejection', (reason) => {
   console.warn('[SERVER WARNING] Unhandled Rejection:', reason);
