@@ -14,68 +14,270 @@
 import { GoogleGenAI, Type } from '@google/genai';
 import { findRelevantSchemesForAI } from './schemes.ts';
 import { WelfareScheme } from '../src/types.ts';
+import {
+  MAHASETU_SERVICES_KB,
+  MAHASETU_PLATFORM_CORE_KB,
+  isQueryOutOfScope,
+  GovernmentServiceKnowledge
+} from './knowledgeBase.ts';
+
+interface KeyPoolMetrics {
+  key: string;
+  masked: string;
+  cooldownUntil: number;
+  requestsServed: number;
+  rateLimitHits: number;
+  lastUsedAt: number;
+}
+
+const keyPoolMap = new Map<string, KeyPoolMetrics>();
+
+/**
+ * Returns all configured Gemini API keys across primary, comma-separated, and numbered team variables.
+ */
+export function getAvailableGeminiKeys(): string[] {
+  const rawList: string[] = [];
+
+  // 1. Check comma/newline/semicolon separated pool variable
+  if (process.env.GEMINI_API_KEYS) {
+    const parts = process.env.GEMINI_API_KEYS.split(/[,\n;]/).map(s => s.trim()).filter(Boolean);
+    rawList.push(...parts);
+  }
+
+  // 2. Check individual primary & team numbered variables
+  const candidateVars = [
+    process.env.GEMINI_API_KEY,
+    process.env.GEMINI_API_KEY_1,
+    process.env.GEMINI_API_KEY_2,
+    process.env.GEMINI_API_KEY_3,
+    process.env.GEMINI_API_KEY_4,
+    process.env.GEMINI_API_KEY_5,
+    process.env.GEMINI_API_KEY_BACKUP,
+  ];
+
+  for (const val of candidateVars) {
+    if (val && typeof val === 'string' && val.trim()) {
+      rawList.push(val.trim());
+    }
+  }
+
+  // Deduplicate and filter out placeholders
+  const uniqueKeys: string[] = [];
+  for (const k of rawList) {
+    if (
+      !uniqueKeys.includes(k) &&
+      k !== 'MY_GEMINI_API_KEY' &&
+      k.length >= 12 &&
+      !k.startsWith('YOUR_') &&
+      !k.includes('placeholder')
+    ) {
+      uniqueKeys.push(k);
+    }
+  }
+
+  return uniqueKeys;
+}
+
+export function hasConfiguredGeminiKeys(): boolean {
+  return getAvailableGeminiKeys().length > 0;
+}
+
+/**
+ * Provides live telemetry on pool status, active keys, and cooling down keys.
+ */
+export function getGeminiPoolStatus() {
+  const keys = getAvailableGeminiKeys();
+  const now = Date.now();
+
+  const statuses = keys.map((key, idx) => {
+    let metrics = keyPoolMap.get(key);
+    if (!metrics) {
+      const masked = key.length > 8 ? `${key.slice(0, 6)}...${key.slice(-4)}` : '****';
+      metrics = {
+        key,
+        masked,
+        cooldownUntil: 0,
+        requestsServed: 0,
+        rateLimitHits: 0,
+        lastUsedAt: 0,
+      };
+      keyPoolMap.set(key, metrics);
+    }
+
+    const isCoolingDown = metrics.cooldownUntil > now;
+    const cooldownSeconds = isCoolingDown ? Math.ceil((metrics.cooldownUntil - now) / 1000) : 0;
+
+    return {
+      index: idx + 1,
+      role: idx === 0 ? 'DEFAULT_PRIMARY' : `FALLBACK_${idx}`,
+      masked: metrics.masked,
+      status: isCoolingDown ? 'RATE_LIMITED_COOLING_DOWN' : 'READY',
+      cooldownSecondsRemaining: cooldownSeconds,
+      requestsServed: metrics.requestsServed,
+      rateLimitHits: metrics.rateLimitHits,
+    };
+  });
+
+  return {
+    totalConfiguredKeys: keys.length,
+    defaultKey: statuses[0]?.masked || 'None',
+    fallbackCount: Math.max(0, keys.length - 1),
+    activeKeys: statuses.filter(s => s.status === 'READY').length,
+    coolingDownKeys: statuses.filter(s => s.status !== 'READY').length,
+    poolRedundancyEnabled: keys.length > 1,
+    keys: statuses,
+  };
+}
 
 function getGeminiClient(): GoogleGenAI | null {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || apiKey === 'MY_GEMINI_API_KEY' || apiKey.trim() === '') {
+  const keys = getAvailableGeminiKeys();
+  if (keys.length === 0) {
     return null;
   }
   return new GoogleGenAI({
-    apiKey,
+    apiKey: keys[0],
     httpOptions: {
-      timeout: 10000,
+      timeout: 12000,
       headers: {
-        'User-Agent': 'aistudio-build',
+        'User-Agent': 'aistudio-build-mahasetu-mesh',
       },
     },
   });
 }
 
 /**
- * Robust caller with multi-model fallback and fast failover when upstream is experiencing high-demand spikes
+ * Robust caller with Multi-Key Pool failover and Multi-Model fallback:
+ * 1. Checks all configured team keys (Key 1 as Default; Keys 2, 3, 4 as sequential Fallbacks)
+ * 2. If a key hits 429 / RESOURCE_EXHAUSTED / quota limit, marks 60s cooldown and fails over to next key
+ * 3. On each key, tries gemini-3.8-flash -> gemini-3.6-flash -> gemini-3.1-flash-lite
+ */
+export async function callGeminiWithKeyPoolAndModelFallback<T>(
+  executor: (ai: GoogleGenAI, modelName: string) => Promise<T>
+): Promise<T> {
+  const keys = getAvailableGeminiKeys();
+  if (keys.length === 0) {
+    throw new Error('NO_GEMINI_API_KEY_CONFIGURED');
+  }
+
+  const now = Date.now();
+
+  // Sort keys: ready keys in defined order (Default first, then Fallbacks), cooling down keys at the end
+  const candidateKeys = [...keys].sort((a, b) => {
+    const ma = keyPoolMap.get(a) || { cooldownUntil: 0 };
+    const mb = keyPoolMap.get(b) || { cooldownUntil: 0 };
+    const aCool = ma.cooldownUntil > now;
+    const bCool = mb.cooldownUntil > now;
+    if (!aCool && bCool) return -1;
+    if (aCool && !bCool) return 1;
+    return keys.indexOf(a) - keys.indexOf(b);
+  });
+
+  const models = ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.1-flash-lite'];
+  let lastError: any = null;
+
+  for (let keyIdx = 0; keyIdx < candidateKeys.length; keyIdx++) {
+    const key = candidateKeys[keyIdx];
+    let metrics = keyPoolMap.get(key);
+    if (!metrics) {
+      const masked = key.length > 8 ? `${key.slice(0, 6)}...${key.slice(-4)}` : '****';
+      metrics = {
+        key,
+        masked,
+        cooldownUntil: 0,
+        requestsServed: 0,
+        rateLimitHits: 0,
+        lastUsedAt: 0,
+      };
+      keyPoolMap.set(key, metrics);
+    }
+
+    const ai = new GoogleGenAI({
+      apiKey: key,
+      httpOptions: {
+        timeout: 12000,
+        headers: {
+          'User-Agent': 'aistudio-build-mahasetu-mesh',
+        },
+      },
+    });
+
+    for (const model of models) {
+      try {
+        metrics.lastUsedAt = Date.now();
+        const result = await Promise.race([
+          executor(ai, model),
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error('UPSTREAM_HIGH_DEMAND_TIMEOUT')), 12000)
+          )
+        ]);
+
+        // Success on this key & model
+        metrics.requestsServed++;
+        metrics.cooldownUntil = 0;
+        return result;
+      } catch (err: any) {
+        lastError = err;
+        const errMsg = err?.message || String(err);
+        const isRateLimit =
+          errMsg.includes('429') ||
+          errMsg.includes('RESOURCE_EXHAUSTED') ||
+          errMsg.includes('quota') ||
+          errMsg.includes('Too Many Requests');
+
+        if (isRateLimit) {
+          metrics.rateLimitHits++;
+          // Put key in cooldown for 60 seconds
+          metrics.cooldownUntil = Date.now() + 60_000;
+          console.warn(
+            `[Mahasetu AI Pool] Key #${keyIdx + 1} (${metrics.masked}) hit rate limit (429/RESOURCE_EXHAUSTED). Failing over to next key in pool (${candidateKeys.length - keyIdx - 1} remaining)...`
+          );
+          // Break out of model loop to try the NEXT key in the pool immediately
+          break;
+        }
+
+        const isTransientModelError =
+          errMsg.includes('503') ||
+          errMsg.includes('high demand') ||
+          errMsg.includes('UNAVAILABLE') ||
+          errMsg.includes('spikes in demand') ||
+          errMsg.includes('try again later') ||
+          errMsg.includes('UPSTREAM_HIGH_DEMAND_TIMEOUT');
+
+        if (isTransientModelError) {
+          console.warn(`[Mahasetu AI] Model '${model}' on key #${keyIdx + 1} busy. Trying next model on same key...`);
+          continue;
+        }
+
+        // Invalid key or permission error: skip this key permanently for this session
+        const isAuthError =
+          errMsg.includes('API_KEY_INVALID') ||
+          errMsg.includes('PERMISSION_DENIED') ||
+          errMsg.includes('401') ||
+          errMsg.includes('403');
+
+        if (isAuthError) {
+          metrics.rateLimitHits += 99;
+          metrics.cooldownUntil = Date.now() + 3_600_000;
+          console.warn(`[Mahasetu AI Pool] Key #${keyIdx + 1} (${metrics.masked}) auth error. Skipping to next key.`);
+          break;
+        }
+
+        console.warn(`[Mahasetu AI] Model '${model}' notice on key #${keyIdx + 1}: ${errMsg}`);
+      }
+    }
+  }
+
+  throw lastError || new Error('ALL_GEMINI_KEYS_EXHAUSTED');
+}
+
+/**
+ * Backwards-compatible caller with single client fallback
  */
 async function callGeminiWithFallback<T>(
   ai: GoogleGenAI,
   executor: (modelName: string) => Promise<T>
 ): Promise<T> {
-  const models = ['gemini-3.8-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest'];
-  let lastError: any = null;
-
-  for (const model of models) {
-    try {
-      // Race against a 6000ms client-side window so the user is never kept waiting during upstream 503 spikes
-      const result = await Promise.race([
-        executor(model),
-        new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('UPSTREAM_HIGH_DEMAND_TIMEOUT')), 6000)
-        )
-      ]);
-      return result;
-    } catch (err: any) {
-      lastError = err;
-      const errMsg = err?.message || String(err);
-      const isTransient =
-        errMsg.includes('503') ||
-        errMsg.includes('429') ||
-        errMsg.includes('high demand') ||
-        errMsg.includes('UNAVAILABLE') ||
-        errMsg.includes('RESOURCE_EXHAUSTED') ||
-        errMsg.includes('spikes in demand') ||
-        errMsg.includes('try again later') ||
-        errMsg.includes('UPSTREAM_HIGH_DEMAND_TIMEOUT');
-
-      if (isTransient) {
-        console.warn(`[Mahasetu AI] Model '${model}' experiencing high demand / timeout. Trying failover model...`);
-        continue;
-      }
-
-      // Non-transient error, break to fallback
-      console.warn(`[Mahasetu AI] Model '${model}' notice: ${errMsg}`);
-      break;
-    }
-  }
-
-  throw lastError;
+  return callGeminiWithKeyPoolAndModelFallback((_ai, model) => executor(model));
 }
 
 export interface RelatedScheme {
@@ -98,6 +300,7 @@ export interface RelatedScheme {
 export interface ServiceNavigationResult {
   greeting?: string;
   isGreeting?: boolean;
+  isOutOfScope?: boolean;
   intent: string;
   department: string;
   departmentCode: string;
@@ -115,7 +318,10 @@ export interface ServiceNavigationResult {
   explanation: string;
   summary?: string;
   advice?: string;
+  profileEligibilityNote?: string;
+  matchedSchemes?: WelfareScheme[];
   relatedSchemes?: RelatedScheme[];
+  suggestedTopics?: string[];
   source?: 'gemini' | 'local_mesh_intelligence';
 }
 
@@ -184,28 +390,64 @@ function isGreetingOnly(text: string): boolean {
 }
 
 /**
- * Deterministic local NLP engine covering Maharashtra state services in Marathi, Hindi & English
+ * Deterministic local NLP engine covering Maharashtra state services in Marathi, Hindi & English,
+ * grounded in the Mahasetu Official Domain Knowledge Base and 4,709+ welfare schemes.
  */
 function resolveLocalNavigation(
   query: string,
-  preferredLanguage: string = 'Marathi'
+  preferredLanguage: string = 'Marathi',
+  citizenProfile?: any
 ): ServiceNavigationResult {
   const q = query.toLowerCase().trim();
   const lang = detectLanguage(query, preferredLanguage);
   const isMr = lang === 'Marathi';
   const isHi = lang === 'Hindi';
 
-  const greeting = isMr
-    ? 'नमस्कार! महासेतू डिजिटल सेवा मंचावर आपले सहर्ष स्वागत आहे.'
-    : isHi
-    ? 'नमस्ते! महासेतु डिजिटल नागरिक सेवा मंच में आपका स्वागत है।'
-    : 'Hello! Welcome to Mahasetu AI Citizen Sahayak.';
+  // 1. STRICT OUT-OF-SCOPE INTERCEPTION
+  if (isQueryOutOfScope(query)) {
+    return {
+      greeting: isMr ? 'सस्नेह नमस्कार!' : isHi ? 'नमस्ते!' : 'Hello!',
+      isGreeting: false,
+      isOutOfScope: true,
+      intent: 'OUT_OF_SCOPE',
+      serviceCode: 'OUT_OF_SCOPE',
+      serviceId: 'srv-out-of-scope',
+      department: isMr ? 'महासेतू नागरिक साहाय्यता नियंत्रण' : isHi ? 'महासेतु नागरिक सहायता नियंत्रण' : 'Mahasetu Citizen Assistance Guardrail',
+      departmentCode: 'OUT_OF_SCOPE',
+      serviceName: isMr ? 'विषयाशी असंबंधित विचारणा (Out of Scope)' : isHi ? 'विषय से बाहर का अनुरोध (Out of Scope)' : 'Request Out of Context',
+      requiredDocuments: [],
+      availableInMesh: [],
+      nextAction: 'REORIENT_TO_GOVT_SERVICES',
+      confidence: 1.0,
+      explanation: isMr
+        ? 'हा प्रश्न महासेतू आणि शासकीय सेवांच्या कक्षेबाहेरचा आहे. महासेतू एआय साहाय्यक केवळ महाराष्ट्र शासन व केंद्र सरकारच्या जनकल्याणकारी योजना, शासकीय दाखले (७/१२, जात, उत्पन्न, अधिवास), शेतकरी अनुदान, शिष्यवृत्ती आणि शासकीय सेवा पडताळणीसाठी सहाय्य करतो.'
+        : isHi
+        ? 'यह अनुरोध महासेतु और सरकारी सेवाओं के दायरे से बाहर है। महासेतु एआई सहायक केवल महाराष्ट्र सरकार और केंद्र सरकार की कल्याणकारी योजनाओं, प्रमाण पत्रों (7/12, जाति, आय, अधिवास), किसान अनुदान, छात्रवृत्ति एवं सरकारी सेवाओं के सत्यापन के लिए है।'
+        : 'Your request is out of context for Mahasetu. The AI Citizen Sahayak is dedicated strictly to Maharashtra and Central Government welfare schemes, official civil certificates (7/12 land extract, caste, income, domicile), farmer subsidies, and public service interoperability.',
+      advice: isMr
+        ? 'कृपया महाराष्ट्र शासनाच्या योजना, दाखले, शेतकरी मदत किंवा शिष्यवृत्ती या विषयाशी संबंधित प्रश्न विचारा. उदा. "लाडकी बहीण योजनेची पात्रता काय आहे?", "७/१२ उतारा कसा मिळवायचा?", किंवा "माझ्या उत्पन्नानुसार कोणत्या योजना मिळतील?".'
+        : isHi
+        ? 'कृपया महाराष्ट्र सरकार की योजनाओं, प्रमाण पत्रों, किसान सब्सिडी या छात्रवृत्ति से संबंधित प्रश्न पूछें।'
+        : 'Please ask questions related to government schemes, certificates, farmer assistance, or scholarships. E.g., "What are the eligibility criteria for Majhi Ladki Bahin Yojana?", "How to get a 7/12 land extract?", or "Which schemes match my profile?".',
+      suggestedTopics: isMr
+        ? ['माझी लाडकी बहीण योजना', '७/१२ डिजिटल उतारा', 'महाडीबीटी शिष्यवृत्ती', 'शिकाऊ वाहन परवाना', 'जात व उत्पन्न दाखला']
+        : isHi
+        ? ['लाड़की बहिन योजना', '7/12 भूमि रिकॉर्ड', 'महाडीबीटी छात्रवृत्ति', 'ड्राइविंग लाइसेंस', 'जाति एवं आय प्रमाण पत्र']
+        : ['Majhi Ladki Bahin Yojana', '7/12 Land Record', 'MahaDBT Scholarship', 'Learner Driving License', 'Caste & Income Certificate'],
+      source: 'local_mesh_intelligence'
+    };
+  }
 
-  // If the query is just a greeting or introduction:
+  // 2. GREETING ONLY
   if (isGreetingOnly(query)) {
     return {
-      greeting,
+      greeting: isMr
+        ? 'नमस्कार! महासेतू डिजिटल सेवा मंचावर आपले सहर्ष स्वागत आहे.'
+        : isHi
+        ? 'नमस्ते! महासेतु डिजिटल नागरिक सेवा मंच में आपका स्वागत है।'
+        : 'Hello! Welcome to Mahasetu AI Citizen Sahayak.',
       isGreeting: true,
+      isOutOfScope: false,
       intent: 'GREETING_AND_DISCOVERY',
       serviceCode: 'MAHASETU_DISCOVERY',
       serviceId: 'srv-discovery',
@@ -225,328 +467,212 @@ function resolveLocalNavigation(
       nextAction: '/services',
       confidence: 1.0,
       explanation: isMr
-        ? 'नमस्कार! मी आपला महासेतू एआय साहाय्यक आहे. मी आपल्याला महाराष्ट्र शासनाच्या विविध सेवांसाठी (उदा. शेतकरी सन्मान निधी ७/१२ उतारा, महाडीबीटी शिष्यवृत्ती, शिकाऊ वाहन परवाना, जात व उत्पन्न दाखला) थेट मदत करू शकतो. आपल्याला आज कोणती शासकीय सेवा हवी आहे?'
+        ? 'नमस्कार! मी आपला महासेतू एआय साहाय्यक आहे. मी आपल्याला महाराष्ट्र शासनाच्या विविध सेवांसाठी (उदा. माझी लाडकी बहीण योजना, शेतकरी सन्मान निधी व ७/१२ उतारा, महाडीबीटी शिष्यवृत्ती, शिकाऊ वाहन परवाना, जात व उत्पन्न दाखला) थेट मदत करू शकतो. आपल्याला आज कोणती शासकीय सेवा हवी आहे?'
         : isHi
-        ? 'नमस्ते! मैं आपका महासेतु एआई सहायक हूँ। मैं आपको महाराष्ट्र सरकार की विभिन्न सेवाओं (जैसे किसान सम्मान निधि 7/12 खतौनी, महाडीबीटी छात्रवृत्ति, ड्राइविंग लाइसेंस, जाति एवं आय प्रमाण पत्र) में सहायता कर सकता हूँ। आज मैं आपकी क्या मदद करूँ?'
-        : 'Hello! I am your Mahasetu AI Assistant for Maharashtra Government digital public services. I can guide you through scholarships, farmer 7/12 land records, learner driving licenses, and caste or income certificates without visiting government offices. How can I help you today?',
+        ? 'नमस्ते! मैं आपका महासेतु एआई सहायक हूँ। मैं आपको महाराष्ट्र सरकार की विभिन्न सेवाओं (जैसे लाड़की बहिन योजना, किसान सम्मान निधि व 7/12 खतौनी, महाडीबीटी छात्रवृत्ति, ड्राइविंग लाइसेंस, जाति एवं आय प्रमाण पत्र) में सहायता कर सकता हूँ। आज मैं आपकी क्या मदद करूँ?'
+        : 'Hello! I am your Mahasetu AI Assistant for Maharashtra Government digital public services. I can guide you through welfare schemes (Ladki Bahin, Namo Shetkari, Scholarships), 7/12 land records, learner driving licenses, and caste or income certificates with zero paper uploads. How can I help you today?',
       summary: isMr
-        ? 'महासेतूच्या माध्यमातून शासकीय सेवांसाठी कार्यालयात जाण्याची गरज नाही. सर्व पडताळणी घरबसल्या पूर्ण होते.'
+        ? 'महासेतूच्या माध्यमातून शासकीय सेवांसाठी कार्यालयात जाण्याची किंवा कागदपत्रे स्कॅन करण्याची गरज नाही. सर्व पडताळणी थेट पूर्ण होते.'
         : isHi
         ? 'महासेतु के माध्यम से सरकारी कार्यालयों के चक्कर काटने की आवश्यकता नहीं है।'
         : 'Zero physical uploads required. All state credentials are authenticated digitally through the Mahasetu federated mesh.',
       advice: isMr
-        ? 'कृपया आपल्या गरजेनुसार कोणतीही सेवा सांगा, जसे: "मला शिष्यवृत्ती हवी आहे" किंवा "७/१२ उतारा कसा काढायचा".'
+        ? 'कृपया आपल्या गरजेनुसार कोणतीही सेवा किंवा योजना विचारा, जसे: "लाडकी बहीण योजनेची पात्रता", "मला शिष्यवृत्ती हवी आहे" किंवा "७/१२ उतारा कसा काढायचा".'
         : isHi
-        ? 'कृपया अपनी आवश्यकता अनुसार पूछें, जैसे: "मुझे छात्रवृत्ति चाहिए" या "ड्राइविंग लाइसेंस कैसे बनेगा".'
-        : 'Feel free to ask for any service, e.g., "I need a scholarship" or "How to get a 7/12 land extract".',
+        ? 'कृपया अपनी आवश्यकता अनुसार पूछें, जैसे: "लाड़की बहिन योजना की पात्रता", "मुझे छात्रवृत्ति चाहिए" या "ड्राइविंग लाइसेंस कैसे बनेगा".'
+        : 'Feel free to ask for any service or scheme, e.g., "Ladki Bahin scheme details", "I need a scholarship", or "How to get a 7/12 land extract".',
+      suggestedTopics: isMr
+        ? ['माझी लाडकी बहीण योजना', 'नमो शेतकरी सन्मान निधी', 'महाडीबीटी शिष्यवृत्ती', 'शिकाऊ वाहन परवाना', 'उत्पन्न व जात दाखला']
+        : ['Majhi Ladki Bahin Yojana', 'Namo Shetkari Subsidy', 'MahaDBT Scholarship', 'Learner Driving License', 'Income & Caste Certificate'],
       source: 'local_mesh_intelligence'
     };
   }
 
-  // 1. Higher & Technical Education (Scholarships, Mahadbt, College Fee Concession)
-  if (
-    q.includes('शिष्यवृत्ती') ||
-    q.includes('scholarship') ||
-    q.includes('छात्रवृत्ति') ||
-    q.includes('mahadbt') ||
-    q.includes('महाडीबीटी') ||
-    q.includes('engineering') ||
-    q.includes('coep') ||
-    q.includes('college') ||
-    q.includes('fee') ||
-    q.includes('फी') ||
-    q.includes('shahu') ||
-    q.includes('शाहू')
-  ) {
-    return {
-      intent: 'APPLY_MAHADBT_SCHOLARSHIP',
-      serviceCode: 'SRV_MAHADBT_SCHOLARSHIP',
-      serviceId: 'srv-scholarship-01',
-      department: 'Higher & Technical Education Department (उच्च व तंत्र शिक्षण विभाग)',
-      departmentCode: 'EDUCATION',
-      serviceName: isMr
-        ? 'राजर्षी छत्रपती शाहू महाराज गुणवत्ता शिष्यवृत्ती'
-        : isHi
-        ? 'राजर्षि छत्रपति शाहू महाराज मेरिट छात्रवृत्ति'
-        : 'Rajarshi Chhatrapati Shahu Maharaj Merit Scholarship',
-      requiredDocuments: ['Income Certificate (Revenue)', 'Maharashtra Domicile Certificate', 'College Enrolment / Bonafide'],
-      availableInMesh: ['Income Certificate (Revenue)', 'Maharashtra Domicile Certificate'],
-      nextAction: '/services/srv-scholarship-01',
-      confidence: 0.98,
-      explanation: isMr
-        ? 'महाडीबीटी अंतर्गत छत्रपती शाहू महाराज शिष्यवृत्तीसाठी महसूल व अधिवास पडताळणी महासेतू मार्फत थेट डिजिटल पद्धतीने केली जाईल.'
-        : isHi
-        ? 'महाडीबीटी के तहत छात्रवृत्ति के लिए आय और अधिवास का डिजिटल सत्यापन महासेतु द्वारा स्वचालित रूप से किया जाएगा।'
-        : 'Eligible for Mahadbt scholarship. Income and Maharashtra domicile proofs are automatically verified via cross-departmental peer adapters.',
-      summary: isMr
-        ? 'उच्च शिक्षण शिष्यवृत्तीसाठी महसूल विभागाकडून उत्पन्नाचा दाखला आणि जिल्हा प्रशासनाकडून अधिवास प्रमाणपत्र विना-कागदी पडताळले जाईल.'
-        : 'Income certificate from Revenue and Domicile from District Admin will be verified paperlessly.',
-      source: 'local_mesh_intelligence'
-    };
+  // 3. MATCH AGAINST OFFICIAL SERVICES KNOWLEDGE BASE
+  let matchedKbService: GovernmentServiceKnowledge | null = null;
+  let highestMatchScore = 0;
+
+  for (const srv of MAHASETU_SERVICES_KB) {
+    let score = 0;
+    for (const kw of srv.keywords) {
+      if (q.includes(kw.toLowerCase())) {
+        score += kw.length > 4 ? 3 : 1;
+      }
+    }
+    if (score > highestMatchScore) {
+      highestMatchScore = score;
+      matchedKbService = srv;
+    }
   }
 
-  // 2. Farmer Subsidy & 7/12 Land Records (Mahabhulekh, Shetkari Sanman, Land Extract)
-  if (
-    q.includes('शेतकरी') ||
-    q.includes('farmer') ||
-    q.includes('7/12') ||
-    q.includes('सातबारा') ||
-    q.includes('जमीन') ||
-    q.includes('उतारा') ||
-    q.includes('mahabhulekh') ||
-    q.includes('gat') ||
-    q.includes('गट') ||
-    q.includes('कृषी') ||
-    q.includes('subsidy') ||
-    q.includes('अनुदान') ||
-    q.includes('kisan') ||
-    q.includes('किसान')
-  ) {
+  // Also query relevant schemes from 4,709+ database
+  const matchingSchemes = findRelevantSchemesForAI(query, 4, citizenProfile);
+
+  if (matchedKbService && highestMatchScore > 0) {
+    const srvName = isMr ? matchedKbService.nameMr : isHi ? matchedKbService.nameHi : matchedKbService.nameEn;
+    const deptName = isMr ? matchedKbService.departmentMr : matchedKbService.departmentEn;
+
+    let profileNote: string | undefined = undefined;
+    if (citizenProfile) {
+      if (matchedKbService.code === 'SRV_LADKI_BAHIN') {
+        const isFemale = citizenProfile.gender === 'FEMALE' || citizenProfile.gender === 'female';
+        const income = Number(citizenProfile.annualIncome) || 0;
+        if (isFemale && (!income || income <= 250000)) {
+          profileNote = isMr
+            ? `आपल्या प्रोफाइलनुसार आपण महिला असून कौटुंबिक उत्पन्न ₹२.५० लाखांपेक्षा कमी असल्यामुळे आपण या योजनेसाठी पूर्ण पात्र आहात.`
+            : `Based on your unified profile (Female, annual income ≤ ₹2.5L), you meet the eligibility criteria for Mukhyamantri Majhi Ladki Bahin Yojana.`;
+        }
+      } else if (matchedKbService.code === 'SRV_SHETKARI_SANMAN') {
+        const landArea = Number(citizenProfile.landHolding?.areaInAcres) || 0;
+        if (landArea > 0) {
+          profileNote = isMr
+            ? `आपल्या प्रोफाइलमध्ये ${landArea} एकर शेतजमीन नोंदणीकृत असल्यामुळे आपण नमो शेतकरी सन्मान निधीसाठी थेट पात्र आहात.`
+            : `With ${landArea} acres of land registered in your profile, you are eligible for Namo Shetkari Mahasanman Nidhi.`;
+        }
+      } else if (matchedKbService.code === 'SRV_MAHADBT_SCHOLARSHIP') {
+        const category = citizenProfile.category;
+        const income = Number(citizenProfile.annualIncome) || 0;
+        if (income <= 800000) {
+          profileNote = isMr
+            ? `आपले कौटुंबिक उत्पन्न ₹८ लाखांच्या मर्यादेत (प्रवर्ग: ${category || 'सामान्य'}) असल्यामुळे आपण महाडीबीटी शिष्यवृत्तीसाठी पात्र आहात.`
+            : `Your annual income is within the ₹8,00,000 ceiling (Category: ${category || 'General'}), qualifying you for MahaDBT fee concessions.`;
+        }
+      }
+    }
+
     return {
-      intent: 'APPLY_FARMER_SUBSIDY',
-      serviceCode: 'SRV_SHETKARI_SANMAN',
-      serviceId: 'srv-farmer-02',
-      department: 'Revenue & Forest Department (महसूल विभाग - महाभूलेख)',
-      departmentCode: 'REVENUE',
-      serviceName: isMr
-        ? 'नमो शेतकरी महासन्मान निधी व ७/१२ डिजिटल पडताळणी'
-        : isHi
-        ? 'नमो शेतकरी महासम्मान निधि एवं 7/12 भूमि रिकॉर्ड सत्यापन'
-        : 'Namo Shetkari Mahasanman Nidhi Subsidy & 7/12 Land Extract',
-      requiredDocuments: ['7/12 Land Extract (Mahabhulekh)', 'Aadhaar Biometric Verification', 'Rural Residence Certificate'],
-      availableInMesh: ['7/12 Land Extract (Mahabhulekh)', 'Aadhaar Biometric Verification'],
-      nextAction: '/services/srv-farmer-02',
+      greeting: isMr ? 'सस्नेह नमस्कार!' : isHi ? 'नमस्ते!' : 'Hello!',
+      isGreeting: false,
+      isOutOfScope: false,
+      intent: `APPLY_${matchedKbService.code}`,
+      serviceCode: matchedKbService.code,
+      serviceId: `srv-${matchedKbService.category.toLowerCase()}`,
+      department: deptName,
+      departmentCode: matchedKbService.departmentCode,
+      serviceName: srvName,
+      slaDays: matchedKbService.slaDays,
+      feeInr: matchedKbService.feeInr,
+      requiredDocuments: matchedKbService.requiredDocuments,
+      availableInMesh: matchedKbService.meshAvailableProofs,
+      nextAction: `/services/${matchedKbService.code}`,
       confidence: 0.96,
       explanation: isMr
-        ? 'नमो शेतकरी सन्मान निधी व ७/१२ भूमी अभिलेख पडताळणी महाभूलेख डिजिटल इंटिग्रेशनद्वारे थेट उपलब्ध आहे.'
+        ? `आपल्या विचारणेनुसार "${srvName}" ही सेवा निश्चित करण्यात आली आहे. ${matchedKbService.keyEligibility}`
         : isHi
-        ? 'नमो शेतकरी सम्मान निधि एवं 7/12 डिजिटल सत्यापन महाभूलेख एकीकरण के माध्यम से सीधे उपलब्ध है।'
-        : 'Farmer subsidy and 7/12 land extract ownership are validated directly against the Mahabhulekh land registry API.',
+        ? `आपके अनुरोध के अनुसार "${srvName}" सेवा चिन्हित की गई है। ${matchedKbService.keyEligibility}`
+        : `Identified service: "${srvName}". ${matchedKbService.keyEligibility}`,
       summary: isMr
-        ? 'शेतजमिनीचा ७/१२ उतारा महसूल विभागाकडून थेट ऑनलाइन उपलब्ध होईल. तलाठी कार्यालयात जाण्याची गरज नाही.'
-        : 'Land ownership extract 7/12 is fetched directly via Mahabhulekh with zero physical visits to the Talathi.',
+        ? `महासेतू शून्य-कागदपत्र तंत्रज्ञान: ${matchedKbService.zeroUploadMechanism}`
+        : `Mahasetu Zero-Upload Engine: ${matchedKbService.zeroUploadMechanism}`,
+      advice: isMr
+        ? `या सेवेसाठी लागणारे सर्व पुरावे महासेतूच्या आंतर-विभागीय प्रणालीद्वारे थेट तपासले जातील. कोणत्याही कार्यालयात फेऱ्या मारण्याची गरज नाही.`
+        : `All required proofs are verified peer-to-peer via Mahasetu consent protocols without scanning physical papers.`,
+      profileEligibilityNote: profileNote,
+      matchedSchemes: matchingSchemes,
       source: 'local_mesh_intelligence'
     };
   }
 
-  // 3. RTO Learner Driving License & Vehicle Transport
-  if (
-    q.includes('लायसन्स') ||
-    q.includes('license') ||
-    q.includes('driving') ||
-    q.includes('गाडी') ||
-    q.includes('rto') ||
-    q.includes('वाहन') ||
-    q.includes('learner') ||
-    q.includes('ड्रायव्हिंग') ||
-    q.includes('परवाना') ||
-    q.includes('sarathi') ||
-    q.includes('vahan')
-  ) {
-    return {
-      intent: 'APPLY_LEARNER_LICENSE',
-      serviceCode: 'SRV_LEARNER_DL_FAST_TRACK',
-      serviceId: 'srv-transport-03',
-      department: 'Transport Department (महाराष्ट्र परिवहन विभाग - सारथी / RTO)',
-      departmentCode: 'RTO',
-      serviceName: isMr
-        ? 'शिकाऊ वाहन चालक परवाना (लर्नर लायसन्स) जलद वितरण'
-        : isHi
-        ? 'शिक्षार्थी ड्राइविंग लाइसेंस (लर्नर लाइसेंस) त्वरित वितरण'
-        : 'Learner Driving License Fast-Track Issuance',
-      requiredDocuments: ['Age & Domicile Proof (District Admin)', 'Form 1A Medical Fitness Clearance (Public Health)'],
-      availableInMesh: ['Age & Domicile Proof (District Admin)', 'Form 1A Medical Fitness Clearance (Public Health)'],
-      nextAction: '/services/srv-transport-03',
-      confidence: 0.97,
-      explanation: isMr
-        ? 'आरटीओ शिकाऊ परवाना (Learner License) घरबसल्या मिळवण्यासाठी आरोग्य विभाग व जिल्हा प्रशासनाची पडताळणी महासेतू द्वारे होते.'
-        : isHi
-        ? 'आरटीओ लर्नर लाइसेंस घर बैठे प्राप्त करने हेतु चिकित्सा फिटनेस एवं निवास सत्यापन महासेतु द्वारा किया जाता है।'
-        : 'Zero-visit Learner Driving License issuance. Form 1A medical fitness and address proofs are cross-verified digitally.',
-      summary: isMr
-        ? 'सारथी आणि महासेतू जोडणीमुळे आरटीओ कार्यालयात प्रत्यक्ष रांगेत उभे राहण्याची आवश्यकता नाही.'
-        : 'Digital peer handshakes eliminate the need to visit RTO offices in person.',
-      source: 'local_mesh_intelligence'
-    };
-  }
+  // 4. GENERAL GOVERNMENT SCHEME / DISCOVERY LOOKUP (When citizen asks a general govt question or about schemes for their profile)
+  const topScheme = matchingSchemes[0];
+  const schemeTitle = topScheme ? (isMr ? (topScheme.nameMr || topScheme.name) : topScheme.name) : (isMr ? 'महाराष्ट्र शासन जनकल्याणकारी योजना' : 'Maharashtra Welfare Schemes');
 
-  // 4. Caste Certificate & Lineage Verification
-  if (
-    q.includes('जात') ||
-    q.includes('caste') ||
-    q.includes('जाती') ||
-    q.includes('प्रमाणपत्र') ||
-    q.includes('obc') ||
-    q.includes('sc') ||
-    q.includes('st') ||
-    q.includes('vjnt') ||
-    q.includes('वैधता') ||
-    q.includes('validity')
-  ) {
-    return {
-      intent: 'APPLY_CASTE_CERTIFICATE',
-      serviceCode: 'CASTE_CERT',
-      serviceId: 'srv-civil-04',
-      department: 'Revenue & Social Welfare Department (सामाजिक न्याय व महसूल विभाग)',
-      departmentCode: 'REVENUE',
-      serviceName: isMr
-        ? 'जात प्रमाणपत्र व डिजिटल वंशावळ पडताळणी'
-        : isHi
-        ? 'जाति प्रमाण पत्र एवं डिजिटल वंशावली सत्यापन'
-        : 'Caste Certificate & Digital Lineage Verification',
-      requiredDocuments: ['Aadhaar Card Biometric', 'Ration Card (Civil Supplies)', 'School Leaving Record'],
-      availableInMesh: ['Aadhaar Card Biometric', 'Ration Card (Civil Supplies)'],
-      nextAction: '/services/srv-civil-04',
-      confidence: 0.95,
-      explanation: isMr
-        ? 'जात प्रमाणपत्रासाठी कौटुंबिक अभिलेख व शिधापत्रिका महासेतू मार्फत डिजिटल पडताळली जाईल.'
-        : isHi
-        ? 'जाति प्रमाण पत्र के लिए पारिवारिक अभिलेख एवं राशन कार्ड डिजिटल रूप से सत्यापित किए जाएंगे।'
-        : 'Mahasetu verifies your identity and family lineage records across state databases with zero manual uploads.',
-      summary: isMr
-        ? 'शासकीय दस्तऐवज पडताळणीद्वारे जात प्रमाणपत्राची प्रक्रिया जलद केली जाते.'
-        : 'Direct cross-departmental verification accelerates caste certification.',
-      source: 'local_mesh_intelligence'
-    };
-  }
-
-  // 5. Income / EWS Certificate (Economically Weaker Section)
-  if (
-    q.includes('उत्पन्न') ||
-    q.includes('income') ||
-    q.includes('ews') ||
-    q.includes('आय') ||
-    q.includes('कमाई') ||
-    q.includes('आर्थिक') ||
-    q.includes('तहसीलदार')
-  ) {
-    return {
-      intent: 'APPLY_EWS_OR_INCOME',
-      serviceCode: 'SRV_EWS_CERTIFICATE',
-      serviceId: 'srv-civil-04',
-      department: 'District Administration & Revenue (जिल्हा प्रशासन व महसूल विभाग)',
-      departmentCode: 'DISTRICT_ADMIN',
-      serviceName: isMr
-        ? 'आर्थिकदृष्ट्या दुर्बल घटक (EWS) व उत्पन्न दाखला'
-        : isHi
-        ? 'आर्थिक रूप से कमजोर वर्ग (EWS) एवं आय प्रमाण पत्र'
-        : 'Economically Weaker Section (EWS) & Income Certificate',
-      requiredDocuments: ['Revenue Income Verification', 'Aadhaar Biometric Proof', 'Land / Property Holding Declaration'],
-      availableInMesh: ['Revenue Income Verification', 'Aadhaar Biometric Proof'],
-      nextAction: '/services/srv-civil-04',
-      confidence: 0.96,
-      explanation: isMr
-        ? '८ लाख रुपयांपेक्षा कमी कौटुंबिक उत्पन्न असलेल्या नागरिकांसाठी EWS व उत्पन्न पडताळणी उपलब्ध आहे.'
-        : isHi
-        ? '8 लाख से कम वार्षिक आय वाले नागरिकों के लिए ईडब्ल्यूएस एवं आय सत्यापन सीधे उपलब्ध है।'
-        : 'EWS & Income Certificate verification for 10% quota reservation with automated revenue data matching.',
-      summary: isMr
-        ? 'महसूल विभागातील तलाठी व मंडळ अधिकारी अहवाल थेट महासेतू कॅनोनिकल फॉरमॅटमध्ये रूपांतरित होतो.'
-        : 'Revenue data converts seamlessly to canonical verification format.',
-      source: 'local_mesh_intelligence'
-    };
-  }
-
-  // 6. Domicile & Residence Certificate
-  if (
-    q.includes('अधिवास') ||
-    q.includes('domicile') ||
-    q.includes('रहिवासी') ||
-    q.includes('residence') ||
-    q.includes('निवास')
-  ) {
-    return {
-      intent: 'APPLY_DOMICILE_CERTIFICATE',
-      serviceCode: 'SRV_MAHADBT_SCHOLARSHIP',
-      serviceId: 'srv-scholarship-01',
-      department: 'District Administration (जिल्हा दंडाधिकारी कार्यालय)',
-      departmentCode: 'DISTRICT_ADMIN',
-      serviceName: isMr
-        ? 'महाराष्ट्र राज्य अधिवास (डोमिसाईल) प्रमाणपत्र'
-        : isHi
-        ? 'महाराष्ट्र राज्य अधिवास (डोमिसाइल) प्रमाण पत्र'
-        : 'Maharashtra State Domicile & Residence Certificate',
-      requiredDocuments: ['15-Year Residence Record (Electoral / Ration)', 'Aadhaar Card Biometric'],
-      availableInMesh: ['15-Year Residence Record (Electoral / Ration)', 'Aadhaar Card Biometric'],
-      nextAction: '/services/srv-scholarship-01',
-      confidence: 0.94,
-      explanation: isMr
-        ? 'किमान १५ वर्षे महाराष्ट्रात वास्तव्याचा पुरावा महासेतूच्या मतदार व महसूल विभागातून डिजिटल तपासला जातो.'
-        : isHi
-        ? 'कम से कम 15 वर्ष महाराष्ट्र में निवास का प्रमाण महासेतु द्वारा सत्यापित किया जाता है।'
-        : '15-year Maharashtra residence verification auto-pulled from District Administration registry.',
-      summary: isMr
-        ? 'अधिवास दाखल्यासाठी लागणारे पुरावे डेटाबेसमधून थेट पडताळले जातात.'
-        : 'Residence proofs are cross-verified across state databases.',
-      source: 'local_mesh_intelligence'
-    };
-  }
-
-  // General Maharashtra State E-Governance Lookup
   return {
-    intent: 'EXPLORE_STATE_SERVICES',
-    serviceCode: 'SRV_MAHADBT_SCHOLARSHIP',
-    serviceId: 'srv-scholarship-01',
-    department: 'Government of Maharashtra (महाराष्ट्र शासन डिजिटल सेवा मंच)',
-    departmentCode: 'REVENUE',
-    serviceName: isMr
-      ? 'महाराष्ट्र शासन एकात्मिक ई-प्रशासन सेवा'
-      : isHi
-      ? 'महाराष्ट्र शासन एकीकृत ई-गवर्नेंस सेवा'
-      : 'Government of Maharashtra Integrated Public Services',
-    requiredDocuments: ['Aadhaar Card Biometric Verification', 'Departmental Registration Data'],
-    availableInMesh: ['Aadhaar Card Biometric Verification'],
-    nextAction: '/services/srv-scholarship-01',
-    confidence: 0.88,
+    greeting: isMr ? 'सस्नेह नमस्कार!' : isHi ? 'नमस्ते!' : 'Hello!',
+    isGreeting: false,
+    isOutOfScope: false,
+    intent: 'EXPLORE_SCHEMES_AND_SERVICES',
+    serviceCode: topScheme ? topScheme.id : 'SRV_MAHADBT_SCHOLARSHIP',
+    serviceId: topScheme ? topScheme.id : 'srv-welfare',
+    department: topScheme ? topScheme.issuingAuthority : (isMr ? 'महाराष्ट्र शासन (सार्वजनिक सेवा मंच)' : 'Government of Maharashtra'),
+    departmentCode: 'MAHASETU',
+    serviceName: schemeTitle,
+    slaDays: 7,
+    feeInr: 0,
+    requiredDocuments: topScheme ? (topScheme.requiredDocuments || ['Aadhaar Card Biometric Verification', 'Income Certificate', 'Domicile Certificate']) : ['Aadhaar Card Biometric Verification'],
+    availableInMesh: ['Aadhaar Card Biometric Verification', 'Income Certificate (Revenue Registry)'],
+    nextAction: '/schemes',
+    confidence: 0.90,
     explanation: isMr
-      ? 'आपल्या विचारणेशी संबंधित शासकीय सेवा महासेतू आंतर-विभागीय पडताळणीद्वारे उपलब्ध आहेत.'
-      : isHi
-      ? 'आपकी पूछताछ से संबंधित सरकारी सेवाएं महासेतु डिजिटल ग्रिड के माध्यम से उपलब्ध हैं।'
-      : 'Identified Maharashtra digital public service. Verified cross-departmentally with zero paper uploads.',
+      ? `आपल्या विचारणेनुसार शासकीय योजना व सेवा शोधण्यात आल्या आहेत. ${topScheme ? `प्रमुख योजना: ${schemeTitle}. लाभ: ${topScheme.benefitSummary}.` : 'महासेतूद्वारे सर्व पुरावे विना-कागदी पडताळले जातात.'}`
+      : `Identified relevant government schemes. ${topScheme ? `Primary scheme: ${schemeTitle}. Benefit: ${topScheme.benefitSummary}.` : 'All proofs are verified digitally through Mahasetu.'}`,
     summary: isMr
-      ? 'महासेतूच्या माध्यमातून कागदपत्रांची डिजिटल देवाणघेवाण सुरक्षितपणे केली जाते.'
-      : 'Secure, paperless verification through the Mahasetu federated mesh.',
+      ? 'महासेतू आंतर-विभागीय प्रणालीद्वारे थेट पडताळणी होते. कागदपत्रे सादर करण्याची गरज नाही.'
+      : 'Peer-to-peer interoperability eliminates manual document submissions.',
+    advice: isMr
+      ? 'आपण योजनेचा तपशील तपासून थेट शून्य-कागदपत्र अर्ज करू शकता किंवा योजना सूचीमध्ये इतर योजना पाहू शकता.'
+      : 'Review the matched scheme details below to begin zero-upload application or explore matching schemes in the catalogue.',
+    matchedSchemes: matchingSchemes,
     source: 'local_mesh_intelligence'
   };
 }
 
 export async function navigateServiceQuery(
   query: string,
-  preferredLanguage: string = 'Marathi'
+  preferredLanguage: string = 'Marathi',
+  citizenProfile?: any
 ): Promise<ServiceNavigationResult> {
   const detectedLang = detectLanguage(query, preferredLanguage);
-  const ai = getGeminiClient();
 
-  if (!ai) {
-    return resolveLocalNavigation(query, detectedLang);
+  // 1. FAST-PATH OUT-OF-SCOPE FILTER:
+  // If the query is blatantly out of scope (weather, time, programming, sports, jokes, etc.),
+  // immediately return the strict refusal without wasting upstream tokens.
+  if (isQueryOutOfScope(query)) {
+    return resolveLocalNavigation(query, detectedLang, citizenProfile);
+  }
+
+  if (!hasConfiguredGeminiKeys()) {
+    return resolveLocalNavigation(query, detectedLang, citizenProfile);
   }
 
   try {
-    const prompt = `You are the official AI Citizen Sahayak for Maharashtra Government's "Mahasetu" platform.
-Your task is to analyze citizen queries, detect their language, greet them first, and guide them to the right public service.
+    const relevantSchemes = findRelevantSchemesForAI(query, 5, citizenProfile);
+    const schemesContext = relevantSchemes.map(s =>
+      `- [${s.id}] ${s.name} (${s.nameMr || ''}): ${s.benefitSummary} | Eligibility: ${s.eligibility} | Category: ${s.category} | Authority: ${s.issuingAuthority}`
+    ).join('\n');
+
+    const profileContext = citizenProfile ? JSON.stringify({
+      gender: citizenProfile.gender,
+      annualIncome: citizenProfile.annualIncome,
+      category: citizenProfile.category,
+      rationCardType: citizenProfile.rationCardType,
+      district: citizenProfile.address?.district,
+      landAreaInAcres: citizenProfile.landHolding?.areaInAcres
+    }) : 'No authenticated citizen profile attached';
+
+    const prompt = `You are the official AI Citizen Sahayak for Maharashtra Government's "Mahasetu" platform (Citizen Interoperability & Consent Gateway).
+Your task is to analyze the citizen query, verify if it is related to Maharashtra or Central government welfare schemes, certificates, subsidies, or services, and guide them with authoritative precision.
 
 CITIZEN QUERY: "${query}"
 DETECTED PRIMARY LANGUAGE: "${detectedLang}"
+CITIZEN UNIFIED PROFILE: ${profileContext}
+
+GROUND TRUTH KNOWLEDGE BASE:
+1. PLATFORM ARCHITECTURE:
+   - Mahasetu connects state departments (Mahabhulekh 7/12, MahaDBT Scholarships, MahaRTO Sarathi, Tahsildar Civil Registry, MJPJAY Health, WCD Ladki Bahin).
+   - Zero Physical Uploads: Verifies all documents peer-to-peer via Aadhaar biometrics and DPDP Act 2023 compliant consent artifacts.
+2. TOP MATCHED SCHEMES FROM MAHASETU REPOSITORY (4,709+ SCHEMES):
+${schemesContext}
 
 CRITICAL RULES:
-1. FIRST SEE THE TEXT & DETECT LANGUAGE:
-   - If the query is in Marathi: The response MUST be 100% in natural, respectful Marathi. You MUST FIRST GREET the citizen with "नमस्कार!" or "सस्नेह नमस्कार!".
-   - If the query is in English: The response MUST be 100% in fluent English. You MUST FIRST GREET the citizen with "Hello! Welcome to Mahasetu AI Citizen Sahayak." or "Namaste and welcome!".
-   - If the query is in Hindi: The response MUST be 100% in Hindi. You MUST FIRST GREET the citizen with "नमस्ते! महासेतु में आपका स्वागत है।".
+1. STRICT OUT-OF-SCOPE GUARDRAIL:
+   - If the query is completely unrelated to government services, welfare schemes, certificates, farmer subsidies, scholarships, or Mahasetu (e.g. asking for weather, current time, writing code, recipes, movie reviews, sports, trivia):
+     You MUST set "isOutOfScope": true, "intent": "OUT_OF_SCOPE", "serviceName": "Request Out of Context", "department": "Mahasetu Guardrail", "departmentCode": "OUT_OF_SCOPE".
+     In "explanation" and "advice", politely explain that Mahasetu AI Sahayak is dedicated strictly to government services, schemes, and official certificates, and ask the user to submit an on-topic government query.
 2. GREETINGS FIRST:
-   - If the citizen query is just a greeting (e.g. "hi", "hello", "नमस्कार", "शुभ सकाळ", "namaste"), greet warmly in that language, introduce yourself as Mahasetu AI Sahayak, and present the key services you can help with (scholarships, 7/12 land records, driving license, caste/income certificates). Set isGreeting=true.
-   - If the citizen query asks for a service or has a greeting + service, START the explanation and advice with the respectful greeting in the matching language, then provide the service details. Set isGreeting=false.
-3. MAP TO ACTIVE MAHARASHTRA SERVICES:
-   - Rajarshi Chhatrapati Shahu Maharaj Merit Scholarship (serviceCode: 'SRV_MAHADBT_SCHOLARSHIP', department: 'Higher & Technical Education Department', departmentCode: 'EDUCATION', serviceId: 'srv-scholarship-01')
-   - Namo Shetkari Mahasanman Nidhi Subsidy & 7/12 Land Extract (serviceCode: 'SRV_SHETKARI_SANMAN', department: 'Revenue & Forest Department (Mahabhulekh)', departmentCode: 'REVENUE', serviceId: 'srv-farmer-02')
-   - Learner Driving License Fast-Track (serviceCode: 'SRV_LEARNER_DL_FAST_TRACK', department: 'Transport Department (MahaRTO)', departmentCode: 'RTO', serviceId: 'srv-transport-03')
-   - Economically Weaker Section (EWS) & Income Certificate (serviceCode: 'SRV_EWS_CERTIFICATE', department: 'District Administration', departmentCode: 'DISTRICT_ADMIN', serviceId: 'srv-civil-04')
-   - Caste Certificate & Lineage Verification (serviceCode: 'CASTE_CERT', department: 'Revenue & Social Welfare', departmentCode: 'REVENUE', serviceId: 'srv-civil-04')
-4. ZERO PHYSICAL UPLOADS: Highlight that Mahasetu verifies documents cross-departmentally via Aadhaar biometrics.
+   - If the query is in Marathi: Greet with "नमस्कार!" or "सस्नेह नमस्कार!".
+   - If the query is in English: Greet with "Hello! Welcome to Mahasetu AI Citizen Sahayak.".
+   - If the query is in Hindi: Greet with "नमस्ते! महासेतु में आपका स्वागत है।".
+   - If the query is only a greeting (e.g. "hi", "namaste"), set isGreeting: true and introduce key services (Ladki Bahin, 7/12 land records, scholarships, driving license, caste/income certificates).
+3. CITIZEN PROFILE RELEVANCE:
+   - If a citizen profile is provided, evaluate whether the citizen qualifies for the relevant scheme based on their gender, income, category, land holding, or district.
+   - If they qualify, set "profileEligibilityNote" explaining why they qualify (e.g. "Based on your verified annual income of ₹1,80,000 and female gender, you meet the eligibility criteria for Mukhyamantri Majhi Ladki Bahin Yojana.").
+4. PAPERLESS & ZERO UPLOADS:
+   - Explain how Mahasetu verifies documents cross-departmentally via Aadhaar biometrics without requiring physical scans or office visits.
 
 Return JSON adhering strictly to the schema.`;
 
-    const response = await callGeminiWithFallback(ai, (modelName) =>
+    const response = await callGeminiWithKeyPoolAndModelFallback((ai, modelName) =>
       ai.models.generateContent({
         model: modelName,
         contents: prompt,
@@ -557,12 +683,15 @@ Return JSON adhering strictly to the schema.`;
             properties: {
               greeting: { type: Type.STRING, description: 'Polite greeting in citizen language (e.g. नमस्कार! or Hello!)' },
               isGreeting: { type: Type.BOOLEAN, description: 'True if citizen query was a greeting' },
+              isOutOfScope: { type: Type.BOOLEAN, description: 'True if query is out of context for government services' },
               intent: { type: Type.STRING },
               department: { type: Type.STRING },
               departmentCode: { type: Type.STRING },
               serviceName: { type: Type.STRING },
               serviceId: { type: Type.STRING },
               serviceCode: { type: Type.STRING },
+              slaDays: { type: Type.NUMBER },
+              feeInr: { type: Type.NUMBER },
               requiredDocuments: {
                 type: Type.ARRAY,
                 items: { type: Type.STRING },
@@ -573,7 +702,8 @@ Return JSON adhering strictly to the schema.`;
               },
               nextAction: { type: Type.STRING },
               confidence: { type: Type.NUMBER },
-              explanation: { type: Type.STRING, description: 'Explanation starting with greeting in the citizen language' },
+              profileEligibilityNote: { type: Type.STRING, description: 'Analysis of citizen profile against scheme criteria' },
+              explanation: { type: Type.STRING, description: 'Detailed explanation starting with greeting in citizen language' },
               summary: { type: Type.STRING, description: 'Short summary of the paperless process in the citizen language' },
               advice: { type: Type.STRING, description: 'Direct advice to citizen in the citizen language' }
             },
@@ -587,15 +717,14 @@ Return JSON adhering strictly to the schema.`;
     if (parsed && parsed.serviceName) {
       return {
         ...parsed,
+        matchedSchemes: relevantSchemes,
         source: 'gemini'
       };
     }
-    return resolveLocalNavigation(query, detectedLang);
+    return resolveLocalNavigation(query, detectedLang, citizenProfile);
   } catch (err: any) {
-    // Upstream 503 high-demand, rate-limit, or network disruption:
-    // Log as a clean diagnostic warning and smoothly return high-accuracy deterministic result
-    console.warn('[Mahasetu AI] Gemini Service temporarily high-demand or offline. Serving via high-precision local DPI engine.');
-    return resolveLocalNavigation(query, detectedLang);
+    console.warn('[Mahasetu AI] Gemini Service note / failover engaged. Serving via knowledge-base engine:', err?.message || err);
+    return resolveLocalNavigation(query, detectedLang, citizenProfile);
   }
 }
 
@@ -612,8 +741,7 @@ export async function explainApplicationStatus(
     ? 'आपका आवेदन प्रगति पर है। महासेतु इंटरऑपरेबिलिटी लेयर के माध्यम से राजस्व विभाग और जिला प्रशासन से दस्तावेजों का डिजिटल सत्यापन पूरा कर लिया गया है।'
     : 'Your application is progressing normally. Required cross-departmental proofs have been automatically verified via Mahasetu consent-based APIs with zero physical visits required.';
 
-  const ai = getGeminiClient();
-  if (!ai) {
+  if (!hasConfiguredGeminiKeys()) {
     return defaultExplanation;
   }
 
@@ -624,7 +752,7 @@ Keep it under 3 sentences. Explain what happened and what, if anything, the citi
 
 Status message: "${statusMessage}"`;
 
-    const response = await callGeminiWithFallback(ai, (modelName) =>
+    const response = await callGeminiWithKeyPoolAndModelFallback((ai, modelName) =>
       ai.models.generateContent({
         model: modelName,
         contents: prompt,
@@ -668,8 +796,7 @@ export async function generateSchemaMappingRules(
     ]
   };
 
-  const ai = getGeminiClient();
-  if (!ai) {
+  if (!hasConfiguredGeminiKeys()) {
     return fallbackMappings;
   }
 
@@ -688,7 +815,7 @@ Rules:
 - If transformation is required (e.g. converting boolean to status string, or parsing date formats), specify in "transform".
 - Return ONLY valid JSON adhering to the schema.`;
 
-    const response = await callGeminiWithFallback(ai, (modelName) =>
+    const response = await callGeminiWithKeyPoolAndModelFallback((ai, modelName) =>
       ai.models.generateContent({
         model: modelName,
         contents: prompt,
@@ -717,9 +844,9 @@ Rules:
       })
     );
 
-    return JSON.parse(response.text || '{"mappings": []}');
+    return JSON.parse(response.text || '{}');
   } catch (err: any) {
-    console.warn('[Mahasetu AI] Gemini Schema Mapper high-demand / fallback engaged.');
+    console.warn('[Mahasetu AI] Gemini Schema Mapper fallback engaged:', err?.message || err);
     return fallbackMappings;
   }
 }
@@ -727,6 +854,7 @@ Rules:
 export interface SchemeAdvisorResult {
   greeting: string;
   advice: string;
+  isOutOfScope?: boolean;
   matchedSchemes: WelfareScheme[];
   keyBenefitsSummary: string;
   eligibilityChecklist: string[];
@@ -743,9 +871,28 @@ export async function adviseSchemesWithAI(
   citizenProfile?: any
 ): Promise<SchemeAdvisorResult> {
   const lang = detectLanguage(query, preferredLanguage);
-  const relevantSchemes = findRelevantSchemesForAI(query, 6);
   const isMr = lang === 'Marathi';
   const isHi = lang === 'Hindi';
+
+  // Fast-path guardrail: strict out-of-scope check
+  if (isQueryOutOfScope(query)) {
+    return {
+      isOutOfScope: true,
+      greeting: isMr ? 'सस्नेह नमस्कार!' : isHi ? 'नमस्ते!' : 'Hello!',
+      advice: isMr
+        ? 'हा प्रश्न महासेतू आणि शासकीय योजनांच्या कक्षेबाहेरचा आहे. महासेतू एआय साहाय्यक केवळ महाराष्ट्र शासन व केंद्र सरकारच्या जनकल्याणकारी योजना, शेतकरी अनुदान, शिष्यवृत्ती आणि शासकीय सेवांच्या मार्गदर्शनासाठी आहे.'
+        : isHi
+        ? 'यह अनुरोध महासेतु और सरकारी योजनाओं के दायरे से बाहर है। महासेतु एआई सहायक केवल सरकारी कल्याणकारी योजनाओं एवं सब्सिडी की जानकारी प्रदान करता है।'
+        : 'Your request is out of context for Mahasetu. The AI Scheme Advisor is dedicated strictly to Maharashtra and Central Government welfare schemes, farmer subsidies, and citizen benefits.',
+      matchedSchemes: [],
+      keyBenefitsSummary: isMr ? 'केवळ अधिकृत शासकीय योजनांसाठी उपलब्ध.' : 'Available only for official government schemes.',
+      eligibilityChecklist: [],
+      zeroUploadVerificationDetails: isMr ? 'महासेतू शून्य-कागदपत्र प्रणाली.' : 'Mahasetu Zero-Upload Engine.',
+      source: 'local_database_index'
+    };
+  }
+
+  const relevantSchemes = findRelevantSchemesForAI(query, 6, citizenProfile);
 
   const defaultGreeting = isMr
     ? 'नमस्कार! महासेतू योजना सहाय्यक मध्ये आपले स्वागत आहे.'
@@ -777,8 +924,7 @@ export async function adviseSchemesWithAI(
     source: 'local_database_index'
   };
 
-  const ai = getGeminiClient();
-  if (!ai) {
+  if (!hasConfiguredGeminiKeys()) {
     return fallbackResult;
   }
 
@@ -822,7 +968,7 @@ CRITICAL INSTRUCTIONS:
 
 Return JSON adhering strictly to the schema.`;
 
-    const response = await callGeminiWithFallback(ai, (modelName) =>
+    const response = await callGeminiWithKeyPoolAndModelFallback((ai, modelName) =>
       ai.models.generateContent({
         model: modelName,
         contents: prompt,

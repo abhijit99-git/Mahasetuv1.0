@@ -38,6 +38,7 @@ import {
   Share2,
   Eye,
   Check,
+  RefreshCw,
   Landmark,
   GraduationCap,
   BookOpen,
@@ -669,10 +670,14 @@ export const HeroSection: React.FC<Props> = ({
                     <button
                       type="submit"
                       disabled={isSubmitting || !promptText.trim()}
-                      className="p-1.5 rounded-xl bg-[#141414] hover:bg-black text-white disabled:opacity-40 transition-all"
+                      className="p-1.5 rounded-xl bg-[#141414] hover:bg-black text-white disabled:opacity-40 transition-all flex items-center justify-center min-w-[28px] min-h-[28px]"
                       title="Submit query"
                     >
-                      <ArrowRight className="w-3.5 h-3.5" />
+                      {isSubmitting ? (
+                        <RefreshCw className="w-3.5 h-3.5 text-emerald-400 animate-spin" />
+                      ) : (
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -693,6 +698,52 @@ export const HeroSection: React.FC<Props> = ({
                     </button>
                   ))}
                 </div>
+
+                {/* Small Processing Loader / Skeleton for Hero Section AI Citizen Sahayak */}
+                {isSubmitting && (
+                  <div
+                    id="hero-ai-processing-card"
+                    className="mt-3 p-3 rounded-2xl bg-white/95 border border-emerald-300 text-xs space-y-2.5 shadow-xs relative overflow-hidden animate-fadeIn"
+                  >
+                    {/* Top gradient pulse line */}
+                    <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600 animate-pulse" />
+
+                    {/* Header with spinning loader and processing message */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <RefreshCw className="w-3.5 h-3.5 text-emerald-600 animate-spin shrink-0" />
+                        <span className="font-bold text-emerald-900 text-[11px] flex items-center gap-1.5">
+                          <span className="uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-100/70 border border-emerald-200 text-[9px] font-bold text-emerald-800">
+                            {language === 'mr' ? 'प्रक्रिया सुरू आहे' : language === 'hi' ? 'प्रक्रिया जारी है' : 'Processing'}
+                          </span>
+                          <span className="text-[#111111] font-semibold">
+                            {language === 'mr'
+                              ? 'महासेतू एआय साहाय्यक विश्लेषण सुरू आहे...'
+                              : language === 'hi'
+                              ? 'महासेतु एआई सहायक विश्लेषण कर रहा है...'
+                              : 'Mahasetu AI analyzing inquiry...'}
+                          </span>
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-emerald-700 font-medium animate-pulse">
+                        {language === 'mr' ? 'पडताळणी...' : 'Verifying...'}
+                      </span>
+                    </div>
+
+                    {/* Small Skeleton Placeholders */}
+                    <div className="space-y-1.5 bg-black/[0.02] p-2 rounded-xl animate-pulse">
+                      <div className="h-3 w-3/5 bg-emerald-100/80 rounded" />
+                      <div className="h-2.5 w-full bg-black/8 rounded" />
+                      <div className="h-2.5 w-4/5 bg-black/8 rounded" />
+                    </div>
+
+                    {/* Footer Skeleton Line */}
+                    <div className="flex items-center justify-between pt-0.5">
+                      <div className="h-3 w-36 bg-emerald-100/60 rounded animate-pulse" />
+                      <div className="h-5 w-16 bg-black/10 rounded-lg animate-pulse" />
+                    </div>
+                  </div>
+                )}
 
                 {/* AI Result Card */}
                 {aiResult && (

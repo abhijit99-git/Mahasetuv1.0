@@ -306,12 +306,20 @@ export default function App() {
             <AuditLedger language={language} />
           )}
 
-          {/* Tab 4: AI Citizen Sahayak (Gemini 3.8 Flash) */}
+          {/* Tab 4: AI Citizen Sahayak (Knowledge Base & Profile-Aware AI) */}
           {activeTab === 'ai' && (
             <AISahayak
               language={language}
-              onApplyForService={() => {
+              currentUser={currentUser as CitizenUser | null}
+              onApplyForService={(serviceCode) => {
                 setActiveTab('citizen');
+                const workspace = document.getElementById('portal-workspace');
+                if (workspace) workspace.scrollIntoView({ behavior: 'smooth' });
+              }}
+              onNavigateToSchemes={(category, search) => {
+                setActiveTab('schemes');
+                const workspace = document.getElementById('portal-workspace');
+                if (workspace) workspace.scrollIntoView({ behavior: 'smooth' });
               }}
             />
           )}

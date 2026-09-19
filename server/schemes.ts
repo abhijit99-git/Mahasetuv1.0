@@ -145,9 +145,10 @@ export function getSchemeStats(): SchemeStats {
 }
 
 /**
- * Returns top relevant schemes to inject into Gemini context for user inquiries
+ * Returns top relevant schemes to inject into Gemini context for user inquiries,
+ * taking into account citizen profile data if provided.
  */
-export function findRelevantSchemesForAI(query: string, maxResults = 8): WelfareScheme[] {
+export function findRelevantSchemesForAI(query: string, maxResults = 8, citizenProfile?: any): WelfareScheme[] {
   const all = loadSchemes();
   const q = (query || '').toLowerCase();
 
@@ -187,6 +188,29 @@ export function findRelevantSchemesForAI(query: string, maxResults = 8): Welfare
     }
     if ((q.includes('health') || q.includes('आरोग्य') || q.includes('hospital') || q.includes('mjpjay') || q.includes('ayushman') || q.includes('उपचार')) && (scheme.rawCategory === 'health' || scheme.id.includes('mjpjay'))) {
       score += 80;
+    }
+
+    // Citizen profile weighting when citizen asks for recommendations or generic queries
+    if (citizenProfile) {
+      const isFemale = citizenProfile.gender === 'FEMALE' || citizenProfile.gender === 'female';
+      const hasLand = citizenProfile.landHolding && Number(citizenProfile.landHolding.areaInAcres) > 0;
+      const income = Number(citizenProfile.annualIncome) || 0;
+      const category = (citizenProfile.category || '').toUpperCase();
+
+      if (isFemale && (scheme.id.includes('ladki') || scheme.rawCategory === 'women' || scheme.gender === 'female')) {
+        score += 45;
+      }
+      if (hasLand && (scheme.rawCategory === 'agriculture' || scheme.id.includes('shetkari') || scheme.id.includes('kisan'))) {
+        score += 40;
+      }
+      if (category && category !== 'GENERAL' && (scheme.rawCategory === 'education' || scheme.category === 'EDUCATION')) {
+        score += 25;
+      }
+      // Income eligibility match
+      const maxInc = Number(scheme.maxAnnualIncome) || 0;
+      if (maxInc > 0 && income > 0 && income <= maxInc) {
+        score += 20;
+      }
     }
 
     return { scheme, score };

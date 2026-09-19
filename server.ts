@@ -18,7 +18,8 @@ import {
   navigateServiceQuery,
   explainApplicationStatus,
   generateSchemaMappingRules,
-  adviseSchemesWithAI
+  adviseSchemesWithAI,
+  getGeminiPoolStatus
 } from './server/gemini.ts';
 import {
   searchSchemes,
@@ -1307,13 +1308,17 @@ async function startServer() {
             id: srvRow.id,
             name: srvRow.name,
             nameMr: srvRow.name,
+            nameHi: srvRow.name,
             code: srvRow.code,
             departmentId: srvRow.department_id,
             departmentCode: 'REVENUE',
             description: srvRow.description || '',
-            requiredDataFields: [],
+            descriptionMr: srvRow.description || '',
+            descriptionHi: srvRow.description || '',
+            category: 'CIVIL_SERVICES',
+            requiredFields: [],
             slaDays: 7,
-            eligibilityCriteria: []
+            feeInr: 0
           };
           db.services.push(service);
         }
@@ -1328,13 +1333,17 @@ async function startServer() {
         id: serviceId || `srv-${Date.now()}`,
         name: formData?.serviceName || 'Public Welfare Scheme',
         nameMr: formData?.serviceName || 'शासकीय योजना',
+        nameHi: formData?.serviceName || 'सरकारी योजना',
         code: `SRV-${String(serviceId || 'SCHEME').slice(0, 10).toUpperCase()}`,
         departmentId: `dept-${deptCode.toLowerCase()}`,
         departmentCode: deptCode,
         description: 'Maharashtra State Public Welfare Service',
-        requiredDataFields: [],
+        descriptionMr: 'महाराष्ट्र शासन सार्वजनिक कल्याणकारी सेवा',
+        descriptionHi: 'महाराष्ट्र सरकार सार्वजनिक कल्याणकारी सेवा',
+        category: 'CIVIL_SERVICES',
+        requiredFields: [],
         slaDays: 7,
-        eligibilityCriteria: []
+        feeInr: 0
       };
       db.services.push(service);
     }
@@ -1602,12 +1611,12 @@ async function startServer() {
   // AI Service Navigator (supports both /api/ai/navigate and /api/gemini/navigate)
   const handleAiNavigate = async (req: Request, res: Response) => {
     try {
-      const { query, language } = req.body;
+      const { query, language, citizenProfile } = req.body;
       if (!query) {
         res.status(400).json({ error: 'Query is required' });
         return;
       }
-      const result = await navigateServiceQuery(query, language || 'Marathi');
+      const result = await navigateServiceQuery(query, language || 'Marathi', citizenProfile);
       res.json(result);
     } catch (err: any) {
       res.status(500).json({ error: err.message || 'AI Navigation error' });
@@ -1647,6 +1656,11 @@ async function startServer() {
 
   app.post('/api/ai/schema-mapper', handleAiSchemaMapper);
   app.post('/api/gemini/schema-mapper', handleAiSchemaMapper);
+
+  // AI Multi-Key Pool Status & Telemetry (tracks rate limits, cooldowns, active keys)
+  app.get('/api/ai/pool-status', (_req: Request, res: Response) => {
+    res.json(getGeminiPoolStatus());
+  });
 
   // ==========================================
   // 4. WELFARE & DBT SCHEMES REPOSITORY (4,709+ SCHEMES)
