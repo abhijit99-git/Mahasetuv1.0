@@ -303,6 +303,17 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
       .catch(err => console.error('Failed to load scheme stats:', err));
   }, []);
 
+  // Prevent background website scrolling when apply or detail modal is open
+  useEffect(() => {
+    if (applyModalScheme || selectedScheme) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [applyModalScheme, selectedScheme]);
+
   // Fetch Schemes when filters change
   const fetchSchemes = async (pageNum = 1) => {
     setLoading(true);
@@ -877,7 +888,12 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
       {/* Detailed Scheme View Modal */}
       <AnimatePresence>
         {selectedScheme && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
+          <div
+            onClick={e => {
+              if (e.target === e.currentTarget) setSelectedScheme(null);
+            }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm overflow-y-auto"
+          >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -1023,92 +1039,92 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
       {/* Interactive Apply Selection Modal (Choose: via Mahasetu vs. Official Department Portal) */}
       <AnimatePresence>
         {applyModalScheme && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
+          <div
+            onClick={e => {
+              if (e.target === e.currentTarget) setApplyModalScheme(null);
+            }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto"
+          >
             <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 10 }}
+              initial={{ scale: 0.95, opacity: 0, y: 8 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 10 }}
-              className="bg-white rounded-3xl shadow-2xl max-w-xl w-full p-6 sm:p-8 space-y-6 relative overflow-hidden border border-slate-100"
+              exit={{ scale: 0.95, opacity: 0, y: 8 }}
+              className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-5 sm:p-6 space-y-4 relative border border-slate-100 my-auto"
             >
               {/* Close Button */}
               <button
+                type="button"
                 onClick={() => setApplyModalScheme(null)}
-                className="absolute right-5 top-5 p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 p-1.5 rounded-full hover:bg-slate-100 transition-colors"
+                title="Close modal"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
 
               {/* Scheme Context Header */}
               <div className="space-y-1.5 pr-8">
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-indigo-100 text-indigo-800">
-                    {applyModalScheme.category}
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="px-3 py-1 text-xs font-semibold rounded-full bg-indigo-50 text-indigo-700">
+                    {applyModalScheme.category || 'Education & Scholarships'}
                   </span>
                   {applyModalScheme.isMaharashtra && (
-                    <span className="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-amber-100 text-amber-900">
+                    <span className="px-3 py-1 text-xs font-semibold rounded-full bg-amber-50 text-amber-900 border border-amber-200">
                       Maharashtra Flagship
                     </span>
                   )}
                 </div>
 
-                <h3 className="text-xl font-bold text-slate-900 leading-snug">
+                <h3 className="text-lg sm:text-xl font-bold text-slate-900 leading-snug">
                   {applyModalScheme.name}
                 </h3>
                 {applyModalScheme.nameMr && (
-                  <p className="text-xs font-medium text-slate-600">{applyModalScheme.nameMr}</p>
+                  <p className="text-xs text-slate-500 font-medium">{applyModalScheme.nameMr}</p>
                 )}
-                <div className="text-xs text-emerald-800 font-semibold pt-1">
-                  लाभ: {applyModalScheme.benefitValue}
+
+                {/* Benefit Badge */}
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-50/90 border border-emerald-200 text-emerald-800 text-xs font-semibold mt-1">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>लाभ: {applyModalScheme.benefitValue || 'Direct Benefit Transfer (DBT)'}</span>
                 </div>
               </div>
 
-              {/* Instruction banner */}
-              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4">
-                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                  अर्ज पद्धत निवडा (Choose How You Want to Apply):
-                </h4>
-                <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                  You can apply with 100% paperless zero-upload verification via Mahasetu, or proceed directly to the respective official government departmental portal.
-                </p>
-              </div>
-
-              {/* Option 1: Apply via Mahasetu Mesh (Zero-Upload Paperless) */}
-              <div className="group relative border-2 border-indigo-600 bg-gradient-to-br from-indigo-50/50 via-white to-indigo-50/30 rounded-2xl p-5 hover:shadow-md transition-all space-y-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-xs">
-                      <ShieldCheck className="w-5 h-5" />
+              {/* Option 1: Apply via Mahasetu Mesh (Zero-Upload Paperless) - NO recommended tag */}
+              <div className="border-2 border-indigo-600 rounded-2xl p-4 bg-white space-y-3 relative">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <ShieldCheck className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-sm sm:text-base font-bold text-slate-900">Apply via Mahasetu</h4>
+                      <span className="px-1.5 py-0.5 text-[9.5px] font-bold rounded bg-emerald-100 text-emerald-800 uppercase tracking-wide">
+                        ZERO UPLOADS
+                      </span>
                     </div>
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <h4 className="text-sm font-bold text-slate-900">Apply via Mahasetu</h4>
-                        <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-100 text-emerald-800 uppercase">
-                          Zero Uploads
-                        </span>
-                      </div>
-                      <p className="text-xs text-indigo-900/80 font-medium mt-0.5">
-                        शून्य कागदपत्रे • 1-Click Federated Verification
-                      </p>
-                    </div>
+                    <p className="text-xs text-indigo-900/90 font-medium mt-0.5">
+                      शून्य कागदपत्रे • 1-Click Federated Verification
+                    </p>
                   </div>
                 </div>
 
-                <div className="space-y-1.5 text-xs text-slate-700 bg-white/80 p-3 rounded-xl border border-indigo-100">
-                  <div className="flex items-center gap-2 text-slate-700">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>7/12 Land Records, Income & Caste verified directly from state registries</span>
+                {/* Verified Points Box */}
+                <div className="space-y-1.5 bg-slate-50/90 p-3 rounded-xl border border-slate-100/80 text-xs text-slate-700">
+                  <div className="flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>7/12 Land, Income & Caste verified via registry</span>
                   </div>
-                  <div className="flex items-center gap-2 text-slate-700">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <div className="flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                     <span>No document scanning or certificate uploads needed</span>
                   </div>
-                  <div className="flex items-center gap-2 text-slate-700">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>Citizen consent controlled with immutable cryptographic audit ledger</span>
+                  <div className="flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>Citizen consent verified with immutable ledger</span>
                   </div>
                 </div>
 
                 <button
+                  type="button"
                   onClick={() => {
                     const s = applyModalScheme;
                     setApplyModalScheme(null);
@@ -1116,71 +1132,91 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
                       onSelectSchemeForApplication(s);
                     }
                   }}
-                  className="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 group-hover:scale-[1.01]"
+                  className="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold shadow-xs hover:shadow transition-all flex items-center justify-center gap-2"
                 >
                   <ShieldCheck className="w-4 h-4 text-emerald-300" />
-                  <span>Continue via Mahasetu (शून्य कागदपत्रे अर्ज करा)</span>
-                  <ArrowRight className="w-4 h-4 text-indigo-200 group-hover:translate-x-1 transition-transform" />
+                  <span>Continue via Mahasetu (शून्य कागदपत्रे)</span>
+                  <ArrowRight className="w-4 h-4 text-indigo-200" />
                 </button>
               </div>
 
               {/* Option 2: Go to Official Government Portal */}
               {(() => {
                 const officialInfo = resolveOfficialSchemeUrl(applyModalScheme);
+                let officialDomain = 'mahadbt.maharashtra.gov.in';
+                try {
+                  if (officialInfo.url && officialInfo.url.startsWith('http')) {
+                    officialDomain = new URL(officialInfo.url).hostname.replace(/^www\./, '');
+                  } else if (officialInfo.portalName) {
+                    officialDomain = officialInfo.portalName;
+                  }
+                } catch {
+                  officialDomain = officialInfo.portalName || 'mahadbt.maharashtra.gov.in';
+                }
+
                 return (
-                  <div className="border border-slate-200 bg-slate-50/70 hover:bg-white rounded-2xl p-5 hover:border-slate-300 hover:shadow-md transition-all space-y-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-9 h-9 rounded-xl bg-slate-800 text-white flex items-center justify-center shadow-xs">
-                          <Landmark className="w-5 h-5" />
+                  <div className="border border-slate-200 rounded-2xl p-4 bg-white space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shrink-0 shadow-xs">
+                        <Landmark className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-sm sm:text-base font-bold text-slate-900">Go to Official Government Portal</h4>
+                          <span className="px-2 py-0.5 text-[10px] font-medium rounded-md bg-slate-100 text-slate-600 border border-slate-200">
+                            External
+                          </span>
                         </div>
-                        <div>
-                          <div className="flex items-center gap-1.5">
-                            <h4 className="text-sm font-bold text-slate-900">Go to Official Government Portal</h4>
-                            <span className="px-2 py-0.5 text-[10px] font-semibold rounded bg-slate-200 text-slate-700">
-                              External Site
-                            </span>
-                          </div>
-                          <p className="text-xs text-slate-500 font-medium mt-0.5">
-                            शासकीय अधिकृत संकेतस्थळावर अर्ज करा
-                          </p>
-                        </div>
+                        <p className="text-xs text-slate-500 font-medium mt-0.5">
+                          शासकीय अधिकृत संकेतस्थळावर अर्ज करा
+                        </p>
                       </div>
                     </div>
 
-                    <div className="p-3 bg-white rounded-xl border border-slate-200 text-xs space-y-1.5">
-                      <div className="text-[11px] text-slate-500">Official Portal Destination:</div>
-                      <div className="font-semibold text-indigo-700 break-all flex items-center gap-1">
-                        <ExternalLink className="w-3.5 h-3.5 shrink-0 text-slate-400" />
-                        <span>{officialInfo.portalName}</span>
+                    <div className="p-3 bg-slate-50/90 rounded-xl border border-slate-100/80 text-xs space-y-1">
+                      <div className="text-slate-600">
+                        Destination:{' '}
+                        <a
+                          href={officialInfo.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-semibold text-indigo-600 hover:underline inline-flex items-center gap-1 ml-1"
+                        >
+                          <span>{officialDomain}</span>
+                          <ExternalLink className="w-3 h-3 text-indigo-500" />
+                        </a>
                       </div>
-                      <div className="text-[11px] text-slate-600">
-                        {officialInfo.departmentNote}
-                      </div>
-                      <p className="text-[11px] text-slate-500 pt-1 border-t border-slate-100">
-                        * Note: On the official portal, you will be required to register manually and upload scanned copies of required documents.
+                      <p className="text-[11px] text-slate-500 italic">
+                        * Note: Requires manual account registration & scanned PDF document uploads.
                       </p>
                     </div>
 
                     <button
+                      type="button"
                       onClick={() => {
                         window.open(officialInfo.url, '_blank', 'noopener,noreferrer');
                         setApplyModalScheme(null);
                       }}
-                      className="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold shadow-sm hover:shadow transition-all flex items-center justify-center gap-2"
+                      className="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-black text-white text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2"
                     >
                       <Landmark className="w-4 h-4 text-amber-400" />
-                      <span>Open Official Portal (अधिकृत संकेतस्थळावर जा)</span>
-                      <ExternalLink className="w-4 h-4 text-slate-300" />
+                      <span>Open Official Portal (अधिकृत संकेतस्थळ)</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
                     </button>
                   </div>
                 );
               })()}
 
-              <div className="flex justify-end pt-2">
+              {/* Modal Footer */}
+              <div className="flex items-center justify-between pt-2 text-xs">
+                <div className="flex items-center gap-2 text-slate-600 font-medium">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                  <span>महाराष्ट्र शासन डिजिटल महासेतू</span>
+                </div>
                 <button
+                  type="button"
                   onClick={() => setApplyModalScheme(null)}
-                  className="text-xs text-slate-500 hover:text-slate-800 font-medium py-1.5 px-3 rounded-lg hover:bg-slate-100 transition-colors"
+                  className="text-slate-600 hover:text-slate-900 font-semibold transition-colors"
                 >
                   Cancel / मागे जा
                 </button>
