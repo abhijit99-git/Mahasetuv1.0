@@ -39,6 +39,7 @@ export default function App() {
   const [departmentsCount, setDepartmentsCount] = useState(5);
   const [isDocModalOpen, setIsDocModalOpen] = useState(false);
   const [docTopic, setDocTopic] = useState<DocTopicId>('working');
+  const [selectedSchemeForApply, setSelectedSchemeForApply] = useState<WelfareScheme | null>(null);
 
   const handleOpenDoc = (topicId: DocTopicId) => {
     setDocTopic(topicId);
@@ -278,6 +279,7 @@ export default function App() {
             <SchemesCatalogue
               language={language}
               onSelectSchemeForApplication={(scheme: WelfareScheme) => {
+                setSelectedSchemeForApply(scheme);
                 setActiveTab('citizen');
                 const workspace = document.getElementById('portal-workspace');
                 if (workspace) workspace.scrollIntoView({ behavior: 'smooth' });
@@ -293,6 +295,8 @@ export default function App() {
               onViewAudit={() => setActiveTab('audit')}
               onViewConsents={() => setActiveTab('consent')}
               onUpdateCitizen={(updated) => handleUpdateUser(updated)}
+              selectedSchemeForApply={selectedSchemeForApply}
+              setSelectedSchemeForApply={setSelectedSchemeForApply}
             />
           )}
 
@@ -307,7 +311,11 @@ export default function App() {
 
           {/* Tab 3: Immutable Cryptographic Audit Ledger */}
           {activeTab === 'audit' && (
-            <AuditLedger language={language} />
+            <AuditLedger
+              language={language}
+              currentUser={currentUser}
+              onOpenAuthModal={() => setIsAuthModalOpen(true)}
+            />
           )}
 
           {/* Tab 4: AI Citizen Sahayak (Knowledge Base & Profile-Aware AI) */}

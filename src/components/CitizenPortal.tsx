@@ -29,12 +29,155 @@ import {
   Landmark,
   CreditCard,
   Layers,
-  Sparkles
+  Sparkles,
+  ChevronLeft,
+  ChevronRight,
+  Search
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { CitizenUser, ServiceDefinition, ConsentRecord, ApplicationRecord } from '../types.ts';
+import { CitizenUser, ServiceDefinition, ConsentRecord, ApplicationRecord, WelfareScheme, RequiredDataField, DepartmentCode, ServiceCategory } from '../types.ts';
 import { Language, TRANSLATIONS } from '../locales.ts';
 import { UnifiedProfileForm } from './UnifiedProfileForm.tsx';
+
+// Maps a 4,709+ database WelfareScheme to an interactive ServiceDefinition
+function mapSchemeToService(scheme: WelfareScheme): ServiceDefinition {
+  let deptCode: DepartmentCode = 'DISTRICT_ADMIN';
+  const authority = (scheme.issuingAuthority || '').toLowerCase();
+  const category = (scheme.rawCategory || '').toLowerCase();
+  
+  if (authority.includes('revenue') || authority.includes('महसूल') || category.includes('agriculture') || category.includes('farmer')) {
+    deptCode = 'REVENUE';
+  } else if (authority.includes('education') || authority.includes('शिक्षण') || category.includes('education') || category.includes('scholarship')) {
+    deptCode = 'EDUCATION';
+  } else if (authority.includes('rto') || authority.includes('transport') || authority.includes('परिवहन')) {
+    deptCode = 'RTO';
+  } else if (authority.includes('health') || authority.includes('आरोग्य') || category.includes('health') || category.includes('medical')) {
+    deptCode = 'HEALTH';
+  } else if (authority.includes('women') || authority.includes('महिला') || category.includes('women') || category.includes('child')) {
+    deptCode = 'WOMEN_CHILD';
+  } else if (authority.includes('social justice') || authority.includes('सामाजिक न्याय') || category.includes('pension') || category.includes('social')) {
+    deptCode = 'SOCIAL_JUSTICE';
+  } else if (authority.includes('energy') || authority.includes('ऊर्जा')) {
+    deptCode = 'ENERGY';
+  } else if (authority.includes('food') || authority.includes('नागरी पुरवठा') || category.includes('ration') || category.includes('food')) {
+    deptCode = 'FOOD_CIVIL';
+  }
+
+  const docs = scheme.requiredDocuments || ['aadhaar', 'domicile_certificate', 'income_certificate'];
+  const fields: RequiredDataField[] = docs.map((doc, idx) => {
+    const code = doc.toUpperCase().replace(/-/g, '_');
+    
+    if (code.includes('INCOME')) {
+      return {
+        id: `rf-mapped-${idx}-${scheme.id}`,
+        sourceDepartmentCode: 'REVENUE',
+        fieldCode: 'INCOME_CERTIFICATE',
+        displayName: 'Annual Family Income Verification',
+        displayNameMr: 'वार्षिक कौटुंबिक उत्पन्न पडताळणी',
+        displayNameHi: 'वार्षिक पारिवारिक आय सत्यापन',
+        purpose: 'Verify that annual family income is eligible for scheme guidelines.',
+        retentionHours: 24,
+        mandatory: true
+      };
+    } else if (code.includes('DOMICILE') || code.includes('RESIDENCE')) {
+      return {
+        id: `rf-mapped-${idx}-${scheme.id}`,
+        sourceDepartmentCode: 'DISTRICT_ADMIN',
+        fieldCode: 'DOMICILE_CERTIFICATE',
+        displayName: 'Maharashtra Domicile Verification',
+        displayNameMr: 'महाराष्ट्र अधिवास (डोमिसाईल) पडताळणी',
+        displayNameHi: 'महाराष्ट्र अधिवास प्रमाणन',
+        purpose: 'Verify applicant is a permanent resident of Maharashtra.',
+        retentionHours: 24,
+        mandatory: true
+      };
+    } else if (code.includes('7_12') || code.includes('LAND') || code.includes('712')) {
+      return {
+        id: `rf-mapped-${idx}-${scheme.id}`,
+        sourceDepartmentCode: 'REVENUE',
+        fieldCode: 'LAND_EXTRACT_712',
+        displayName: 'Mahabhulekh 7/12 Land Record',
+        displayNameMr: 'महाभूलेख ७/१२ जमीन उतारा पडताळणी',
+        displayNameHi: 'महाभूलेख 7/12 भूमि रिकॉर्ड सत्यापन',
+        purpose: 'Verify active ownership of cultivable agricultural land area.',
+        retentionHours: 24,
+        mandatory: true
+      };
+    } else if (code.includes('CASTE')) {
+      return {
+        id: `rf-mapped-${idx}-${scheme.id}`,
+        sourceDepartmentCode: 'REVENUE',
+        fieldCode: 'CASTE_CERTIFICATE',
+        displayName: 'Revenue Issued Caste Certificate',
+        displayNameMr: 'जात प्रमाणपत्र पडताळणी',
+        displayNameHi: 'जाति प्रमाण पत्र सत्यापन',
+        purpose: "Verify candidate's social category and caste validity.",
+        retentionHours: 24,
+        mandatory: true
+      };
+    } else if (code.includes('RATION')) {
+      return {
+        id: `rf-mapped-${idx}-${scheme.id}`,
+        sourceDepartmentCode: 'FOOD_CIVIL',
+        fieldCode: 'RATION_CARD',
+        displayName: 'Digitized Ration Card Verification',
+        displayNameMr: 'रेशन कार्ड पडताळणी',
+        displayNameHi: 'राशन कार्ड सत्यापन',
+        purpose: 'Verify family ration card category and allocation history.',
+        retentionHours: 24,
+        mandatory: true
+      };
+    } else {
+      const niceName = doc.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      return {
+        id: `rf-mapped-${idx}-${scheme.id}`,
+        sourceDepartmentCode: deptCode,
+        fieldCode: code,
+        displayName: niceName,
+        displayNameMr: niceName,
+        displayNameHi: niceName,
+        purpose: `Verify required document: ${niceName}.`,
+        retentionHours: 24,
+        mandatory: true
+      };
+    }
+  });
+
+  let srvCat: ServiceCategory = 'CIVIL_SERVICES';
+  const catLower = (scheme.category || '').toLowerCase();
+  if (catLower.includes('scholarship') || catLower.includes('education')) {
+    srvCat = 'SCHOLARSHIP';
+  } else if (catLower.includes('farmer') || catLower.includes('agriculture')) {
+    srvCat = 'FARMER_WELFARE';
+  } else if (catLower.includes('transport')) {
+    srvCat = 'TRANSPORT';
+  } else if (catLower.includes('health') || catLower.includes('medical')) {
+    srvCat = 'HEALTHCARE';
+  } else if (catLower.includes('women') || catLower.includes('child')) {
+    srvCat = 'WOMEN_WELFARE';
+  } else if (catLower.includes('pension') || catLower.includes('social')) {
+    srvCat = 'SOCIAL_WELFARE';
+  }
+
+  return {
+    id: `srv-mapped-${scheme.id}`,
+    code: `SRV_MAPPED_${scheme.id.toUpperCase().replace(/-/g, '_')}`,
+    departmentId: `dept-${deptCode.toLowerCase().replace(/_/g, '-')}`,
+    departmentCode: deptCode,
+    name: scheme.name,
+    nameMr: scheme.nameMr || scheme.name,
+    nameHi: scheme.nameHi || scheme.name,
+    description: scheme.benefitSummary || scheme.eligibility || 'No description provided.',
+    descriptionMr: scheme.benefitSummaryMr || scheme.eligibilityMr || scheme.benefitSummary || 'माहिती उपलब्ध नाही.',
+    descriptionHi: scheme.benefitSummaryHi || scheme.eligibilityHi || scheme.benefitSummary || 'जानकारी उपलब्ध नहीं है.',
+    category: srvCat,
+    requiredFields: fields,
+    slaDays: 7,
+    feeInr: 0,
+    benefit: scheme.benefitValue,
+    benefitMr: scheme.benefitValueMr || scheme.benefitValue
+  };
+}
 
 interface Props {
   citizen: CitizenUser;
@@ -42,6 +185,8 @@ interface Props {
   onViewAudit: () => void;
   onViewConsents: () => void;
   onUpdateCitizen?: (updated: CitizenUser) => void;
+  selectedSchemeForApply?: WelfareScheme | null;
+  setSelectedSchemeForApply?: (scheme: WelfareScheme | null) => void;
 }
 
 export const CitizenPortal: React.FC<Props> = ({
@@ -49,7 +194,9 @@ export const CitizenPortal: React.FC<Props> = ({
   language,
   onViewAudit,
   onViewConsents,
-  onUpdateCitizen
+  onUpdateCitizen,
+  selectedSchemeForApply,
+  setSelectedSchemeForApply
 }) => {
   const t = TRANSLATIONS[language];
 
@@ -95,6 +242,60 @@ export const CitizenPortal: React.FC<Props> = ({
   const [explainingStatus, setExplainingStatus] = useState<string | null>(null);
   const [aiExplanationText, setAiExplanationText] = useState<string>('');
   const [isExplainingAi, setIsExplainingAi] = useState<boolean>(false);
+
+  // State for all 4,700+ schemes integration in Citizen Portal
+  const [schemeSearch, setSchemeSearch] = useState('');
+  const [schemeCategory, setSchemeCategory] = useState('ALL');
+  const [schemePage, setSchemePage] = useState(1);
+  const [schemeTotalPages, setSchemeTotalPages] = useState(1);
+  const [schemeTotalCount, setSchemeTotalCount] = useState(0);
+  const [schemesLoading, setSchemesLoading] = useState(false);
+  const [portalSchemes, setPortalSchemes] = useState<WelfareScheme[]>([]);
+
+  // Fetch schemes from search API for the Portal
+  const fetchPortalSchemes = async (pageNum = 1) => {
+    setSchemesLoading(true);
+    try {
+      const params = new URLSearchParams({
+        page: String(pageNum),
+        limit: '12',
+        search: schemeSearch,
+        category: schemeCategory,
+        onlyMaharashtra: 'false',
+      });
+      const res = await fetch(`/api/schemes?${params.toString()}`);
+      const data = await res.json();
+      if (data && data.schemes) {
+        setPortalSchemes(data.schemes);
+        setSchemeTotalPages(data.totalPages || 1);
+        setSchemeTotalCount(data.total || 0);
+        setSchemePage(data.page || 1);
+      }
+    } catch (err) {
+      console.error('Failed to load portal schemes:', err);
+    } finally {
+      setSchemesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchPortalSchemes(1);
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [schemeSearch, schemeCategory]);
+
+  // Handle cross-tab scheme redirection from SchemesCatalogue
+  useEffect(() => {
+    if (selectedSchemeForApply) {
+      const mapped = mapSchemeToService(selectedSchemeForApply);
+      handleSelectService(mapped);
+      setActiveAppTab('catalogue');
+      if (setSelectedSchemeForApply) {
+        setSelectedSchemeForApply(null);
+      }
+    }
+  }, [selectedSchemeForApply]);
 
   // Load services and existing applications
   const loadData = async () => {
@@ -847,80 +1048,186 @@ export const CitizenPortal: React.FC<Props> = ({
           {/* Service Cards Grid (Shown when activeWorkflowStep is SELECT) */}
           {activeWorkflowStep === 'SELECT' && (
             <div>
-              <div className="flex items-center justify-between mb-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
                   <h3 className="text-xl font-semibold tracking-tight text-[#111111]">
-                    {t.servicesTitle}
+                    {language === 'mr' ? 'उपलब्ध सरकारी सेवा आणि योजना' : language === 'hi' ? 'उपलब्ध सरकारी सेवाएं और योजनाएं' : 'Available Government Services & Schemes'}
                   </h3>
                   <p className="text-xs text-[#5c5c5c] mt-0.5">
-                    Choose a scheme or service to verify and apply with zero document uploads
+                    {language === 'mr' ? 'सर्व ४,७००+ योजनांमध्ये शोधा आणि शून्य कागदपत्र अपलोडसह त्वरित अर्ज करा' : language === 'hi' ? 'सभी ४,७००+ योजनाओं में खोजें और शून्य दस्तावेज़ अपलोड के साथ तुरंत आवेदन करें' : 'Search across all 4,700+ schemes and apply with zero physical document uploads'}
                   </p>
                 </div>
-                <span className="text-xs font-semibold text-[#111111] bg-white border border-black/8 px-3 py-1 rounded-full shadow-xs">
-                  {services.length} ACTIVE SERVICES
+                <span className="text-xs font-semibold text-[#111111] bg-white border border-black/8 px-3 py-1.5 rounded-full shadow-xs shrink-0 self-start sm:self-auto">
+                  {schemeTotalCount > 0 ? `${schemeTotalCount.toLocaleString()} ${language === 'mr' ? 'योजना उपलब्ध' : language === 'hi' ? 'योजनाएं उपलब्ध' : 'ACTIVE SCHEMES'}` : 'LOADING...'}
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {services.map(srv => (
-                  <div
-                    key={srv.id}
-                    className="bg-white/80 hover:bg-white border border-black/8 hover:border-black/20 rounded-3xl p-6 shadow-[0_18px_44px_-26px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_48px_-20px_rgba(0,0,0,0.14)] transition-all duration-300 flex flex-col justify-between group"
-                  >
-                    <div>
-                      <div className="flex items-start justify-between gap-3 mb-3">
-                        <span className="text-[10px] font-semibold tracking-wider uppercase text-[#5c5c5c] bg-black/5 px-2.5 py-1 rounded-lg border border-black/5">
-                          {srv.category} • {srv.departmentCode}
-                        </span>
-                        <span className="text-[11px] text-[#5c5c5c] font-medium">
-                          SLA: {srv.slaDays} {t.days}
-                        </span>
-                      </div>
-
-                      <h4 className="text-lg font-semibold text-[#111111] leading-snug group-hover:text-black transition-colors">
-                        {language === 'mr' ? srv.nameMr : srv.name}
-                      </h4>
-                      <p className="text-xs text-[#5c5c5c] mt-2 leading-relaxed">
-                        {language === 'mr' ? srv.descriptionMr : srv.description}
-                      </p>
-
-                      {/* Required proofs pills */}
-                      <div className="mt-5 pt-3.5 border-t border-black/8">
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-[#5c5c5c] block mb-2">
-                          {t.requiredProofs}
-                        </span>
-                        <div className="flex flex-wrap gap-2">
-                          {srv.requiredFields.map(f => (
-                            <span
-                              key={f.id}
-                              className="text-[10.5px] font-medium bg-white text-[#333333] px-2.5 py-1 rounded-lg border border-black/8 flex items-center gap-1.5 shadow-xs"
-                            >
-                              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                              {f.sourceDepartmentCode}: {language === 'mr' ? f.displayNameMr : f.displayName}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-6 pt-4 border-t border-black/8 flex items-center justify-between">
-                      <div className="text-xs">
-                        <span className="text-[#5c5c5c]">{t.fee}</span>{' '}
-                        <span className="font-bold text-[#111111] text-sm">{srv.feeInr === 0 ? t.free : `₹${srv.feeInr}`}</span>
-                      </div>
-
+              <div className="space-y-6">
+                {/* Search and category filters */}
+                <div className="bg-white/40 p-4 rounded-3xl border border-black/5 space-y-3">
+                  <div className="relative">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5c5c5c]" />
+                    <input
+                      type="text"
+                      placeholder={language === 'mr' ? 'योजना, विभाग किंवा कीवर्ड शोधा...' : language === 'hi' ? 'योजना, विभाग या कीवर्ड खोजें...' : 'Search all 4,700+ schemes by name, ministry, or keyword...'}
+                      value={schemeSearch}
+                      onChange={(e) => { setSchemeSearch(e.target.value); setSchemePage(1); }}
+                      className="w-full pl-10 pr-4 py-2.5 bg-white border border-black/8 rounded-xl text-xs sm:text-sm text-[#111111] placeholder-[#8c8c8c] focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all shadow-xs"
+                    />
+                    {schemeSearch && (
                       <button
-                        id={`btn-apply-service-${srv.code}`}
                         type="button"
-                        onClick={() => handleSelectService(srv)}
-                        className="px-5 py-2.5 bg-[#141414] text-white hover:bg-black font-semibold rounded-xl text-xs transition-all shadow-xs flex items-center gap-2"
+                        onClick={() => { setSchemeSearch(''); setSchemePage(1); }}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#8c8c8c] hover:text-[#111111]"
                       >
-                        <span>{t.applyNow}</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
+                        <X className="w-4 h-4" />
                       </button>
-                    </div>
+                    )}
                   </div>
-                ))}
+
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {[
+                      { id: 'ALL', label: language === 'mr' ? 'सर्व विभाग' : language === 'hi' ? 'सभी विभाग' : 'All Categories' },
+                      { id: 'Agriculture & Farming', label: language === 'mr' ? 'कृषी व शेती' : language === 'hi' ? 'कृषि एवं खेती' : 'Agriculture & Farming' },
+                      { id: 'Education & Scholarships', label: language === 'mr' ? 'शिक्षण व शिष्यवृत्ती' : language === 'hi' ? 'शिक्षा एवं छात्रवृत्ति' : 'Education & Scholarships' },
+                      { id: 'Women & Child Welfare', label: language === 'mr' ? 'महिला व बाल विकास' : language === 'hi' ? 'महिला एवं बाल विकास' : 'Women & Child Welfare' },
+                      { id: 'Social Welfare & Pensions', label: language === 'mr' ? 'सामाजिक कल्याण' : language === 'hi' ? 'सामाजिक कल्याण' : 'Social Welfare & Pensions' },
+                      { id: 'Healthcare & Medical', label: language === 'mr' ? 'आरोग्य व वैद्यकीय' : language === 'hi' ? 'आरोग्य एवं चिकित्सा' : 'Healthcare & Medical' },
+                    ].map(cat => (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => { setSchemeCategory(cat.id); setSchemePage(1); }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                          schemeCategory === cat.id
+                            ? 'bg-[#141414] text-white border-black shadow-xs'
+                            : 'bg-white text-[#5c5c5c] border-black/8 hover:text-[#111111] hover:border-black/20'
+                        }`}
+                      >
+                        {cat.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {schemesLoading ? (
+                  <div className="py-16 text-center text-xs text-[#5c5c5c] flex flex-col items-center gap-3">
+                    <RefreshCw className="w-6 h-6 animate-spin text-[#111111]" />
+                    <span>{language === 'mr' ? 'योजना लोड होत आहेत...' : language === 'hi' ? 'योजनाएं लोड हो रही हैं...' : 'Searching and loading schemes...'}</span>
+                  </div>
+                ) : portalSchemes.length === 0 ? (
+                  <div className="py-16 text-center text-xs text-[#5c5c5c] bg-white border border-black/5 rounded-2xl">
+                    {language === 'mr' ? 'कोणतीही योजना आढळली नाही.' : language === 'hi' ? 'कोई योजना नहीं मिली।' : 'No matching schemes found. Adjust your search criteria.'}
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      {portalSchemes.map(sch => {
+                        const srv = mapSchemeToService(sch);
+                        return (
+                          <div
+                            key={srv.id}
+                            className="bg-white/80 hover:bg-white border border-black/8 hover:border-black/20 rounded-3xl p-6 shadow-[0_18px_44px_-26px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_48px_-20px_rgba(0,0,0,0.14)] transition-all duration-300 flex flex-col justify-between group"
+                          >
+                            <div>
+                              <div className="flex items-start justify-between gap-3 mb-3">
+                                <span className="text-[10px] font-semibold tracking-wider uppercase text-[#5c5c5c] bg-black/5 px-2.5 py-1 rounded-lg border border-black/5">
+                                  {srv.category} • {srv.departmentCode}
+                                </span>
+                                <span className="text-[11px] text-[#5c5c5c] font-medium">
+                                  SLA: {srv.slaDays} {t.days}
+                                </span>
+                              </div>
+
+                              <h4 className="text-lg font-semibold text-[#111111] leading-snug group-hover:text-black transition-colors line-clamp-2 min-h-[44px]">
+                                {language === 'mr' ? srv.nameMr : srv.name}
+                              </h4>
+                              <p className="text-xs text-[#5c5c5c] mt-2 leading-relaxed line-clamp-3 min-h-[51px]">
+                                {language === 'mr' ? srv.descriptionMr : srv.description}
+                              </p>
+
+                              {/* Required proofs pills - EXACT same green badge indicators as earlier services */}
+                              <div className="mt-5 pt-3.5 border-t border-black/8">
+                                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#5c5c5c] block mb-2">
+                                  {t.requiredProofs}
+                                </span>
+                                <div className="flex flex-wrap gap-2">
+                                  {srv.requiredFields.map(f => (
+                                    <span
+                                      key={f.id}
+                                      className="text-[10.5px] font-medium bg-white text-[#333333] px-2.5 py-1 rounded-lg border border-black/8 flex items-center gap-1.5 shadow-xs"
+                                    >
+                                      <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                      {f.sourceDepartmentCode}: {language === 'mr' ? f.displayNameMr : f.displayName}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="mt-6 pt-4 border-t border-black/8 flex items-center justify-between">
+                              <div className="text-xs">
+                                <span className="text-[#5c5c5c]">{t.fee}</span>{' '}
+                                <span className="font-bold text-[#111111] text-sm">{srv.feeInr === 0 ? t.free : `₹${srv.feeInr}`}</span>
+                              </div>
+
+                              <button
+                                id={`btn-apply-service-${srv.code}`}
+                                type="button"
+                                onClick={() => handleSelectService(srv)}
+                                className="px-5 py-2.5 bg-[#141414] text-white hover:bg-black font-semibold rounded-xl text-xs transition-all shadow-xs flex items-center gap-2 cursor-pointer"
+                              >
+                                <span>{t.applyNow}</span>
+                                <ArrowRight className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Pagination controls */}
+                    {schemeTotalPages > 1 && (
+                      <div className="flex items-center justify-between mt-8 pt-4 border-t border-black/8">
+                        <button
+                          type="button"
+                          disabled={schemePage === 1}
+                          onClick={() => {
+                            const prev = schemePage - 1;
+                            setSchemePage(prev);
+                            fetchPortalSchemes(prev);
+                          }}
+                          className="px-3 py-1.5 rounded-lg border border-black/8 bg-white hover:bg-slate-50 text-xs font-semibold text-[#333333] disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer"
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                          <span>{language === 'mr' ? 'मागे' : language === 'hi' ? 'पीछे' : 'Prev'}</span>
+                        </button>
+
+                        <span className="text-xs text-[#5c5c5c] font-medium">
+                          {language === 'mr'
+                            ? `पान ${schemePage} पैकी ${schemeTotalPages} (एकूण ${schemeTotalCount} योजना)`
+                            : language === 'hi'
+                            ? `पृष्ठ ${schemePage} का ${schemeTotalPages} (कुल ${schemeTotalCount} योजनाएं)`
+                            : `Page ${schemePage} of ${schemeTotalPages} (${schemeTotalCount} schemes)`}
+                        </span>
+
+                        <button
+                          type="button"
+                          disabled={schemePage === schemeTotalPages}
+                          onClick={() => {
+                            const next = schemePage + 1;
+                            setSchemePage(next);
+                            fetchPortalSchemes(next);
+                          }}
+                          className="px-3 py-1.5 rounded-lg border border-black/8 bg-white hover:bg-slate-50 text-xs font-semibold text-[#333333] disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer"
+                        >
+                          <span>{language === 'mr' ? 'पुढे' : language === 'hi' ? 'आगे' : 'Next'}</span>
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             </div>
           )}

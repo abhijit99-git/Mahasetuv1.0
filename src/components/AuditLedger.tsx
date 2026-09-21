@@ -17,16 +17,19 @@ import {
   ArrowRight,
   Key,
   CheckCircle2,
-  Database
+  Database,
+  Fingerprint
 } from 'lucide-react';
-import { AuditLogEntry } from '../types.ts';
+import { AuditLogEntry, CitizenUser, OfficerUser } from '../types.ts';
 import { Language, TRANSLATIONS } from '../locales.ts';
 
 interface Props {
   language: Language;
+  currentUser: CitizenUser | OfficerUser | null;
+  onOpenAuthModal: () => void;
 }
 
-export const AuditLedger: React.FC<Props> = ({ language }) => {
+export const AuditLedger: React.FC<Props> = ({ language, currentUser, onOpenAuthModal }) => {
   const t = TRANSLATIONS[language];
   const [logs, setLogs] = useState<AuditLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,9 +37,16 @@ export const AuditLedger: React.FC<Props> = ({ language }) => {
   const [selectedFilter, setSelectedFilter] = useState('ALL');
 
   const fetchLogs = async () => {
+    if (!currentUser) {
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
-      const res = await fetch('/api/audit-logs');
+      const url = currentUser.role === 'citizen'
+        ? `/api/audit-logs?citizenId=${currentUser.id}`
+        : '/api/audit-logs';
+      const res = await fetch(url);
       const data = await res.json();
       if (Array.isArray(data)) {
         const normalized: AuditLogEntry[] = data.map((raw: any, idx: number, arr: any[]) => {
@@ -70,7 +80,7 @@ export const AuditLedger: React.FC<Props> = ({ language }) => {
 
   useEffect(() => {
     fetchLogs();
-  }, []);
+  }, [currentUser]);
 
   const filteredLogs = logs.filter(log => {
     const actionStr = log.action || '';
@@ -106,6 +116,42 @@ export const AuditLedger: React.FC<Props> = ({ language }) => {
         return 'bg-white/10 text-white/70 border-white/10';
     }
   };
+
+  if (!currentUser) {
+    return (
+      <div className="max-w-xl mx-auto my-12 bg-white/75 backdrop-blur-xl border border-black/8 rounded-3xl p-8 text-center shadow-[0_18px_44px_-26px_rgba(0,0,0,0.12)] space-y-6 relative overflow-hidden group">
+        <div className="w-16 h-16 rounded-2xl bg-[#111815] text-amber-400 flex items-center justify-center mx-auto shadow-sm">
+          <Fingerprint className="w-8 h-8 text-amber-400 animate-pulse" />
+        </div>
+
+        <div>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-black/10 text-[#111111] text-[11px] font-medium tracking-wide">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+            <span>{language === 'mr' ? 'ऑडिट लॉग आणि सुरक्षा' : language === 'hi' ? 'ऑडिट लॉग और सुरक्षा' : 'Audit Logs & Security'}</span>
+          </div>
+          <h2 className="text-2xl font-semibold tracking-tight text-[#111111] mt-3">
+            {language === 'mr' ? 'ऑडिट लॉग पाहण्यासाठी लॉगिन करा' : language === 'hi' ? 'ऑडिट लॉग देखने के लिए लॉगिन करें' : 'Sign In to View Your Audit Trail'}
+          </h2>
+          <p className="text-xs text-[#5c5c5c] max-w-md mx-auto mt-2 leading-relaxed">
+            {language === 'mr' 
+              ? 'आपल्या योजनांचे अर्ज आणि पडताळणी प्रक्रियेची वैयक्तिक क्रिप्टोग्राफिक ऑडिट ट्रेल पाहण्यासाठी कृपया आधार द्वारे लॉगिन करा.'
+              : language === 'hi'
+              ? 'अपनी योजनाओं के आवेदन और सत्यापन प्रक्रिया की व्यक्तिगत क्रिप्टोग्राफिक ऑडिट ट्रेल देखने के लिए कृपया आधार द्वारा लॉगिन करें।'
+              : 'Please sign in to view your personalized cryptographic audit trail detailing all verification requests, consent grants, and status transitions associated with your identity.'}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={onOpenAuthModal}
+          className="w-full sm:w-auto px-8 py-3.5 bg-[#141414] hover:bg-black text-white font-medium text-xs rounded-xl shadow-sm hover:shadow transition-all inline-flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <Fingerprint className="w-4 h-4 text-emerald-400" />
+          <span>{language === 'mr' ? 'आधार द्वारे लॉगिन करा' : language === 'hi' ? 'आधार से लॉगिन करें' : 'Sign In with Aadhaar'}</span>
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

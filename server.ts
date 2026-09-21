@@ -1564,7 +1564,33 @@ async function startServer() {
     let list = db.auditLogs;
 
     if (citizenId) {
-      list = list.filter(l => l.actorUserId === citizenId || (l.metadata && (l.metadata as any).citizenAadhaarMasked));
+      const citizen = db.citizens.find(c => c.id === citizenId);
+      if (citizen) {
+        const citizenConsents = db.consents.filter(c => c.citizenId === citizenId).map(c => c.id);
+        const citizenApps = db.applications.filter(a => a.citizenId === citizenId).map(a => a.id);
+        const citizenAppNums = db.applications.filter(a => a.citizenId === citizenId).map(a => a.applicationNumber);
+
+        list = list.filter(l => {
+          // If citizen is the direct actor
+          if (l.actorUserId === citizenId) return true;
+
+          // Or if metadata specifies this citizen's masked Aadhaar
+          if (l.metadata && (l.metadata as any).citizenAadhaarMasked === citizen.maskedAadhaar) return true;
+
+          // Or if it's about their consent
+          if (l.metadata && (l.metadata as any).consentId && citizenConsents.includes((l.metadata as any).consentId)) return true;
+
+          // Or if it's about their applications
+          if (l.entityId && citizenApps.includes(l.entityId)) return true;
+          if (l.metadata && (l.metadata as any).applicationId && citizenApps.includes((l.metadata as any).applicationId)) return true;
+          if (l.metadata && (l.metadata as any).applicationNumber && citizenAppNums.includes((l.metadata as any).applicationNumber)) return true;
+
+          return false;
+        });
+      } else {
+        // Safe fallback if citizen is not found
+        list = [];
+      }
     }
     if (entityId) {
       list = list.filter(l => l.entityId === entityId);
