@@ -381,12 +381,15 @@ export const CitizenPortal: React.FC<Props> = ({
     setHopStep(1);
 
     const proofs: any[] = [];
+    const fields = selectedService.requiredFields || [];
 
-    // Hop 1: Request from first source department
-    const field1 = selectedService.requiredFields[0];
-    if (field1) {
-      setTimeout(async () => {
+    try {
+      if (fields.length > 0) {
+        const field1 = fields[0];
+        setHopStep(1);
+        await new Promise(r => setTimeout(r, 600));
         try {
+          console.log('[CitizenPortal] Executing Hop 1 data request for field:', field1);
           const res1 = await fetch('/api/data-request', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -399,70 +402,69 @@ export const CitizenPortal: React.FC<Props> = ({
             })
           });
           const data1 = await res1.json();
+          console.log('[CitizenPortal] Hop 1 response:', data1);
           if (data1.success && data1.result?.canonical) {
             proofs.push({
               fieldCode: field1.fieldCode,
               sourceDepartment: field1.sourceDepartmentCode,
               verificationStatus: 'VERIFIED',
-              certificateNumber: data1.result.canonical.documentNumber,
-              validUntil: data1.result.canonical.validUntil,
+              certificateNumber: data1.result.canonical.documentNumber || 'CERT-VERIFIED',
+              validUntil: data1.result.canonical.validUntil || 'PERMANENT',
               verifiedAt: new Date().toISOString(),
               canonicalPayload: data1.result.canonical
             });
             setVerifiedProofs([...proofs]);
           }
         } catch (e) {
-          console.error('Hop 1 error', e);
+          console.error('[CitizenPortal] Hop 1 error:', e);
         }
+      }
 
-        // Hop 2: Request from second source department
+      if (fields.length > 1) {
+        const field2 = fields[1];
         setHopStep(2);
-        const field2 = selectedService.requiredFields[1];
-        if (field2) {
-          setTimeout(async () => {
-            try {
-              const res2 = await fetch('/api/data-request', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  consent_id: consent.id,
-                  source_department_id: field2.sourceDepartmentCode,
-                  requesting_department_id: selectedService.departmentCode,
-                  requested_fields: [field2.fieldCode],
-                  citizen_id: citizen.id
-                })
-              });
-              const data2 = await res2.json();
-              if (data2.success && data2.result?.canonical) {
-                proofs.push({
-                  fieldCode: field2.fieldCode,
-                  sourceDepartment: field2.sourceDepartmentCode,
-                  verificationStatus: 'VERIFIED',
-                  certificateNumber: data2.result.canonical.documentNumber,
-                  validUntil: data2.result.canonical.validUntil,
-                  verifiedAt: new Date().toISOString(),
-                  canonicalPayload: data2.result.canonical
-                });
-                setVerifiedProofs([...proofs]);
-              }
-            } catch (e) {
-              console.error('Hop 2 error', e);
-            }
-
-            setHopStep(3);
-            setIsVerifyingHops(false);
-            setTimeout(() => {
-              setActiveWorkflowStep('FORM');
-            }, 900);
-          }, 700);
-        } else {
-          setHopStep(3);
-          setIsVerifyingHops(false);
-          setTimeout(() => {
-            setActiveWorkflowStep('FORM');
-          }, 900);
+        await new Promise(r => setTimeout(r, 600));
+        try {
+          console.log('[CitizenPortal] Executing Hop 2 data request for field:', field2);
+          const res2 = await fetch('/api/data-request', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              consent_id: consent.id,
+              source_department_id: field2.sourceDepartmentCode,
+              requesting_department_id: selectedService.departmentCode,
+              requested_fields: [field2.fieldCode],
+              citizen_id: citizen.id
+            })
+          });
+          const data2 = await res2.json();
+          console.log('[CitizenPortal] Hop 2 response:', data2);
+          if (data2.success && data2.result?.canonical) {
+            proofs.push({
+              fieldCode: field2.fieldCode,
+              sourceDepartment: field2.sourceDepartmentCode,
+              verificationStatus: 'VERIFIED',
+              certificateNumber: data2.result.canonical.documentNumber || 'CERT-VERIFIED',
+              validUntil: data2.result.canonical.validUntil || 'PERMANENT',
+              verifiedAt: new Date().toISOString(),
+              canonicalPayload: data2.result.canonical
+            });
+            setVerifiedProofs([...proofs]);
+          }
+        } catch (e) {
+          console.error('[CitizenPortal] Hop 2 error:', e);
         }
-      }, 700);
+      }
+
+      setHopStep(3);
+      await new Promise(r => setTimeout(r, 500));
+    } catch (err) {
+      console.error('[CitizenPortal] Interoperability hops execution error:', err);
+    } finally {
+      setIsVerifyingHops(false);
+      setTimeout(() => {
+        setActiveWorkflowStep('FORM');
+      }, 500);
     }
   };
 
