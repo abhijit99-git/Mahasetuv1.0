@@ -247,13 +247,17 @@ export default function App() {
               <div>
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-black/10 text-[#111111] text-[11px] font-medium tracking-wide">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Aadhaar Identity Gateway</span>
+                  <span>{language === 'mr' ? 'आधार ओळख गेटवे' : language === 'hi' ? 'आधार पहचान गेटवे' : 'Aadhaar Identity Gateway'}</span>
                 </div>
                 <h2 className="text-2xl font-semibold tracking-tight text-[#111111] mt-3">
-                  Sign In with Aadhaar & Email OTP
+                  {language === 'mr' ? 'आधार व ईमेल ओटीपी द्वारे लॉगिन करा' : language === 'hi' ? 'आधार एवं ईमेल ओटीपी द्वारा लॉगिन करें' : 'Sign In with Aadhaar & Email OTP'}
                 </h2>
                 <p className="text-xs text-[#5c5c5c] max-w-md mx-auto mt-2 leading-relaxed">
-                  To access the Mahasetu Interoperability Layer, please verify your identity using your 12-digit Aadhaar UID Number and linked Email OTP code.
+                  {language === 'mr' 
+                    ? 'महासेतू आंतर-विभागीय मंचावर प्रवेश करण्यासाठी, कृपया आपल्या १२ अंकी आधार क्रमांकाने व ईमेल ओटीपीने पडताळणी करा.'
+                    : language === 'hi'
+                    ? 'महासेतु इंटरऑपरेबिलिटी लेयर तक पहुंचने हेतु, कृपया अपने 12 अंकों के आधार नंबर और ईमेल ओटीपी से सत्यापन करें।'
+                    : 'To access the Mahasetu Interoperability Layer, please verify your identity using your 12-digit Aadhaar UID Number and linked Email OTP code.'}
                 </p>
               </div>
 
@@ -264,7 +268,7 @@ export default function App() {
                 className="w-full sm:w-auto px-8 py-3.5 bg-[#141414] hover:bg-black text-white font-medium text-xs rounded-xl shadow-sm hover:shadow transition-all inline-flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Fingerprint className="w-4 h-4 text-emerald-400" />
-                <span>Sign In / Sign Up with Aadhaar</span>
+                <span>{language === 'mr' ? 'आधार द्वारे लॉगिन / नोंदणी करा' : language === 'hi' ? 'आधार से लॉगिन / पंजीकरण करें' : 'Sign In / Sign Up with Aadhaar'}</span>
               </button>
             </div>
           )}
@@ -356,6 +360,7 @@ export default function App() {
 
       {/* Official Government Standard Frosted Footer */}
       <Footer
+        language={language}
         onOpenDoc={handleOpenDoc}
         onNavigateTab={(tab) => {
           setActiveTab(tab);
@@ -369,6 +374,7 @@ export default function App() {
         isOpen={isDocModalOpen}
         onClose={() => setIsDocModalOpen(false)}
         initialTopic={docTopic}
+        language={language}
         onNavigateTab={(tab) => {
           setActiveTab(tab);
           const el = document.getElementById('portal-workspace');

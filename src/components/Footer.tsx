@@ -17,13 +17,19 @@ import {
   ScrollText
 } from 'lucide-react';
 import { DocTopicId } from './DocumentationModal.tsx';
+import { Language, TRANSLATIONS } from '../locales.ts';
 
 interface FooterProps {
+  language?: Language;
   onOpenDoc: (topicId: DocTopicId) => void;
   onNavigateTab: (tab: 'citizen' | 'consent' | 'audit' | 'ai' | 'officer' | 'gateway' | 'supabase') => void;
 }
 
-export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
+export function Footer({ language = 'en', onOpenDoc, onNavigateTab }: FooterProps) {
+  const t = TRANSLATIONS[language];
+  const isMr = language === 'mr';
+  const isHi = language === 'hi';
+
   return (
     <footer className="border-t border-black/8 bg-white/75 backdrop-blur-xl mt-auto relative z-10">
       {/* Top Decorative Subtle Line */}
@@ -45,16 +51,16 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
               </div>
               <div>
                 <span className="text-[11px] font-medium text-[#5c5c5c] block mb-0.5">
-                  Government of Maharashtra
+                  {t.govDepartment}
                 </span>
                 <div className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111111] font-marathi-calligraphy">
-                  महासेतू
+                  {t.portalTitle}
                 </div>
               </div>
             </div>
 
             <p className="text-xs text-[#5c5c5c] leading-relaxed max-w-sm">
-              The unified digital public infrastructure for Maharashtra. Enables instant, 100% paperless verification of citizen records between state departments with zero physical uploads, biometric authentication, and strict DPDP Act 2023 compliance.
+              {t.footerMission}
             </p>
 
             <div className="pt-2 flex flex-wrap items-center gap-2">
@@ -76,7 +82,7 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
           <div className="lg:col-span-2 space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-[#111111] flex items-center gap-1.5">
               <BookOpen className="w-3.5 h-3.5 text-[#141414]" />
-              Documentation
+              {t.documentation}
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
@@ -86,7 +92,7 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
                   className="text-[#5c5c5c] hover:text-[#111111] transition-colors text-left flex items-center gap-1 group"
                 >
                   <ChevronRight className="w-3 h-3 text-black/20 group-hover:text-black group-hover:translate-x-0.5 transition-all" />
-                  <span>How Mahasetu Works</span>
+                  <span>{t.howItWorks}</span>
                 </button>
               </li>
               <li>
@@ -96,7 +102,7 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
                   className="text-[#5c5c5c] hover:text-[#111111] transition-colors text-left flex items-center gap-1 group"
                 >
                   <ChevronRight className="w-3 h-3 text-black/20 group-hover:text-black group-hover:translate-x-0.5 transition-all" />
-                  <span>System Architecture</span>
+                  <span>{t.systemArchitecture}</span>
                 </button>
               </li>
               <li>
@@ -106,7 +112,7 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
                   className="text-[#5c5c5c] hover:text-[#111111] transition-colors text-left flex items-center gap-1 group"
                 >
                   <ChevronRight className="w-3 h-3 text-black/20 group-hover:text-black group-hover:translate-x-0.5 transition-all" />
-                  <span>Adapter &amp; API Specs</span>
+                  <span>{t.apiDocs}</span>
                 </button>
               </li>
               <li>
@@ -116,7 +122,7 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
                   className="text-[#5c5c5c] hover:text-[#111111] transition-colors text-left flex items-center gap-1 group"
                 >
                   <ChevronRight className="w-3 h-3 text-black/20 group-hover:text-black group-hover:translate-x-0.5 transition-all" />
-                  <span>System Cloud Status</span>
+                  <span>{isMr ? 'सिस्टम क्लाउड स्थिती' : isHi ? 'क्लाउड स्थिति' : 'System Cloud Status'}</span>
                 </button>
               </li>
               <li>
@@ -126,7 +132,7 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
                   className="text-emerald-800 font-medium hover:text-emerald-950 transition-colors text-left flex items-center gap-1 group mt-1"
                 >
                   <ArrowUpRight className="w-3 h-3" />
-                  <span>Live Adapter Bench</span>
+                  <span>{isMr ? 'लाइव्ह अडॅप्टर बेंच' : isHi ? 'लाइव एडॉप्टर बेंच' : 'Live Adapter Bench'}</span>
                 </button>
               </li>
             </ul>
@@ -136,7 +142,7 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
           <div className="lg:col-span-2 space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-[#111111] flex items-center gap-1.5">
               <Lock className="w-3.5 h-3.5 text-[#141414]" />
-              Citizen Security
+              {t.navConsent}
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
@@ -146,7 +152,7 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
                   className="text-[#5c5c5c] hover:text-[#111111] transition-colors text-left flex items-center gap-1 group font-medium text-[#111111]"
                 >
                   <ChevronRight className="w-3 h-3 text-black/20 group-hover:text-black group-hover:translate-x-0.5 transition-all" />
-                  <span>What Citizens Must Know</span>
+                  <span>{t.securityCompliance}</span>
                 </button>
               </li>
               <li>
@@ -156,7 +162,7 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
                   className="text-[#5c5c5c] hover:text-[#111111] transition-colors text-left flex items-center gap-1 group"
                 >
                   <ChevronRight className="w-3 h-3 text-black/20 group-hover:text-black group-hover:translate-x-0.5 transition-all" />
-                  <span>DPDP Act 2023 Rights</span>
+                  <span>{isMr ? 'DPDP कायदा २०२३ अधिकार' : isHi ? 'DPDP अधिनियम 2023 अधिकार' : 'DPDP Act 2023 Rights'}</span>
                 </button>
               </li>
               <li>
@@ -166,7 +172,7 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
                   className="text-[#5c5c5c] hover:text-[#111111] transition-colors text-left flex items-center gap-1 group"
                 >
                   <ChevronRight className="w-3 h-3 text-black/20 group-hover:text-black group-hover:translate-x-0.5 transition-all" />
-                  <span>Biometric Protection</span>
+                  <span>{isMr ? 'बायोमेट्रिक सुरक्षा' : isHi ? 'बायोमेट्रिक सुरक्षा' : 'Biometric Protection'}</span>
                 </button>
               </li>
               <li>
@@ -176,7 +182,7 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
                   className="text-[#5c5c5c] hover:text-[#111111] transition-colors text-left flex items-center gap-1 group"
                 >
                   <ChevronRight className="w-3 h-3 text-black/20 group-hover:text-black group-hover:translate-x-0.5 transition-all" />
-                  <span>Cryptographic Ledger</span>
+                  <span>{t.navAudit}</span>
                 </button>
               </li>
               <li>
@@ -186,7 +192,7 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
                   className="text-[#111111] font-medium hover:underline transition-colors text-left flex items-center gap-1 group mt-1"
                 >
                   <ArrowUpRight className="w-3 h-3" />
-                  <span>Consent Center</span>
+                  <span>{t.navConsent}</span>
                 </button>
               </li>
             </ul>
@@ -196,7 +202,7 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
           <div className="lg:col-span-2 space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-[#111111] flex items-center gap-1.5">
               <Building2 className="w-3.5 h-3.5 text-[#141414]" />
-              State Bridges
+              {isMr ? 'शासकीय विभाग' : isHi ? 'सरकारी विभाग' : 'State Bridges'}
             </h4>
             <ul className="space-y-2 text-xs text-[#5c5c5c]">
               <li>
@@ -206,7 +212,7 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
                   className="hover:text-[#111111] transition-colors text-left flex items-center gap-1 group"
                 >
                   <ChevronRight className="w-3 h-3 text-black/20 group-hover:text-black group-hover:translate-x-0.5 transition-all" />
-                  <span>Revenue (7/12 Land)</span>
+                  <span>{isMr ? 'महसूल विभाग (७/१२ जमीन)' : isHi ? 'राजस्व विभाग (7/12 खसरा)' : 'Revenue (7/12 Land)'}</span>
                 </button>
               </li>
               <li>
@@ -216,7 +222,7 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
                   className="hover:text-[#111111] transition-colors text-left flex items-center gap-1 group"
                 >
                   <ChevronRight className="w-3 h-3 text-black/20 group-hover:text-black group-hover:translate-x-0.5 transition-all" />
-                  <span>District Administration</span>
+                  <span>{isMr ? 'जिल्हा प्रशासन (उत्पन्न/जात)' : isHi ? 'जिला प्रशासन (आय/जाति)' : 'District Administration'}</span>
                 </button>
               </li>
               <li>
@@ -226,7 +232,7 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
                   className="hover:text-[#111111] transition-colors text-left flex items-center gap-1 group"
                 >
                   <ChevronRight className="w-3 h-3 text-black/20 group-hover:text-black group-hover:translate-x-0.5 transition-all" />
-                  <span>Transport (Vahan RTO)</span>
+                  <span>{isMr ? 'परिवहन विभाग (वाहन RTO)' : isHi ? 'परिवहन विभाग (वाहन RTO)' : 'Transport (Vahan RTO)'}</span>
                 </button>
               </li>
               <li>
@@ -236,7 +242,7 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
                   className="hover:text-[#111111] transition-colors text-left flex items-center gap-1 group"
                 >
                   <ChevronRight className="w-3 h-3 text-black/20 group-hover:text-black group-hover:translate-x-0.5 transition-all" />
-                  <span>Higher &amp; Tech Education</span>
+                  <span>{isMr ? 'उच्च व तंत्रशिक्षण विभाग' : isHi ? 'उच्च व तकनीकी शिक्षा' : 'Higher & Tech Education'}</span>
                 </button>
               </li>
               <li>
@@ -246,7 +252,7 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
                   className="text-[#111111] font-medium hover:underline transition-colors text-left flex items-center gap-1 group mt-1"
                 >
                   <ArrowUpRight className="w-3 h-3" />
-                  <span>Verify Audit Trail</span>
+                  <span>{isMr ? 'ऑडिट ट्रेल तपासा' : isHi ? 'ऑडिट ट्रेल जांचें' : 'Verify Audit Trail'}</span>
                 </button>
               </li>
             </ul>
@@ -256,7 +262,7 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
           <div className="lg:col-span-2 space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-[#111111] flex items-center gap-1.5">
               <HelpCircle className="w-3.5 h-3.5 text-[#141414]" />
-              Help &amp; Legal
+              {t.quickLinks}
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
@@ -266,17 +272,7 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
                   className="text-[#5c5c5c] hover:text-[#111111] transition-colors text-left flex items-center gap-1 group"
                 >
                   <ChevronRight className="w-3 h-3 text-black/20 group-hover:text-black group-hover:translate-x-0.5 transition-all" />
-                  <span>Citizen Helpdesk</span>
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => onOpenDoc('helpdesk')}
-                  className="text-[#5c5c5c] hover:text-[#111111] transition-colors text-left flex items-center gap-1 group"
-                >
-                  <ChevronRight className="w-3 h-3 text-black/20 group-hover:text-black group-hover:translate-x-0.5 transition-all" />
-                  <span>Grievance Escalation</span>
+                  <span>{isMr ? 'नागरिक मदत कक्ष (Helpdesk)' : isHi ? 'नागरिक सहायता कक्ष' : 'Citizen Helpdesk'}</span>
                 </button>
               </li>
               <li>
@@ -286,7 +282,7 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
                   className="text-[#5c5c5c] hover:text-[#111111] transition-colors text-left flex items-center gap-1 group"
                 >
                   <ChevronRight className="w-3 h-3 text-black/20 group-hover:text-black group-hover:translate-x-0.5 transition-all" />
-                  <span>Privacy Policy</span>
+                  <span>{isMr ? 'गोपनीयता धोरण (Privacy)' : isHi ? 'गोपनीयता नीति' : 'Privacy Policy'}</span>
                 </button>
               </li>
               <li>
@@ -296,7 +292,7 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
                   className="text-[#5c5c5c] hover:text-[#111111] transition-colors text-left flex items-center gap-1 group"
                 >
                   <ChevronRight className="w-3 h-3 text-black/20 group-hover:text-black group-hover:translate-x-0.5 transition-all" />
-                  <span>Terms of Service (RTS)</span>
+                  <span>{isMr ? 'सेवा अटी व शर्ती' : isHi ? 'सेवा की शर्तें' : 'Terms of Service (RTS)'}</span>
                 </button>
               </li>
               <li>
@@ -306,7 +302,7 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
                   className="text-amber-800 font-medium hover:text-amber-950 transition-colors text-left flex items-center gap-1 group mt-1"
                 >
                   <Sparkles className="w-3 h-3" />
-                  <span>AI Sahayak Chat</span>
+                  <span>{t.navAiSahayak}</span>
                 </button>
               </li>
             </ul>
@@ -317,12 +313,12 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
         <div className="mt-12 pt-6 border-t border-black/8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#5c5c5c]">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-center sm:text-left">
             <span className="font-semibold text-[#111111]">
-              © {new Date().getFullYear()} Government of Maharashtra.
+              © {new Date().getFullYear()} {t.allRightsReserved}
             </span>
             <span className="hidden sm:inline text-black/20">•</span>
-            <span>Directorate of Information Technology (MahaIT)</span>
+            <span>{isMr ? 'माहिती तंत्रज्ञान संचालनालय (MahaIT)' : isHi ? 'सूचना प्रौद्योगिकी निदेशालय (MahaIT)' : 'Directorate of Information Technology (MahaIT)'}</span>
             <span className="hidden sm:inline text-black/20">•</span>
-            <span>Digital Public Infrastructure</span>
+            <span>{isMr ? 'डिजिटल सार्वजनिक पायाभूत सुविधा' : isHi ? 'डिजिटल सार्वजनिक अवसंरचना' : 'Digital Public Infrastructure'}</span>
           </div>
 
           <div className="flex items-center gap-4 text-[11px]">
@@ -332,7 +328,7 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
               className="flex items-center gap-1.5 text-emerald-800 hover:text-emerald-950 font-medium"
             >
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span>State Cloud Operational (99.98%)</span>
+              <span>{isMr ? 'राज्य क्लाउड सक्रिय (९९.९८%)' : isHi ? 'राज्य क्लाउड सक्रिय (99.98%)' : 'State Cloud Operational (99.98%)'}</span>
             </button>
             <span className="text-black/20">•</span>
             <button
@@ -340,7 +336,7 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
               onClick={() => onOpenDoc('security')}
               className="text-[#5c5c5c] hover:text-[#111111] transition-colors"
             >
-              Security Advisory
+              {isMr ? 'सुरक्षा सूचना' : isHi ? 'सुरक्षा सलाह' : 'Security Advisory'}
             </button>
           </div>
         </div>
@@ -348,3 +344,4 @@ export function Footer({ onOpenDoc, onNavigateTab }: FooterProps) {
     </footer>
   );
 }
+

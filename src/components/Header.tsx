@@ -65,7 +65,7 @@ export const Header: React.FC<Props> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[11px] text-[#5c5c5c] font-medium hidden sm:inline-block">
-                  Government of Maharashtra • Digital Public Infrastructure
+                  {t.govDepartment}
                 </span>
               </div>
               <div className="flex items-baseline gap-2 mt-0.5">
@@ -84,64 +84,34 @@ export const Header: React.FC<Props> = ({
             {/* Live Gateway Health Indicator */}
             <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/90 border border-black/8 text-xs font-medium text-[#4a4a4a] shadow-xs">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>{departmentsCount || 5}/5 Nodes Online</span>
+              <span>{departmentsCount || 5}/5 {t.nodesOnline}</span>
               <span className="text-[10px] text-emerald-700 font-semibold">14ms</span>
-            </div>
-
-            {/* Language Switcher */}
-
-            <div className="flex items-center bg-black/5 p-0.5 rounded-xl border border-black/5 text-xs font-medium">
-              <button
-                type="button"
-                onClick={() => setLanguage('mr')}
-                className={`px-2.5 py-1 rounded-lg transition-all ${
-                  language === 'mr' ? 'bg-white text-[#111111] font-semibold shadow-xs' : 'text-[#5c5c5c] hover:text-[#111111]'
-                }`}
-              >
-                मराठी
-              </button>
-              <button
-                type="button"
-                onClick={() => setLanguage('hi')}
-                className={`px-2.5 py-1 rounded-lg transition-all ${
-                  language === 'hi' ? 'bg-white text-[#111111] font-semibold shadow-xs' : 'text-[#5c5c5c] hover:text-[#111111]'
-                }`}
-              >
-                हिंदी
-              </button>
-              <button
-                type="button"
-                onClick={() => setLanguage('en')}
-                className={`px-2.5 py-1 rounded-lg transition-all ${
-                  language === 'en' ? 'bg-white text-[#111111] font-semibold shadow-xs' : 'text-[#5c5c5c] hover:text-[#111111]'
-                }`}
-              >
-                EN
-              </button>
             </div>
 
             {/* User Profile / Biometric Badge */}
             {currentUser ? (
-              <div className="flex items-center gap-2 bg-white/90 border border-black/8 rounded-2xl p-1.5 pl-2.5 shadow-xs">
-                <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 bg-white/95 border border-black/10 rounded-2xl p-1.5 pl-3 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-2.5">
                   <div className="relative">
-                    <div className="w-7 h-7 rounded-full bg-black/5 border border-black/10 text-[#111111] flex items-center justify-center shadow-xs">
-                      <User className="w-4 h-4 text-[#111111]" />
+                    <div className="w-8 h-8 rounded-full bg-black/5 border border-black/10 text-[#111111] flex items-center justify-center shadow-xs">
+                      <User className="w-4.5 h-4.5 text-[#111111]" />
                     </div>
                     <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white flex items-center justify-center">
                       <ShieldCheck className="w-2 h-2 text-white" />
                     </span>
                   </div>
                   <div className="hidden sm:block text-left">
-                    <div className="text-xs font-semibold text-[#111111] leading-tight truncate max-w-[130px]">
+                    <div className="text-xs font-bold text-[#111111] leading-tight truncate max-w-[140px]">
                       {currentUser.name}
                     </div>
-                    <div className="text-[10px] text-[#5c5c5c] font-mono flex items-center gap-1">
+                    <div className="text-[10px] text-[#5c5c5c] font-mono flex items-center gap-1 mt-0.5">
                       <Fingerprint className="w-2.5 h-2.5 text-[#141414]" />
                       {currentUser.maskedAadhaar}
                     </div>
                   </div>
                 </div>
+
+                <div className="h-6 w-[1px] bg-black/10 mx-1 hidden sm:block" />
 
                 <button
                   type="button"
@@ -165,9 +135,9 @@ export const Header: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={onOpenAuthModal}
-                className="flex items-center gap-2 px-4 py-2 bg-[#141414] hover:bg-black text-white rounded-xl text-xs font-semibold transition-all shadow-xs"
+                className="flex items-center gap-2 px-5 py-2.5 bg-[#141414] hover:bg-black text-white rounded-xl text-xs font-bold transition-all shadow-md hover:shadow-lg active:scale-95"
               >
-                <Fingerprint className="w-4 h-4" />
+                <Fingerprint className="w-4.5 h-4.5 text-amber-400" />
                 <span>{t.aadhaarAuth}</span>
               </button>
             )}
@@ -189,7 +159,7 @@ export const Header: React.FC<Props> = ({
                 }`}
               >
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Officer Workspace</span>
+                <span>{t.navOfficer}</span>
                 <span className="text-[9px] bg-emerald-700 text-white px-1.5 py-0.5 rounded-full font-bold">
                   Active
                 </span>
@@ -205,7 +175,7 @@ export const Header: React.FC<Props> = ({
                 }`}
               >
                 <BookOpen className="w-3.5 h-3.5 text-amber-500" />
-                <span>Schemes Directory</span>
+                <span>{t.navSchemes}</span>
               </button>
 
               <button
@@ -218,7 +188,7 @@ export const Header: React.FC<Props> = ({
                 }`}
               >
                 <ScrollText className="w-3.5 h-3.5" />
-                <span>Inter-Dept Audit Ledger</span>
+                <span>{t.navAudit}</span>
               </button>
 
               <button
@@ -231,7 +201,7 @@ export const Header: React.FC<Props> = ({
                 }`}
               >
                 <Bot className="w-3.5 h-3.5" />
-                <span>AI Sahayak</span>
+                <span>{t.navAiSahayak}</span>
                 <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${activeTab === 'ai' ? 'bg-white/20 text-white' : 'bg-black/5 text-[#5c5c5c]'}`}>
                   Gemini
                 </span>

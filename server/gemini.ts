@@ -326,9 +326,16 @@ export interface ServiceNavigationResult {
 }
 
 /**
- * First see the text: detect whether the query is in Marathi, Hindi, or English.
+ * Detect language with strict priority given to citizen's selected preferred language
  */
 export function detectLanguage(text: string, preferredLanguage?: string): 'Marathi' | 'English' | 'Hindi' {
+  if (preferredLanguage) {
+    const pl = preferredLanguage.toLowerCase().trim();
+    if (pl === 'mr' || pl === 'marathi') return 'Marathi';
+    if (pl === 'hi' || pl === 'hindi') return 'Hindi';
+    if (pl === 'en' || pl === 'english') return 'English';
+  }
+
   const t = (text || '').toLowerCase().trim();
   const marathiRegex = /[\u0900-\u097F]/;
 
@@ -357,18 +364,7 @@ export function detectLanguage(text: string, preferredLanguage?: string): 'Marat
 
   // Devanagari script present
   if (marathiRegex.test(text)) {
-    if (preferredLanguage?.toLowerCase().includes('hindi') || preferredLanguage === 'hi') {
-      return 'Hindi';
-    }
     return 'Marathi';
-  }
-
-  // Check preferred language if provided
-  if (preferredLanguage?.toLowerCase().includes('marathi') || preferredLanguage === 'mr') {
-    return 'Marathi';
-  }
-  if (preferredLanguage?.toLowerCase().includes('hindi') || preferredLanguage === 'hi') {
-    return 'Hindi';
   }
 
   return 'English';
@@ -655,20 +651,24 @@ GROUND TRUTH KNOWLEDGE BASE:
 ${schemesContext}
 
 CRITICAL RULES:
-1. STRICT OUT-OF-SCOPE GUARDRAIL:
+1. MANDATORY LANGUAGE ENFORCEMENT:
+   - The citizen has selected "${detectedLang}" language.
+   - You MUST write ALL user-facing text fields (greeting, serviceName, department, explanation, summary, advice, profileEligibilityNote, requiredDocuments, availableInMesh) strictly in ${detectedLang === 'Marathi' ? 'MARATHI (मराठी)' : detectedLang === 'Hindi' ? 'HINDI (हिंदी)' : 'ENGLISH'}.
+   - DO NOT output English text if Marathi or Hindi is requested!
+2. STRICT OUT-OF-SCOPE GUARDRAIL:
    - If the query is completely unrelated to government services, welfare schemes, certificates, farmer subsidies, scholarships, or Mahasetu (e.g. asking for weather, current time, writing code, recipes, movie reviews, sports, trivia):
-     You MUST set "isOutOfScope": true, "intent": "OUT_OF_SCOPE", "serviceName": "Request Out of Context", "department": "Mahasetu Guardrail", "departmentCode": "OUT_OF_SCOPE".
-     In "explanation" and "advice", politely explain that Mahasetu AI Sahayak is dedicated strictly to government services, schemes, and official certificates, and ask the user to submit an on-topic government query.
-2. GREETINGS FIRST:
-   - If the query is in Marathi: Greet with "नमस्कार!" or "सस्नेह नमस्कार!".
-   - If the query is in English: Greet with "Hello! Welcome to Mahasetu AI Citizen Sahayak.".
-   - If the query is in Hindi: Greet with "नमस्ते! महासेतु में आपका स्वागत है।".
-   - If the query is only a greeting (e.g. "hi", "namaste"), set isGreeting: true and introduce key services (Ladki Bahin, 7/12 land records, scholarships, driving license, caste/income certificates).
-3. CITIZEN PROFILE RELEVANCE:
+     You MUST set "isOutOfScope": true, "intent": "OUT_OF_SCOPE", "serviceName": "${detectedLang === 'Marathi' ? 'विषयाशी असंबंधित विचारणा' : detectedLang === 'Hindi' ? 'विषय से बाहर का अनुरोध' : 'Request Out of Context'}", "department": "${detectedLang === 'Marathi' ? 'महासेतू नागरिक नियंत्रण' : detectedLang === 'Hindi' ? 'महासेतु नियंत्रण' : 'Mahasetu Guardrail'}", "departmentCode": "OUT_OF_SCOPE".
+     In "explanation" and "advice", politely explain in ${detectedLang} that Mahasetu AI Sahayak is dedicated strictly to government services, schemes, and official certificates, and ask the user to submit an on-topic government query.
+3. GREETINGS FIRST:
+   - If Marathi: Greet with "नमस्कार!" or "सस्नेह नमस्कार!".
+   - If English: Greet with "Hello! Welcome to Mahasetu AI Citizen Sahayak.".
+   - If Hindi: Greet with "नमस्ते! महासेतु में आपका स्वागत है।".
+   - If the query is only a greeting (e.g. "hi", "namaste"), set isGreeting: true and introduce key services in ${detectedLang}.
+4. CITIZEN PROFILE RELEVANCE:
    - If a citizen profile is provided, evaluate whether the citizen qualifies for the relevant scheme based on their gender, income, category, land holding, or district.
-   - If they qualify, set "profileEligibilityNote" explaining why they qualify (e.g. "Based on your verified annual income of ₹1,80,000 and female gender, you meet the eligibility criteria for Mukhyamantri Majhi Ladki Bahin Yojana.").
-4. PAPERLESS & ZERO UPLOADS:
-   - Explain how Mahasetu verifies documents cross-departmentally via Aadhaar biometrics without requiring physical scans or office visits.
+   - If they qualify, set "profileEligibilityNote" in ${detectedLang} explaining why they qualify.
+5. PAPERLESS & ZERO UPLOADS:
+   - Explain in ${detectedLang} how Mahasetu verifies documents cross-departmentally via Aadhaar biometrics without requiring physical scans or office visits.
 
 Return JSON adhering strictly to the schema.`;
 
@@ -955,16 +955,18 @@ RELEVANT SCHEMES FROM DATASET:
 ${schemeContext}
 
 CRITICAL INSTRUCTIONS:
-1. GREET FIRST:
+1. STRICT MANDATORY LANGUAGE ENFORCEMENT:
+   - The citizen has selected "${lang}" language.
+   - You MUST write greeting, advice, keyBenefitsSummary, eligibilityChecklist items, and zeroUploadVerificationDetails STRICTLY IN ${isMr ? 'MARATHI (मराठी)' : isHi ? 'HINDI (हिंदी)' : 'ENGLISH'}.
+   - DO NOT write English if Marathi or Hindi is chosen!
+2. GREET FIRST:
    - If Marathi: Start with warm "नमस्कार!" or "सस्नेह नमस्कार!".
    - If Hindi: Start with "नमस्ते!".
    - If English: Start with "Hello and welcome to Mahasetu Scheme Advisor!".
-2. ANSWER IN CITIZEN'S LANGUAGE:
-   - Match "${lang}". If Marathi, explain in respectful, clear Marathi.
 3. EXPLAIN APPLICABLE SCHEMES & BENEFITS:
-   - Clearly explain which schemes the citizen is eligible for and how much financial benefit/subsidy/scholarship they will receive.
+   - In ${lang}, clearly explain which schemes the citizen is eligible for and how much financial benefit/subsidy/scholarship they will receive.
 4. ZERO UPLOADS / MAHASETU ADVANTAGE:
-   - Highlight that citizens DO NOT need to visit offices or upload scan copies. Mahasetu's federated adapters (Bhulekh 7/12, MahaDBT Caste/Income, UIDAI Biometric) fetch authoritative verified proofs in seconds.
+   - In ${lang}, highlight that citizens DO NOT need to visit offices or upload scan copies. Mahasetu's federated adapters (Bhulekh 7/12, MahaDBT Caste/Income, UIDAI Biometric) fetch authoritative verified proofs in seconds.
 
 Return JSON adhering strictly to the schema.`;
 

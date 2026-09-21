@@ -290,144 +290,179 @@ export const HeroSection: React.FC<Props> = ({
   ];
 
   return (
-    <section id="hero" className="relative w-full bg-[#eef2ee] text-[#111111] overflow-hidden border-b border-black/8">
-      {/* Background Subtle Mesh Grid and Glows */}
-      <div className="absolute inset-0 bg-[radial-gradient(#141414_0.75px,transparent_0.75px)] [background-size:24px_24px] opacity-[0.035] pointer-events-none" />
-      <div className="absolute top-0 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+    <section id="hero" className="relative w-full bg-dot-grid overflow-hidden border-b border-slate-200 min-h-screen pb-16">
+      {/* Dynamic Embedded Styles for Unique CSS Accents */}
+      <style>{`
+        .bg-dot-grid {
+          background-color: #f8fafc;
+          background-image: radial-gradient(#cbd5e1 1.1px, transparent 1.1px);
+          background-size: 24px 24px;
+        }
+        
+        .top-glow-gradient {
+          background: radial-gradient(circle at 50% 20%, rgba(204, 251, 241, 0.45) 0%, rgba(254, 243, 199, 0.35) 40%, rgba(248, 250, 252, 0) 75%);
+        }
+
+        .wavy-underline {
+          position: relative;
+          display: inline-block;
+        }
+        .wavy-underline::after {
+          content: '';
+          position: absolute;
+          left: 0;
+          bottom: -10px;
+          width: 100%;
+          height: 12px;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 6' preserveAspectRatio='none'%3E%3Cpath d='M0,3 Q2.5,0 5,3 T10,3 T15,3 T20,3' fill='none' stroke='%23d97706' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
+          background-repeat: repeat-x;
+          background-size: 20px 7px;
+        }
+
+        .glass-card {
+          background: rgba(255, 255, 255, 0.72);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.8);
+          box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+        }
+      `}</style>
+
+      {/* Background Ambient Glow Overlay */}
+      <div className="pointer-events-none absolute inset-0 top-glow-gradient h-[750px] z-0"></div>
 
       {/* 1. TOP HERO HEADER / NAVIGATION */}
-      <header className="relative z-30 max-w-7xl mx-auto px-4 sm:px-6 pt-5 pb-3">
-        <div className="flex items-center justify-between gap-4">
-          {/* Logo & Emblem */}
-          <div className="flex items-center gap-3">
-            <a href="#hero" className="flex items-center gap-3 group text-decoration-none">
-              <div className="w-12 h-12 shrink-0 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform">
-                <img
-                  src="/mahasetu-logo.png"
-                  alt="Mahasetu Emblem"
-                  className="w-full h-full object-contain"
-                  referrerPolicy="no-referrer"
-                />
-              </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111111] font-marathi-calligraphy leading-tight">
+      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200/80 transition-all">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+          {/* Brand & Maharashtra Emblem */}
+          <a className="flex items-center gap-3.5 shrink-0 group focus:outline-none" href="#hero">
+            <img
+              alt="Government of Maharashtra Official Emblem"
+              className="w-12 h-12 md:w-14 md:h-14 object-contain drop-shadow-sm transition-transform group-hover:scale-105"
+              src="https://lh3.googleusercontent.com/aida/AEtjO1UPR3k70QCbGE30jI_u8OLZfVRHsXCOXMJVsyMr6Gf7ejR21QYYEcfjY0k1P0JYzdI0K-mYrGUP3lVNQhb1FUu_P2K_PZsUtAh_VSrR9ETO-J6cfC3Cpw-K_BfcE9r5jXcyunXJCeuxogFX-HxEHhcoCSXca4V3SigXbV0SbvxxT_X0L4X_GXdMQQ7vFYlNmOjV8Zpzj1faXn3VbZmHYPIhsHw6AQs-swN_m2yDGjbglZQHt3tXmbSo3oaf"
+            />
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 leading-none font-marathi-calligraphy">
                   महासेतू
-                </h1>
-                <p className="text-[11px] text-[#5c5c5c] font-semibold leading-none mt-0.5">
-                  महाराष्ट्र शासन • आंतर-विभागीय इंटरऑपरेबिलिटी मंच
-                </p>
+                </span>
               </div>
-            </a>
-          </div>
+              <span className="text-[11px] md:text-[12px] font-medium text-slate-600 tracking-tight leading-tight mt-0.5">
+                <span className="sm:hidden">
+                  {language === 'mr' ? 'महाराष्ट्र शासन' : language === 'hi' ? 'महाराष्ट्र शासन' : 'Govt of Maharashtra'}
+                </span>
+                <span className="hidden sm:inline">
+                  {language === 'mr' 
+                    ? 'महाराष्ट्र शासन • आंतर-विभागीय इंटरऑपरेबिलिटी मंच' 
+                    : language === 'hi' 
+                    ? 'महाराष्ट्र शासन • अंतर-विभागीय इंटरऑपरेबिलिटी मंच' 
+                    : 'Govt of Maharashtra • Inter-Departmental Interoperability'}
+                </span>
+              </span>
+            </div>
+          </a>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-1 bg-white/75 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-black/8 shadow-xs">
+          <nav className="hidden xl:flex items-center gap-1.5 text-[14.5px] font-medium text-slate-700" data-purpose="desktop-nav">
             <button
-              type="button"
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="px-3.5 py-2 font-semibold text-slate-950 hover:text-amber-700 transition-colors"
+            >
+              {language === 'mr' ? 'मुख्यपृष्ठ' : language === 'hi' ? 'मुख्य पृष्ठ' : 'Home'}
+            </button>
+            <button
               onClick={() => handleNavClick('citizen')}
-              className="px-3 py-1.5 rounded-xl text-xs font-semibold text-[#111111] hover:bg-black/5 transition-colors"
+              className="px-3.5 py-2 hover:text-amber-700 transition-colors"
             >
-              Citizen Portal
+              {t.navCitizen}
             </button>
             <button
-              type="button"
-              onClick={() => handleNavClick('ai')}
-              className="px-3 py-1.5 rounded-xl text-xs font-semibold text-[#111111] hover:bg-black/5 transition-colors flex items-center gap-1"
+              onClick={() => handleNavClick('schemes')}
+              className="px-3.5 py-1.5 text-amber-800 font-semibold rounded-lg bg-amber-50/90 border border-amber-300/80 hover:bg-amber-100 transition-colors"
             >
-              <Sparkles className="w-3 h-3 text-amber-600" />
-              <span>AI Sahayak</span>
+              {t.navSchemes}
             </button>
             <button
-              type="button"
-              onClick={() => handleNavClick('consent')}
-              className="px-3 py-1.5 rounded-xl text-xs font-semibold text-[#111111] hover:bg-black/5 transition-colors"
-            >
-              Consent Matrix
-            </button>
-            <button
-              type="button"
-              onClick={() => handleNavClick('audit')}
-              className="px-3 py-1.5 rounded-xl text-xs font-semibold text-[#111111] hover:bg-black/5 transition-colors"
-            >
-              Audit Trail
-            </button>
-            <button
-              type="button"
               onClick={() => handleNavClick('officer')}
-              className="px-3 py-1.5 rounded-xl text-xs font-semibold text-[#111111] hover:bg-black/5 transition-colors"
+              className="px-3.5 py-2 hover:text-amber-700 transition-colors"
             >
-              Officer Review
+              {t.navOfficer}
+            </button>
+            <button
+              onClick={() => handleNavClick('audit')}
+              className="px-3.5 py-2 hover:text-amber-700 transition-colors"
+            >
+              {t.navAudit}
             </button>
           </nav>
 
-          {/* Right Action Stack: Language + Biometric Button */}
-          <div className="flex items-center gap-2">
-            {/* Language Switcher */}
-            <div className="flex items-center bg-white/80 backdrop-blur-md rounded-xl p-1 border border-black/10 text-xs font-semibold text-black/70 shadow-xs">
+          {/* Right Header Actions */}
+          <div className="flex items-center gap-3 shrink-0">
+            {/* Language Selector Segmented Pill */}
+            <div className="hidden sm:inline-flex items-center p-1 bg-slate-100 rounded-full border border-slate-200/90 text-xs font-medium text-slate-600 shadow-inner" data-purpose="language-selector">
               <button
-                type="button"
                 onClick={() => setLanguage('en')}
-                className={`px-2 py-1 rounded-lg transition-all ${
-                  language === 'en' ? 'bg-[#141414] text-white font-bold shadow-xs' : 'hover:text-black'
-                }`}
+                className={`px-2.5 py-1 rounded-full transition-all ${language === 'en' ? 'bg-slate-900 text-white font-bold shadow-sm' : 'hover:text-slate-900'}`}
+                type="button"
               >
                 EN
               </button>
               <button
-                type="button"
                 onClick={() => setLanguage('mr')}
-                className={`px-2 py-1 rounded-lg transition-all ${
-                  language === 'mr' ? 'bg-[#141414] text-white font-bold shadow-xs' : 'hover:text-black'
-                }`}
+                className={`px-2.5 py-1 rounded-full transition-all ${language === 'mr' ? 'bg-slate-900 text-white font-bold shadow-sm' : 'hover:text-slate-900'}`}
+                type="button"
               >
                 मराठी
               </button>
               <button
-                type="button"
                 onClick={() => setLanguage('hi')}
-                className={`px-2 py-1 rounded-lg transition-all ${
-                  language === 'hi' ? 'bg-[#141414] text-white font-bold shadow-xs' : 'hover:text-black'
-                }`}
+                className={`px-2.5 py-1 rounded-full transition-all ${language === 'hi' ? 'bg-slate-900 text-white font-bold shadow-sm' : 'hover:text-slate-900'}`}
+                type="button"
               >
                 हिंदी
               </button>
             </div>
 
-            {/* Auth CTA / User Badge */}
+            {/* Citizen Auth Dynamic CTA */}
             {currentUser ? (
               <button
-                type="button"
                 onClick={onOpenAuthModal}
-                className="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition-all"
+                className="hidden md:inline-flex items-center gap-2.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-sm font-semibold shadow-md hover:shadow-lg transition-all"
               >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>{currentUser.name.split(' ')[0]} (Aadhaar Verified)</span>
+                <ShieldCheck className="w-4 h-4 text-emerald-200 animate-pulse" />
+                <span>
+                  {currentUser.name.split(' ')[0]} ({language === 'mr' ? 'पडताळणीकृत' : language === 'hi' ? 'सत्यापित' : 'Aadhaar Verified'})
+                </span>
               </button>
             ) : (
               <button
-                type="button"
                 onClick={onOpenAuthModal}
-                className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#141414] hover:bg-black text-white text-xs font-semibold shadow-sm transition-all"
+                className="hidden md:inline-flex items-center gap-2.5 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-full text-sm font-semibold shadow-md hover:shadow-lg transition-all transform active:scale-95"
+                data-purpose="citizen-auth-btn"
               >
-                <Fingerprint className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Biometric Auth</span>
+                <Fingerprint className="w-4 h-4 text-amber-400" />
+                <span>{t.aadhaarAuth}</span>
               </button>
             )}
 
-            {/* Mobile Menu Toggle Button */}
+            {/* Mobile Menu Hamburger Button */}
             <button
-              ref={toggleRef}
-              type="button"
               onClick={toggleMenu}
-              className="lg:hidden p-2 rounded-xl bg-white/80 border border-black/10 text-[#111111]"
-              aria-label="Toggle Navigation"
+              aria-label="Open Navigation Menu"
+              className="xl:hidden p-2.5 text-slate-700 hover:text-slate-950 rounded-xl hover:bg-slate-100 border border-slate-200 transition focus:outline-none"
+              type="button"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24">
                 {isMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <path d="M6 18L18 6M6 6l12 12" />
                 ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  <>
+                    <line x1="4" x2="20" y1="6" y2="6"></line>
+                    <line x1="4" x2="20" y1="12" y2="12"></line>
+                    <line x1="4" x2="20" y1="18" y2="18"></line>
+                  </>
                 )}
               </svg>
             </button>
@@ -436,178 +471,337 @@ export const HeroSection: React.FC<Props> = ({
 
         {/* Mobile Dropdown Panel */}
         {isMenuOpen && (
-          <div className="lg:hidden mt-3 p-4 rounded-2xl bg-white/95 backdrop-blur-xl border border-black/10 shadow-xl space-y-2">
+          <div className="xl:hidden p-5 bg-white border-t border-slate-100 flex flex-col space-y-3 font-medium text-slate-800 shadow-xl">
             <button
-              type="button"
               onClick={() => handleNavClick('citizen')}
-              className="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold hover:bg-black/5"
+              className="w-full text-left px-4 py-2.5 rounded-lg hover:bg-slate-50 transition-colors"
             >
-              Citizen Portal
+              {t.navCitizen}
             </button>
             <button
-              type="button"
-              onClick={() => handleNavClick('ai')}
-              className="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold hover:bg-black/5 flex items-center justify-between"
+              onClick={() => handleNavClick('schemes')}
+              className="w-full text-left px-4 py-2.5 rounded-lg bg-amber-50 text-amber-900 border border-amber-200 transition-colors"
             >
-              <span>AI Sahayak</span>
-              <Sparkles className="w-4 h-4 text-amber-600" />
+              {t.navSchemes}
             </button>
             <button
-              type="button"
-              onClick={() => handleNavClick('consent')}
-              className="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold hover:bg-black/5"
-            >
-              Consent Matrix
-            </button>
-            <button
-              type="button"
-              onClick={() => handleNavClick('audit')}
-              className="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold hover:bg-black/5"
-            >
-              Audit Trail
-            </button>
-            <button
-              type="button"
               onClick={() => handleNavClick('officer')}
-              className="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold hover:bg-black/5"
+              className="w-full text-left px-4 py-2.5 rounded-lg hover:bg-slate-50 transition-colors"
             >
-              Officer Review
+              {t.navOfficer}
             </button>
-            <div className="pt-2 border-t border-black/10">
+            <button
+              onClick={() => handleNavClick('audit')}
+              className="w-full text-left px-4 py-2.5 rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              {t.navAudit}
+            </button>
+            
+            <div className="pt-4 border-t border-slate-100">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                {language === 'mr' ? 'भाषा निवडा' : language === 'hi' ? 'भाषा चुनें' : 'Select Language'}
+              </p>
+              <div className="flex gap-2 text-sm">
+                <button
+                  onClick={() => { setLanguage('en'); setIsMenuOpen(false); }}
+                  className={`flex-1 py-1.5 rounded-md font-semibold transition-all ${language === 'en' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'}`}
+                >
+                  EN
+                </button>
+                <button
+                  onClick={() => { setLanguage('mr'); setIsMenuOpen(false); }}
+                  className={`flex-1 py-1.5 rounded-md font-semibold transition-all ${language === 'mr' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'}`}
+                >
+                  मराठी
+                </button>
+                <button
+                  onClick={() => { setLanguage('hi'); setIsMenuOpen(false); }}
+                  className={`flex-1 py-1.5 rounded-md font-semibold transition-all ${language === 'hi' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'}`}
+                >
+                  हिंदी
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-slate-100">
               <button
-                type="button"
                 onClick={() => {
                   setIsMenuOpen(false);
                   onOpenAuthModal();
                 }}
-                className="w-full py-2.5 rounded-xl bg-[#141414] text-white text-xs font-semibold flex items-center justify-center gap-2"
+                className="flex items-center justify-center gap-2.5 w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-semibold shadow transition-all"
               >
-                <Fingerprint className="w-4 h-4 text-emerald-400" />
-                <span>{currentUser ? 'Switch / Re-authenticate User' : 'Aadhaar Biometric Login'}</span>
+                <Fingerprint className="w-4 h-4 text-amber-400" />
+                <span>{currentUser ? t.switchUser : t.aadhaarAuth}</span>
               </button>
             </div>
           </div>
         )}
       </header>
 
-      {/* 2. MAIN HERO DISPLAY (2-COLUMN MODERN SPLIT) */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-12 sm:pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
-          
-          {/* LEFT COLUMN: Mission, Core Slogan, Value Props, Telemetry */}
-          <div className="lg:col-span-6 flex flex-col justify-center space-y-6">
-            {/* Main Headline */}
-            <div className="space-y-3">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#111111] leading-[1.12]">
-                {language === 'mr' ? (
-                  <>
-                    एक महासेतू. <span className="text-emerald-700">शून्य कागदपत्रे.</span><br />
-                    संपूर्ण नागरिक संमती.
-                  </>
-                ) : language === 'hi' ? (
-                  <>
-                    एक महासेतु। <span className="text-emerald-700">शून्य दस्तावेज।</span><br />
-                    पूर्ण नागरिक सहमति।
-                  </>
-                ) : (
-                  <>
-                    One Gateway. <span className="text-emerald-700">Zero Uploads.</span><br />
-                    Absolute Citizen Consent.
-                  </>
-                )}
-              </h1>
+      {/* 2. HERO MAIN CONTENT SECTION */}
+      <main className="relative z-10 pt-10 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center text-center">
+        {/* Layout Spacer replacing the removed live services badge to maintain identical vertical rhythm */}
+        <div className="h-10 sm:h-12 w-full" aria-hidden="true" />
 
-              <p className="text-sm sm:text-base text-[#4a4a4a] leading-relaxed max-w-2xl font-normal">
-                {language === 'mr'
-                  ? 'महासेतू महसूल, महाडीबीटी, उच्च शिक्षण, परिवहन आणि भूमी अभिलेख विभागांना थेट जोडणारा आंतर-विभागीय मंच आहे. आधार बायोमेट्रिक पडताळणीद्वारे नागरिकांना वारंवार कागदपत्रे जोडण्यापासून १००% मुक्ती मिळते.'
-                  : language === 'hi'
-                  ? 'महासेतु राजस्व, महाडीबीटी, उच्च शिक्षा, परिवहन और भूमि अभिलेख विभागों को सीधे जोड़ने वाला इंटरऑपरेबिलिटी प्लेटफॉर्म है। आधार बायोमेट्रिक सत्यापन के साथ नागरिकों को बार-बार दस्तावेज अपलोड करने से पूर्ण मुक्ति।'
-                  : 'Mahasetu eliminates government department silos by orchestrating real-time canonical data exchange between Revenue (7/12), MahaDBT, Higher Education, and Transport with strict Aadhaar biometrics and DPDP cryptographic consent.'}
-              </p>
+        {/* Main Headings */}
+        <div className="max-w-4xl mx-auto mb-6">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-serif text-slate-800 tracking-tight font-medium mb-2">
+            महाराष्ट्र शासन
+          </h2>
+          <h1 className="text-3.5xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.15]">
+            {language === 'mr' ? (
+              <>
+                सर्व सेवा आणि योजनांसाठी<br className="hidden sm:block"/>
+                <span className="text-orange-500 font-serif italic font-normal tracking-wide wavy-underline">
+                  युनिफाइड सिटीझन गेटवे
+                </span>
+              </>
+            ) : language === 'hi' ? (
+              <>
+                सभी सेवाओं और योजनाओं के लिए<br className="hidden sm:block"/>
+                <span className="text-orange-500 font-serif italic font-normal tracking-wide wavy-underline">
+                  एकीकृत नागरिक गेटवे
+                </span>
+              </>
+            ) : (
+              <>
+                Unified Citizen Gateway for All<br className="hidden sm:block"/>
+                <span className="text-orange-500 font-serif italic font-normal tracking-wide wavy-underline">
+                  Services and Schemes
+                </span>
+              </>
+            )}
+          </h1>
+        </div>
+
+        {/* Description Subtitle */}
+        <div className="max-w-3xl text-slate-600 text-sm sm:text-base md:text-lg leading-relaxed mb-10 text-center">
+          <span className="font-bold text-slate-800 block mb-1">
+            {language === 'mr' 
+              ? 'शून्य अपलोड फेडरेटेड गव्हर्नन्स:' 
+              : language === 'hi' 
+              ? 'शून्य अपलोड फेडरेटेड गवर्नेंस:' 
+              : 'Zero Upload Federated Governance:'}
+          </span>
+          <span className="text-slate-700 block">
+            {language === 'mr' 
+              ? 'डिजिटल पडताळणी: भौतिक कागदपत्रे अपलोड न करता महसूल, शिक्षण, कृषी आणि सामाजिक कल्याण सेवांमध्ये प्रवेश मिळवण्यासाठी सिंगल क्लिक आधार प्रमाणीकरण'
+              : language === 'hi'
+              ? 'डिजिटल सत्यापन: भौतिक दस्तावेज अपलोड किए बिना राजस्व, शिक्षा, कृषि और समाज कल्याण सेवाओं तक पहुंच के लिए सिंगल क्लिक आधार प्रमाणीकरण'
+              : 'Digital Verification: Single Click Aadhaar Authentication to Access Revenue, Education, Agriculture, and Social Welfare Services Without Uploading Physical Documents'}
+          </span>
+        </div>
+
+        {/* BEGIN: AISahayakCard */}
+        <div className="w-full max-w-3xl bg-white rounded-3xl p-4 sm:p-7 shadow-[0_20px_50px_rgba(15,23,42,0.06)] border border-slate-200/90 mb-10 text-left transition-all hover:shadow-[0_25px_60px_rgba(15,23,42,0.09)]" data-purpose="search-box-card">
+          {/* Card Top Bar */}
+          <div className="flex items-center justify-between gap-2 mb-4">
+            <div className="flex items-center gap-2 text-slate-900 font-bold text-base sm:text-lg">
+              <Sparkles className="w-5 h-5 text-amber-500" />
+              <span>
+                {language === 'mr' ? 'AI नागरिक सहाय्यक ' : language === 'hi' ? 'AI नागरिक सहायक ' : 'AI Citizen Sahayak '}
+                <span className="font-medium text-slate-700 text-sm sm:text-base">
+                  {language === 'mr' ? '(शून्य कागदपत्र सहाय्यक)' : language === 'hi' ? '(शून्य दस्तावेज सहायक)' : '(Zero-Document Assistant)'}
+                </span>
+              </span>
+            </div>
+            <span className="text-xs sm:text-sm font-medium text-slate-400 shrink-0">
+              {language === 'mr' ? 'आवाज आणि मराठी सक्षम' : language === 'hi' ? 'आवाज़ और हिंदी सक्षम' : 'Voice & Marathi Enabled'}
+            </span>
+          </div>
+
+          {/* Search Input Container */}
+          <form onSubmit={handlePromptSubmit} className="space-y-3">
+            <div className="relative flex items-center bg-slate-50 hover:bg-slate-100/80 rounded-full border border-slate-200 focus-within:border-amber-500 focus-within:ring-4 focus-within:ring-amber-100 transition-all p-1.5 sm:p-2 mb-4">
+              <input
+                className="w-full bg-transparent border-0 px-4 text-sm sm:text-base text-slate-900 placeholder:text-slate-400 focus:ring-0 focus:outline-none"
+                placeholder={t.aiSearchPlaceholder}
+                type="text"
+                value={promptText}
+                onChange={e => setPromptText(e.target.value)}
+              />
+              <div className="flex items-center gap-2 shrink-0 pr-1">
+                {/* Mic Voice Button */}
+                <button
+                  className={`p-2 rounded-full transition-all ${
+                    isListening ? 'bg-rose-500 text-white animate-pulse' : 'text-slate-500 hover:text-slate-800 hover:bg-white'
+                  }`}
+                  title="Voice Search"
+                  type="button"
+                  onClick={handleToggleVoice}
+                >
+                  <Mic className="w-5 h-5" />
+                </button>
+                {/* Submit Search Button */}
+                <button
+                  className="w-10 h-10 rounded-full bg-slate-950 text-white flex items-center justify-center hover:bg-amber-600 transition-colors shadow disabled:opacity-45"
+                  title="Search"
+                  type="submit"
+                  disabled={isSubmitting || !promptText.trim()}
+                >
+                  {isSubmitting ? (
+                    <RefreshCw className="w-4 h-4 text-emerald-400 animate-spin" />
+                  ) : (
+                    <ArrowRight className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
             </div>
 
-            {/* Live Telemetry Metric Chips */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
-              <div className="p-3 rounded-2xl bg-white/80 border border-black/8 shadow-xs backdrop-blur-md">
-                <div className="text-lg font-bold text-[#111111] flex items-center gap-1">
-                  <span>5/5</span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                </div>
-                <div className="text-[11px] text-[#5c5c5c] font-medium mt-0.5">Live Adapters</div>
-              </div>
-
-              <div className="p-3 rounded-2xl bg-white/80 border border-black/8 shadow-xs backdrop-blur-md">
-                <div className="text-lg font-bold text-emerald-700">0 Files</div>
-                <div className="text-[11px] text-[#5c5c5c] font-medium mt-0.5">Zero Uploads</div>
-              </div>
-
-              <div className="p-3 rounded-2xl bg-white/80 border border-black/8 shadow-xs backdrop-blur-md">
-                <div className="text-lg font-bold text-[#111111]">100% L1</div>
-                <div className="text-[11px] text-[#5c5c5c] font-medium mt-0.5">Aadhaar Biometric</div>
-              </div>
-
-              <div className="p-3 rounded-2xl bg-white/80 border border-black/8 shadow-xs backdrop-blur-md">
-                <div className="text-lg font-bold text-[#111111]">SHA-256</div>
-                <div className="text-[11px] text-[#5c5c5c] font-medium mt-0.5">Tamper-Proof Audit</div>
-              </div>
+            {/* Quick Search Filter Pills */}
+            <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+              <span className="text-slate-500 font-medium">
+                {language === 'mr' ? 'त्वरित:' : language === 'hi' ? 'त्वरित:' : 'Quick:'}
+              </span>
+              {(sampleServices || []).slice(0, 4).map(s => {
+                const localizedTitle = language === 'mr' ? (s.code === '7_12_EXTRACT' ? '७/१२ उतारा' : s.code === 'CASTE_CERT' ? 'जात प्रमाणपत्र' : s.code === 'MAHADBT_SCHOLARSHIP' ? 'महाडीबीटी शिष्यवृत्ती' : 'ड्रायव्हिंग लायसन्स') : language === 'hi' ? (s.code === '7_12_EXTRACT' ? '7/12 भूलेख' : s.code === 'CASTE_CERT' ? 'जाति प्रमाण पत्र' : s.code === 'MAHADBT_SCHOLARSHIP' ? 'महाडीबीटी छात्रवृत्ति' : 'ड्राइविंग लाइसेंस') : s.title;
+                return (
+                  <button
+                    key={s.code}
+                    type="button"
+                    onClick={() => setPromptText(s.query)}
+                    className="px-3.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium border border-slate-200/70 transition"
+                  >
+                    {localizedTitle}
+                  </button>
+                );
+              })}
             </div>
 
-            {/* Primary Action Buttons */}
-            <div className="flex flex-wrap items-center gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => handleNavClick('schemes')}
-                className="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs sm:text-sm font-semibold shadow-md hover:shadow-lg transition-all flex items-center gap-2 group"
-              >
-                <BookOpen className="w-4 h-4 text-white" />
-                <span>{language === 'mr' ? 'सर्व योजना शोधा (४,७०९+)' : language === 'hi' ? 'सभी सरकारी योजनाएं (4,709+)' : 'Explore 4,709+ Schemes'}</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform text-amber-100" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleNavClick('citizen')}
-                className="px-5 py-3 rounded-xl bg-[#141414] hover:bg-black text-white text-xs sm:text-sm font-semibold shadow-md hover:shadow-lg transition-all flex items-center gap-2 group"
-              >
-                <span>{language === 'mr' ? 'नागरिक पोर्टल' : language === 'hi' ? 'नागरिक पोर्टल' : 'Citizen Portal'}</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform text-emerald-400" />
-              </button>
-            </div>
-
-            {/* Active Citizen Session Bar */}
-            {currentUser && (
-              <div className="p-3 rounded-2xl bg-white/70 border border-black/8 flex items-center justify-between text-xs backdrop-blur-md">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs">
-                    AP
+            {/* Simulated processing skeleton */}
+            {isSubmitting && (
+              <div className="mt-4 p-3.5 rounded-2xl bg-slate-50 border border-emerald-300 text-xs space-y-2.5 shadow-sm relative overflow-hidden animate-pulse">
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600" />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <RefreshCw className="w-3.5 h-3.5 text-emerald-600 animate-spin shrink-0" />
+                    <span className="font-bold text-emerald-900 text-[11px] flex items-center gap-1.5">
+                      <span className="uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-100/70 border border-emerald-200 text-[9px] font-bold text-emerald-800">
+                        {language === 'mr' ? 'प्रक्रिया सुरू आहे' : language === 'hi' ? 'प्रक्रिया जारी है' : 'Processing'}
+                      </span>
+                      <span className="text-[#111111] font-semibold">
+                        {language === 'mr'
+                          ? 'महासेतू एआय साहाय्यक विश्लेषण सुरू आहे...'
+                          : 'Mahasetu AI analyzing query...'}
+                      </span>
+                    </span>
                   </div>
-                  <div>
-                    <span className="font-semibold text-[#111111]">{currentUser.name}</span>
-                    <span className="text-[#5c5c5c] ml-2">UID: {currentUser.maskedAadhaar}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5 text-emerald-800 font-medium">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>NFIQ Score: {currentUser.biometricQualityScore}%</span>
                 </div>
               </div>
             )}
+
+            {/* AI Result presentation */}
+            {aiResult && (
+              <div className="mt-4 p-4 rounded-2xl bg-white border border-emerald-300 text-xs space-y-2 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-emerald-800 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    {aiResult.serviceName || 'Service Identified'}
+                  </span>
+                  <span className="text-[10px] text-[#5c5c5c] font-mono">{aiResult.department}</span>
+                </div>
+                <p className="text-[11px] text-[#333333] leading-relaxed bg-black/[0.02] p-2.5 rounded-xl">
+                  {aiResult.explanation || aiResult.summary}
+                </p>
+                <div className="flex items-center justify-between pt-1">
+                  <span className="text-[10px] text-emerald-700 font-semibold flex items-center gap-1">
+                    <Check className="w-3 h-3" />
+                    <span>
+                      {language === 'mr' 
+                        ? 'राज्य डेटा मेश द्वारे आपोआप पडताळणीकृत' 
+                        : language === 'hi' 
+                        ? 'राज्य डेटा मेश द्वारा स्वचालित सत्यापित' 
+                        : 'Auto-verified via State Data Mesh'}
+                    </span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (onSelectServiceFromHero && aiResult.serviceCode) {
+                        onSelectServiceFromHero(aiResult.serviceCode);
+                      }
+                      handleNavClick('citizen');
+                    }}
+                    className="px-3.5 py-1.5 rounded-xl bg-slate-950 text-white text-[11px] font-semibold hover:bg-slate-800 transition-colors flex items-center gap-1"
+                  >
+                    <span>{language === 'mr' ? 'ऑनलाइन अर्ज करा' : language === 'hi' ? 'ऑनलाइन आवेदन करें' : 'Apply Online'}</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </form>
+        </div>
+        {/* END: AISahayakCard */}
+
+        {/* BEGIN: MetricsBadgesStrip */}
+        <div className="w-full flex flex-col items-center gap-2.5 mb-14" data-purpose="metrics-badges">
+          {/* First Row of Badges */}
+          <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-3 text-xs sm:text-sm">
+            {/* Badge 1: Citizens */}
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900 text-white font-medium shadow-sm border border-slate-800">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+              <span>
+                {language === 'mr' ? 'नोंदणीकृत नागरिक: ' : language === 'hi' ? 'पंजीकृत नागरिक: ' : 'Registered Citizens: '}
+                <strong>{language === 'mr' || language === 'hi' ? '४.८८ कोटी+' : '4.88 Cr+'}</strong>
+              </span>
+            </div>
+            {/* Badge 2: Direct Benefit Transfer */}
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900 text-white font-medium shadow-sm border border-slate-800">
+              <svg className="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24">
+                <rect height="16" rx="2" width="20" x="2" y="4"></rect>
+                <path d="M16 12h.01"></path>
+                <path d="M2 10h20"></path>
+              </svg>
+              <span>
+                {language === 'mr' ? 'थेट लाभ हस्तांतरण: ' : language === 'hi' ? 'प्रत्यक्ष लाभ हस्तांतरण: ' : 'Direct Benefit Transfer: '}
+                <strong>{language === 'mr' || language === 'hi' ? '₹१८,५२० कोटी+' : '₹18,520 Cr+'}</strong>
+              </span>
+            </div>
+            {/* Badge 3: Paperless Verification */}
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900 text-white font-medium shadow-sm border border-slate-800">
+              <svg className="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+              <span>
+                {language === 'mr' ? 'कागदपत्रविरहित पडताळणी: ' : language === 'hi' ? 'दस्तावेज़ रहित सत्यापन: ' : 'Paperless Verification: '}
+                <strong>{language === 'mr' || language === 'hi' ? '१००%' : '100%'}</strong>
+              </span>
+            </div>
           </div>
+          {/* Second Row of Badges */}
+          <div className="flex justify-center items-center">
+            {/* Badge 4: Districts & Talukas */}
+            <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900 text-white text-xs sm:text-sm font-medium shadow-sm border border-slate-800">
+              <svg className="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24">
+                <rect height="20" rx="2" ry="2" width="16" x="4" y="2"></rect>
+                <path d="M9 22v-4h6v4"></path>
+                <line x1="8" x2="8.01" y1="6" y2="6"></line>
+                <line x1="16" x2="16.01" y1="6" y2="6"></line>
+                <line x1="12" x2="12.01" y1="6" y2="6"></line>
+                <line x1="8" x2="8.01" y1="10" y2="10"></line>
+                <line x1="16" x2="16.01" y1="10" y2="10"></line>
+                <line x1="12" x2="12.01" y1="10" y2="10"></line>
+              </svg>
+              <span>
+                {language === 'mr' ? 'सक्रिय जिल्हे: ' : language === 'hi' ? 'सक्रिय जिले: ' : 'Active Districts: '}
+                <strong>{language === 'mr' || language === 'hi' ? '३६ जिल्हे / ३५८ तालुके' : '36 Districts / 358 Talukas'}</strong>
+              </span>
+            </div>
+          </div>
+        </div>
+        {/* END: MetricsBadgesStrip */}
 
-          {/* RIGHT COLUMN: Video Showcase & Smart Citizen Sahayak */}
-          <div className="lg:col-span-6 space-y-4 flex flex-col justify-center">
-            {/* Floating Phone Video with Blurred & Transparent Corners */}
-            <div className="relative w-full flex items-center justify-center py-2 overflow-hidden rounded-3xl">
-              {/* Outer Edge & Corner Blur Vignette (Center is completely clear and unblurred) */}
-              <div className="absolute inset-0 z-10 backdrop-blur-md [mask-image:radial-gradient(ellipse_75%_70%_at_50%_50%,transparent_45%,rgba(0,0,0,0.5)_70%,black_100%)] [-webkit-mask-image:radial-gradient(ellipse_75%_70%_at_50%_50%,transparent_45%,rgba(0,0,0,0.5)_70%,black_100%)] pointer-events-none" />
+        {/* BEGIN: DevicePreviewShowcase */}
+        <div className="w-full max-w-4xl relative mx-auto" data-purpose="mockup-frame-container">
+          {/* Outer Display Frame */}
+          <div className="bg-slate-900 p-3 sm:p-5 md:p-6 rounded-[2.5rem] shadow-2xl border-4 border-slate-800 relative overflow-hidden">
+            {/* Screen Content */}
+            <div className="bg-gradient-to-b from-slate-100 to-slate-200/90 rounded-[2rem] h-[340px] sm:h-[420px] md:h-[480px] w-full relative flex items-center justify-center overflow-hidden border border-white/60">
               
-              {/* 4 Corner-Specific Soft Blurs */}
-              <div className="absolute top-0 left-0 w-36 h-36 z-10 backdrop-blur-lg [mask-image:radial-gradient(circle_at_0%_0%,black_30%,transparent_80%)] [-webkit-mask-image:radial-gradient(circle_at_0%_0%,black_30%,transparent_80%)] pointer-events-none" />
-              <div className="absolute top-0 right-0 w-36 h-36 z-10 backdrop-blur-lg [mask-image:radial-gradient(circle_at_100%_0%,black_30%,transparent_80%)] [-webkit-mask-image:radial-gradient(circle_at_100%_0%,black_30%,transparent_80%)] pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-36 h-36 z-10 backdrop-blur-lg [mask-image:radial-gradient(circle_at_0%_100%,black_30%,transparent_80%)] [-webkit-mask-image:radial-gradient(circle_at_0%_100%,black_30%,transparent_80%)] pointer-events-none" />
-              <div className="absolute bottom-0 right-0 w-36 h-36 z-10 backdrop-blur-lg [mask-image:radial-gradient(circle_at_100%_100%,black_30%,transparent_80%)] [-webkit-mask-image:radial-gradient(circle_at_100%_100%,black_30%,transparent_80%)] pointer-events-none" />
-
-              {/* Main Video with smooth corner fade to transparent */}
+              {/* Product Animation Video inside Device Screen */}
               <video
                 src="/GovTech_platform_product_animation_202609092312.mp4"
                 autoPlay
@@ -615,258 +809,88 @@ export const HeroSection: React.FC<Props> = ({
                 muted
                 playsInline
                 controls={false}
-                className="w-full h-auto max-h-[440px] lg:max-h-[500px] object-contain mix-blend-multiply [mask-image:radial-gradient(ellipse_85%_80%_at_50%_50%,black_55%,rgba(0,0,0,0.85)_75%,transparent_100%)] [-webkit-mask-image:radial-gradient(ellipse_85%_80%_at_50%_50%,black_55%,rgba(0,0,0,0.85)_75%,transparent_100%)] pointer-events-none"
-                title="Mahasetu Citizen Digital Services Animation"
+                className="absolute inset-0 w-full h-full object-cover opacity-90 z-0 pointer-events-none"
+                title="Mahasetu Product Animation Video"
               />
-            </div>
 
-            {/* Smart Multilingual AI Sahayak Prompt Bar */}
-            <div className="p-4 rounded-3xl bg-white/85 backdrop-blur-xl border border-black/10 shadow-md">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-[#111111]">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                  <span>AI Citizen Sahayak (शून्य कागदपत्र सहाय्यक)</span>
+              {/* Gradient Dark Backdrop for Legibility */}
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent z-10 pointer-events-none" />
+
+              {/* Mock Phone Cutout / Dynamic Island on the left */}
+              <div className="absolute left-6 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-20 sm:h-28 bg-slate-900 rounded-full shadow-md z-20"></div>
+
+              {/* Floating Glass UI Chip: ID Card (Top Left) */}
+              <div className="absolute left-14 sm:left-24 top-10 sm:top-14 glass-card p-3 sm:p-4 rounded-2xl flex items-center gap-3 z-20 transition-transform hover:-translate-y-1">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 bg-slate-800 rounded-xl flex items-center justify-center text-white">
+                  <svg className="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
                 </div>
-                <span className="text-[10px] text-[#5c5c5c]">Voice & Marathi Enabled</span>
+                <div className="text-left hidden sm:block">
+                  <div className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
+                    {language === 'mr' ? 'ओळख' : language === 'hi' ? 'पहचान' : 'Identity'}
+                  </div>
+                  <div className="w-12 h-1.5 bg-slate-400 rounded mt-1"></div>
+                </div>
               </div>
 
-              <form onSubmit={handlePromptSubmit} className="space-y-2">
-                <div className="relative">
-                  <textarea
-                    rows={2}
-                    className="w-full text-xs sm:text-sm p-3 pr-16 rounded-2xl bg-black/[0.03] border border-black/10 focus:outline-none focus:border-black/30 placeholder:text-[#5c5c5c] text-[#111111] resize-none"
-                    placeholder={
-                      language === 'mr'
-                        ? 'उदा. मला इंजिनिअरिंग प्रवेशासाठी जात प्रमाणपत्र हवे आहे...'
-                        : language === 'hi'
-                        ? 'उदा. मुझे छात्रवृत्ति और 7/12 सत्यापन की आवश्यकता है...'
-                        : 'Ask: "I need Caste Certificate" or "Verify 7/12 Land Record"...'
-                    }
-                    value={promptText}
-                    onChange={e => setPromptText(e.target.value)}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handlePromptSubmit();
-                      }
-                    }}
-                  />
+              {/* Floating Glass UI Chip: Education / Cap (Top Right) */}
+              <div className="absolute right-12 sm:right-28 top-12 sm:top-16 glass-card p-3 sm:p-4 rounded-2xl flex items-center justify-center z-20 hover:-translate-y-1 transition-transform">
+                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-slate-700" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                  <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                </svg>
+              </div>
 
-                  {/* Mic and Send Button Inside Input */}
-                  <div className="absolute right-2 bottom-2.5 flex items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={handleToggleVoice}
-                      className={`p-1.5 rounded-xl border transition-all ${
-                        isListening
-                          ? 'bg-rose-500 text-white border-rose-600 animate-pulse'
-                          : 'bg-white text-[#111111] border-black/10 hover:bg-black/5'
-                      }`}
-                      title="Speak query"
-                    >
-                      <Mic className="w-3.5 h-3.5" />
-                    </button>
+              {/* Floating Glass UI Chip: Scholarship / Education (Bottom Left) */}
+              <div className="absolute left-16 sm:left-28 bottom-12 sm:bottom-16 glass-card p-3 sm:p-4 rounded-2xl flex items-center justify-center z-20 hover:-translate-y-1 transition-transform">
+                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-slate-700" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+              </div>
 
-                    <button
-                      type="submit"
-                      disabled={isSubmitting || !promptText.trim()}
-                      className="p-1.5 rounded-xl bg-[#141414] hover:bg-black text-white disabled:opacity-40 transition-all flex items-center justify-center min-w-[28px] min-h-[28px]"
-                      title="Submit query"
-                    >
-                      {isSubmitting ? (
-                        <RefreshCw className="w-3.5 h-3.5 text-emerald-400 animate-spin" />
-                      ) : (
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      )}
-                    </button>
-                  </div>
-                </div>
+              {/* Floating Glass UI Chip: Medical / Health (Bottom Right) */}
+              <div className="absolute right-14 sm:right-32 bottom-12 sm:bottom-16 glass-card p-3.5 sm:p-4 rounded-2xl flex items-center justify-center z-20 hover:-translate-y-1 transition-transform">
+                <svg className="w-6 h-6 sm:w-7 sm:h-7 text-slate-700" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 10.5h-5.5V5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v5.5H5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5h5.5V19c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-5.5H19c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5z"></path>
+                </svg>
+              </div>
 
-                {/* Quick Service Suggestions */}
-                <div className="flex flex-wrap items-center gap-1 pt-0.5">
-                  <span className="text-[10px] font-semibold text-[#5c5c5c] mr-1">Quick:</span>
-                  {(sampleServices || []).slice(0, 3).map(s => (
-                    <button
-                      key={s.code}
-                      type="button"
-                      onClick={() => {
-                        setPromptText(s.query);
-                      }}
-                      className="px-2 py-0.5 rounded-lg text-[10.5px] bg-white hover:bg-black/5 text-[#333333] border border-black/8 font-medium transition-all"
-                    >
-                      {s.title}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Small Processing Loader / Skeleton for Hero Section AI Citizen Sahayak */}
-                {isSubmitting && (
-                  <div
-                    id="hero-ai-processing-card"
-                    className="mt-3 p-3 rounded-2xl bg-white/95 border border-emerald-300 text-xs space-y-2.5 shadow-xs relative overflow-hidden animate-fadeIn"
-                  >
-                    {/* Top gradient pulse line */}
-                    <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600 animate-pulse" />
-
-                    {/* Header with spinning loader and processing message */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <RefreshCw className="w-3.5 h-3.5 text-emerald-600 animate-spin shrink-0" />
-                        <span className="font-bold text-emerald-900 text-[11px] flex items-center gap-1.5">
-                          <span className="uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-100/70 border border-emerald-200 text-[9px] font-bold text-emerald-800">
-                            {language === 'mr' ? 'प्रक्रिया सुरू आहे' : language === 'hi' ? 'प्रक्रिया जारी है' : 'Processing'}
-                          </span>
-                          <span className="text-[#111111] font-semibold">
-                            {language === 'mr'
-                              ? 'महासेतू एआय साहाय्यक विश्लेषण सुरू आहे...'
-                              : language === 'hi'
-                              ? 'महासेतु एआई सहायक विश्लेषण कर रहा है...'
-                              : 'Mahasetu AI analyzing inquiry...'}
-                          </span>
-                        </span>
-                      </div>
-                      <span className="text-[10px] text-emerald-700 font-medium animate-pulse">
-                        {language === 'mr' ? 'पडताळणी...' : 'Verifying...'}
-                      </span>
-                    </div>
-
-                    {/* Small Skeleton Placeholders */}
-                    <div className="space-y-1.5 bg-black/[0.02] p-2 rounded-xl animate-pulse">
-                      <div className="h-3 w-3/5 bg-emerald-100/80 rounded" />
-                      <div className="h-2.5 w-full bg-black/8 rounded" />
-                      <div className="h-2.5 w-4/5 bg-black/8 rounded" />
-                    </div>
-
-                    {/* Footer Skeleton Line */}
-                    <div className="flex items-center justify-between pt-0.5">
-                      <div className="h-3 w-36 bg-emerald-100/60 rounded animate-pulse" />
-                      <div className="h-5 w-16 bg-black/10 rounded-lg animate-pulse" />
-                    </div>
-                  </div>
-                )}
-
-                {/* AI Result Card */}
-                {aiResult && (
-                  <div className="mt-3 p-3 rounded-2xl bg-white border border-emerald-300 text-xs space-y-2 shadow-sm animate-fadeIn">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-emerald-800 flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        {aiResult.serviceName || 'Service Identified'}
-                      </span>
-                      <span className="text-[10px] text-[#5c5c5c] font-mono">{aiResult.department}</span>
-                    </div>
-
-                    <p className="text-[11px] text-[#333333] leading-relaxed bg-black/[0.02] p-2 rounded-xl">
-                      {aiResult.explanation || aiResult.summary}
-                    </p>
-
-                    <div className="flex items-center justify-between pt-1">
-                      <span className="text-[10px] text-emerald-700 font-semibold flex items-center gap-1">
-                        <Check className="w-3 h-3" />
-                        <span>Auto-verified via State Data Mesh</span>
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (onSelectServiceFromHero && aiResult.serviceCode) {
-                            onSelectServiceFromHero(aiResult.serviceCode);
-                          }
-                          handleNavClick('citizen');
-                        }}
-                        className="px-2.5 py-1 rounded-lg bg-[#141414] text-white text-[10.5px] font-semibold hover:bg-black flex items-center gap-1"
-                      >
-                        <span>Apply Online</span>
-                        <ArrowRight className="w-3 h-3" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </form>
+              {/* Center Device Text */}
+              <div className="text-center px-6 py-4 z-20 max-w-sm sm:max-w-md bg-white/80 backdrop-blur-md rounded-2xl border border-white/40 shadow-lg">
+                <h3 className="text-xl sm:text-2xl font-serif text-slate-800 leading-tight">
+                  {language === 'mr' ? (
+                    <>तुमच्या डिजिटल सेवा<br/>थेट जोडत आहोत...</>
+                  ) : language === 'hi' ? (
+                    <>आपकी डिजिटल सेवाएं<br/>सीधे जोड़ रहे हैं...</>
+                  ) : (
+                    <>Connecting your<br/>digital services...</>
+                  )}
+                </h3>
+              </div>
             </div>
           </div>
         </div>
-
-        {/* 3. FOUR-PILLAR ARCHITECTURE HIGHLIGHTS (MODERN BOTTOM STRIP) */}
-        <div className="mt-12 pt-8 border-t border-black/8">
-          <div className="text-center max-w-xl mx-auto mb-6">
-            <span className="text-[10.5px] font-bold uppercase tracking-widest text-[#5c5c5c]">
-              Core Architectural Pillars
-            </span>
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#111111] mt-1">
-              Engineered for Maharashtra's Digital Public Infrastructure
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Pillar 1: Biometrics */}
-            <div className="p-4 rounded-2xl bg-white/70 hover:bg-white border border-black/8 hover:border-black/20 transition-all shadow-xs space-y-2 group">
-              <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
-                <Fingerprint className="w-4 h-4" />
-              </div>
-              <h3 className="text-xs sm:text-sm font-bold text-[#111111]">
-                Strict Biometric Auth
-              </h3>
-              <p className="text-[11px] text-[#5c5c5c] leading-relaxed">
-                Zero OTP bypass. Enforces UIDAI L1 biometric verification with NFIQ 2.0 quality scoring and anti-spoofing liveness checks.
-              </p>
-            </div>
-
-            {/* Pillar 2: Peer Adapters */}
-            <div className="p-4 rounded-2xl bg-white/70 hover:bg-white border border-black/8 hover:border-black/20 transition-all shadow-xs space-y-2 group">
-              <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center font-bold">
-                <Layers className="w-4 h-4" />
-              </div>
-              <h3 className="text-xs sm:text-sm font-bold text-[#111111]">
-                Zero-Upload Adapters
-              </h3>
-              <p className="text-[11px] text-[#5c5c5c] leading-relaxed">
-                Standardized JSON-LD canonical schemas exchange authoritative records directly between Revenue, MahaDBT, and Higher Ed registries.
-              </p>
-            </div>
-
-            {/* Pillar 3: DPDP Consent */}
-            <div className="p-4 rounded-2xl bg-white/70 hover:bg-white border border-black/8 hover:border-black/20 transition-all shadow-xs space-y-2 group">
-              <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
-                <ShieldCheck className="w-4 h-4" />
-              </div>
-              <h3 className="text-xs sm:text-sm font-bold text-[#111111]">
-                DPDP Consent Matrix
-              </h3>
-              <p className="text-[11px] text-[#5c5c5c] leading-relaxed">
-                Citizens retain complete sovereignty with purpose-limited, time-bound consent tokens that can be revoked at any moment with one click.
-              </p>
-            </div>
-
-            {/* Pillar 4: SHA-256 Audit */}
-            <div className="p-4 rounded-2xl bg-white/70 hover:bg-white border border-black/8 hover:border-black/20 transition-all shadow-xs space-y-2 group">
-              <div className="w-8 h-8 rounded-xl bg-purple-100 text-purple-800 flex items-center justify-center font-bold">
-                <Lock className="w-4 h-4" />
-              </div>
-              <h3 className="text-xs sm:text-sm font-bold text-[#111111]">
-                Immutable Audit Trail
-              </h3>
-              <p className="text-[11px] text-[#5c5c5c] leading-relaxed">
-                Every inter-departmental data access hop is cryptographically hashed via SHA-256 into a transparent, tamper-evident ledger.
-              </p>
-            </div>
-          </div>
-        </div>
+        {/* END: DevicePreviewShowcase */}
 
         {/* Quick workspace jump button */}
-        <div className="flex justify-center mt-8">
+        <div className="flex justify-center mt-12">
           <button
             type="button"
             onClick={() => {
               const el = document.getElementById('portal-workspace');
               if (el) el.scrollIntoView({ behavior: 'smooth' });
             }}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/80 hover:bg-white border border-black/10 text-xs font-semibold text-[#111111] shadow-xs transition-all hover:shadow"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/80 hover:bg-white border border-slate-200 text-xs font-semibold text-slate-800 shadow-sm transition-all hover:shadow"
           >
-            <span>Explore Full Mahasetu Interoperability Workspace</span>
-            <ChevronDown className="w-3.5 h-3.5 text-emerald-700 animate-bounce" />
+            <span>{t.exploreWorkspace || 'Explore Workspace'}</span>
+            <ChevronDown className="w-3.5 h-3.5 text-amber-600 animate-bounce" />
           </button>
         </div>
-      </div>
+      </main>
     </section>
   );
 };
+

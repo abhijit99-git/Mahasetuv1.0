@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { CitizenUser, WelfareScheme } from '../types.ts';
 import { Language, TRANSLATIONS } from '../locales.ts';
+import { getLocalizedScheme } from '../utils/schemeLocalization.ts';
 
 interface Props {
   language: Language;
@@ -172,13 +173,31 @@ export const AISahayak: React.FC<Props> = ({
       console.warn('AI navigation network fallback:', e);
       setResult({
         serviceCode: 'SRV_MAHADBT_SCHOLARSHIP',
-        serviceName: isMr ? 'राजर्षी छत्रपती शाहू महाराज गुणवत्ता शिष्यवृत्ती' : 'Rajarshi Chhatrapati Shahu Maharaj Merit Scholarship',
-        department: isMr ? 'उच्च व तंत्र शिक्षण विभाग (महाडीबीटी)' : 'Higher & Technical Education Department',
+        serviceName: isMr
+          ? 'राजर्षी छत्रपती शाहू महाराज गुणवत्ता शिष्यवृत्ती'
+          : isHi
+          ? 'राजर्षि छत्रपति शाहू महाराज मेरिट छात्रवृत्ति'
+          : 'Rajarshi Chhatrapati Shahu Maharaj Merit Scholarship',
+        department: isMr
+          ? 'उच्च व तंत्र शिक्षण विभाग (महाडीबीटी)'
+          : isHi
+          ? 'उच्च एवं तकनीकी शिक्षा विभाग (महाडीबीटी)'
+          : 'Higher & Technical Education Department',
         explanation: isMr
           ? 'आपल्या विचारणेशी संबंधित शासकीय सेवा महासेतू आंतर-विभागीय पडताळणीद्वारे उपलब्ध आहेत.'
+          : isHi
+          ? 'आपके अनुरोध से संबंधित सरकारी सेवाएं महासेतु अंतर-विभागीय सत्यापन द्वारा उपलब्ध हैं।'
           : 'Identified Maharashtra public service. All proofs are verified peer-to-peer with zero paper scans.',
-        requiredDocuments: ['Income Certificate (Revenue)', 'Maharashtra Domicile Certificate'],
-        availableInMesh: ['Income Certificate (Revenue)', 'Maharashtra Domicile Certificate'],
+        requiredDocuments: isMr
+          ? ['सक्षम प्राधिकाऱ्याचा उत्पन्न दाखला', 'महाराष्ट्र अधिवास प्रमाणपत्र']
+          : isHi
+          ? ['आय प्रमाण पत्र (राजस्व विभाग)', 'महाराष्ट्र अधिवास प्रमाण पत्र']
+          : ['Income Certificate (Revenue)', 'Maharashtra Domicile Certificate'],
+        availableInMesh: isMr
+          ? ['सक्षम प्राधिकाऱ्याचा उत्पन्न दाखला', 'महाराष्ट्र अधिवास प्रमाणपत्र']
+          : isHi
+          ? ['आय प्रमाण पत्र (राजस्व विभाग)', 'महाराष्ट्र अधिवास प्रमाण पत्र']
+          : ['Income Certificate (Revenue)', 'Maharashtra Domicile Certificate'],
         confidence: 0.95
       });
     } finally {
@@ -198,10 +217,10 @@ export const AISahayak: React.FC<Props> = ({
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                  Official DPI Sahayak
+                  {isMr ? 'अधिकृत DPI साहाय्यक' : isHi ? 'आधिकारिक DPI सहायक' : 'Official DPI Sahayak'}
                 </span>
                 <span className="text-[10px] font-semibold text-[#5c5c5c] bg-black/5 px-2.5 py-0.5 rounded-full border border-black/5">
-                  Knowledge Base & 4,709+ Schemes
+                  {isMr ? '४,७०९+ योजना संच व माहिती' : isHi ? '4,709+ योजना भंडार एवं डेटा' : 'Knowledge Base & 4,709+ Schemes'}
                 </span>
                 <span className="text-xs text-emerald-700 font-semibold flex items-center gap-1">
                   <Sparkles className="w-3.5 h-3.5" />
@@ -216,7 +235,7 @@ export const AISahayak: React.FC<Props> = ({
                     <ShieldCheck className="w-3 h-3 text-indigo-600" />
                     {poolStatus.totalConfiguredKeys > 1
                       ? `${poolStatus.totalConfiguredKeys}x Key Pool Failover`
-                      : 'AI Engine Ready'}
+                      : (isMr ? 'AI प्रणाली सज्ज' : isHi ? 'AI इंजन सक्रिय' : 'AI Engine Ready')}
                   </span>
                 )}
               </div>
@@ -246,19 +265,23 @@ export const AISahayak: React.FC<Props> = ({
                   <span>•</span>
                   <span>{currentUser.category || 'General'}</span>
                   <span>•</span>
-                  <span>₹{(currentUser.annualIncome || 0).toLocaleString('en-IN')}/yr</span>
+                  <span>₹{(currentUser.annualIncome || 0).toLocaleString('en-IN')}/{isMr ? 'वर्ष' : isHi ? 'वर्ष' : 'yr'}</span>
                 </div>
                 <div className="text-[10px] text-emerald-700 mt-1 font-medium">
-                  {isMr ? '✓ प्रोफाइल आधारित पात्रता सक्रिय' : '✓ Profile-aware eligibility active'}
+                  {isMr ? '✓ प्रोफाइल आधारित पात्रता सक्रिय' : isHi ? '✓ प्रोफाइल आधारित पात्रता सक्रिय' : '✓ Profile-aware eligibility active'}
                 </div>
               </div>
             ) : (
               <div className="p-3 bg-black/5 border border-black/8 rounded-2xl text-left md:text-right">
                 <span className="text-xs font-semibold text-[#5c5c5c] block">
-                  {isMr ? 'अतिथी नागरिक' : 'Guest Citizen'}
+                  {isMr ? 'अतिथी नागरिक' : isHi ? 'अतिथि नागरिक' : 'Guest Citizen'}
                 </span>
                 <span className="text-[11px] text-[#777777] block mt-0.5">
-                  {isMr ? 'बायोमेट्रिक लॉगिन केल्यास प्रोफाइल जुळवणी होईल' : 'Log in via Aadhaar for personalized qualification'}
+                  {isMr
+                    ? 'बायोमेट्रिक लॉगिन केल्यास प्रोफाइल जुळवणी होईल'
+                    : isHi
+                    ? 'बायोमेट्रिक लॉगिन करने पर व्यक्तिगत पात्रता प्राप्त होगी'
+                    : 'Log in via Aadhaar for personalized qualification'}
                 </span>
               </div>
             )}
@@ -307,7 +330,7 @@ export const AISahayak: React.FC<Props> = ({
               {isLoading ? (
                 <>
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  <span>{isMr ? 'विश्लेषण सुरू आहे...' : 'Analyzing...'}</span>
+                  <span>{isMr ? 'विश्लेषण सुरू आहे...' : isHi ? 'विश्लेषण जारी है...' : 'Analyzing...'}</span>
                 </>
               ) : (
                 <>
@@ -319,7 +342,11 @@ export const AISahayak: React.FC<Props> = ({
           </div>
           <div className="text-[11px] text-[#777777] mt-1.5 flex items-center justify-between">
             <span>
-              {isMr ? '💡 टीप: केवळ महाराष्ट्र शासन व केंद्र सरकारच्या योजनांशी संबंधित प्रश्न विचारा.' : '💡 Note: Strictly limited to government welfare schemes, civil certificates, and public services.'}
+              {isMr
+                ? '💡 टीप: केवळ महाराष्ट्र शासन व केंद्र सरकारच्या योजनांशी संबंधित प्रश्न विचारा.'
+                : isHi
+                ? '💡 नोट: केवल सरकारी योजनाओं, प्रमाण पत्रों और नागरिक सेवाओं के संबंध में पूछें।'
+                : '💡 Note: Strictly limited to government welfare schemes, civil certificates, and public services.'}
             </span>
             <span className="hidden sm:inline text-[10px] text-[#888888]">Ctrl + Enter to send</span>
           </div>
@@ -328,7 +355,11 @@ export const AISahayak: React.FC<Props> = ({
         {/* Quick sample prompt chips */}
         <div>
           <span className="text-[11px] font-semibold text-[#5c5c5c] uppercase tracking-wider block mb-2.5">
-            {isMr ? 'नागरिकांचे वारंवार विचारले जाणारे अधिकृत प्रश्न:' : 'Suggested Citizen Inquiries:'}
+            {isMr
+              ? 'नागरिकांचे वारंवार विचारले जाणारे अधिकृत प्रश्न:'
+              : isHi
+              ? 'नागरिकों द्वारा अक्सर पूछे जाने वाले आधिकारिक प्रश्न:'
+              : 'Suggested Citizen Inquiries:'}
           </span>
           <div className="flex flex-wrap gap-2.5">
             {samplePrompts.map((p, i) => (
@@ -532,14 +563,18 @@ export const AISahayak: React.FC<Props> = ({
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-amber-900 bg-amber-100 border border-amber-300 px-2.5 py-0.5 rounded-full">
-                      {isMr ? 'विषयाशी असंबंधित विचारणा (Out of Scope)' : 'Request Out of Context'}
+                      {isMr
+                        ? 'विषयाशी असंबंधित विचारणा (Out of Scope)'
+                        : isHi
+                        ? 'विषय से बाहर का अनुरोध (Out of Scope)'
+                        : 'Request Out of Context'}
                     </span>
                     <span className="text-[11px] font-semibold text-amber-800">
-                      Mahasetu Citizen Guardrail
+                      {isMr ? 'महासेतू नागरिक नियंत्रण' : isHi ? 'महासेतु नागरिक नियंत्रण' : 'Mahasetu Citizen Guardrail'}
                     </span>
                   </div>
                   <h3 className="text-lg font-bold text-amber-950 mt-1">
-                    {result.serviceName || (isMr ? 'हा प्रश्न महासेतूच्या कक्षेबाहेरचा आहे' : 'Your request is out of context for Mahasetu')}
+                    {result.serviceName || (isMr ? 'हा प्रश्न महासेतूच्या कक्षेबाहेरचा आहे' : isHi ? 'यह प्रश्न महासेतु के दायरे से बाहर है' : 'Your request is out of context for Mahasetu')}
                   </h3>
                   <p className="text-xs text-amber-900 mt-2 leading-relaxed font-medium">
                     {result.explanation}
@@ -547,7 +582,7 @@ export const AISahayak: React.FC<Props> = ({
                   {result.advice && (
                     <div className="mt-3 p-3.5 bg-white/70 border border-amber-200 rounded-xl text-xs text-amber-950 leading-relaxed">
                       <span className="font-bold block mb-1">
-                        {isMr ? 'मार्गदर्शक सूचना:' : 'Advisory Note:'}
+                        {isMr ? 'मार्गदर्शक सूचना:' : isHi ? 'मार्गदर्शक सूचना:' : 'Advisory Note:'}
                       </span>
                       {result.advice}
                     </div>
@@ -558,22 +593,40 @@ export const AISahayak: React.FC<Props> = ({
               {/* Recommended on-topic suggestions */}
               <div className="pt-3 border-t border-amber-200/80">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-amber-900 block mb-2">
-                  {isMr ? 'कृपया यापैकी कोणत्याही शासकीय सेवेबद्दल विचारा:' : 'Please ask about official government services:'}
+                  {isMr
+                    ? 'कृपया यापैकी कोणत्याही शासकीय सेवेबद्दल विचारा:'
+                    : isHi
+                    ? 'कृपया इनमें से किसी सरकारी सेवा के बारे में पूछें:'
+                    : 'Please ask about official government services:'}
                 </span>
                 <div className="flex flex-wrap gap-2">
-                  {(result.suggestedTopics || [
+                  {(result.suggestedTopics || (isMr ? [
                     'माझी लाडकी बहीण योजना',
                     '७/१२ डिजिटल उतारा',
                     'महाडीबीटी शिष्यवृत्ती',
                     'शिकाऊ वाहन परवाना',
                     'जात व उत्पन्न दाखला'
-                  ]).map((topic: string, idx: number) => (
+                  ] : isHi ? [
+                    'लाड़की बहिन योजना',
+                    '7/12 भूमि रिकॉर्ड',
+                    'महाडीबीटी छात्रवृत्ति',
+                    'लर्नर ड्राइविंग लाइसेंस',
+                    'जाति एवं आय प्रमाण पत्र'
+                  ] : [
+                    'Majhi Ladki Bahin Yojana',
+                    '7/12 Land Record',
+                    'MahaDBT Scholarship',
+                    'Learner Driving License',
+                    'Caste & Income Certificate'
+                  ])).map((topic: string, idx: number) => (
                     <button
                       key={idx}
                       type="button"
                       onClick={() => {
                         const newQ = isMr
                           ? `${topic} विषयी मला संपूर्ण माहिती व अर्ज प्रक्रिया सांगा.`
+                          : isHi
+                          ? `${topic} के बारे में मुझे पूरी जानकारी एवं आवेदन प्रक्रिया बताएं।`
                           : `Tell me the eligibility and application process for ${topic}.`;
                         setQuery(newQ);
                         handleAskAI(newQ);
@@ -597,26 +650,28 @@ export const AISahayak: React.FC<Props> = ({
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
-                      {result.isGreeting ? (isMr ? 'महासेतू स्वागत व शोध' : 'Welcome & Discovery') : (isMr ? 'अधिकृत शासकीय सेवा निश्चिती' : 'Government Service Identified')}
+                      {result.isGreeting
+                        ? (isMr ? 'महासेतू स्वागत व शोध' : isHi ? 'महासेतु स्वागत एवं खोज' : 'Welcome & Discovery')
+                        : (isMr ? 'अधिकृत शासकीय सेवा निश्चिती' : isHi ? 'अधिकृत सरकारी सेवा सत्यापन' : 'Government Service Identified')}
                     </span>
                     <span className="text-[10px] font-semibold text-[#5c5c5c] bg-black/5 border border-black/5 px-2 py-0.5 rounded-full">
-                      {result.source === 'gemini' ? 'Google Gemini Analysis' : 'Mahasetu Knowledge Base'}
+                      {result.source === 'gemini' ? (isMr ? 'जेमिनी एआय विश्लेषण' : isHi ? 'जेमिनी एआई विश्लेषण' : 'Google Gemini Analysis') : (isMr ? 'महासेतू ज्ञान संच' : isHi ? 'महासेतु ज्ञान संच' : 'Mahasetu Knowledge Base')}
                     </span>
                   </div>
 
                   <h3 className="text-xl sm:text-2xl font-bold text-[#111111] mt-2">
-                    {result.serviceName || 'Maharashtra Public Service'}
+                    {result.serviceName || (isMr ? 'महाराष्ट्र सार्वजनिक सेवा' : isHi ? 'महाराष्ट्र सार्वजनिक सेवा' : 'Maharashtra Public Service')}
                   </h3>
                   <div className="text-xs text-[#5c5c5c] mt-1 font-medium flex flex-wrap items-center gap-2">
                     <span>
-                      {isMr ? 'संबंधित विभाग:' : 'Department:'} <span className="font-semibold text-[#111111]">{result.department}</span>
+                      {isMr ? 'संबंधित विभाग:' : isHi ? 'संबंधित विभाग:' : 'Department:'} <span className="font-semibold text-[#111111]">{result.department}</span>
                     </span>
                     {result.slaDays && (
                       <>
                         <span>•</span>
                         <span className="flex items-center gap-1 text-neutral-700">
                           <Clock className="w-3 h-3 text-neutral-500" />
-                          SLA: {result.slaDays} {isMr ? 'दिवस' : 'Days'}
+                          SLA: {result.slaDays} {isMr ? 'दिवस' : isHi ? 'दिन' : 'Days'}
                         </span>
                       </>
                     )}
@@ -624,7 +679,7 @@ export const AISahayak: React.FC<Props> = ({
                       <>
                         <span>•</span>
                         <span className="font-semibold text-emerald-700">
-                          {result.feeInr === 0 ? (isMr ? 'विनामूल्य (₹०)' : 'Free (₹0)') : `₹${result.feeInr}`}
+                          {result.feeInr === 0 ? (isMr ? 'विनामूल्य (₹०)' : isHi ? 'निःशुल्क (₹0)' : 'Free (₹0)') : `₹${result.feeInr}`}
                         </span>
                       </>
                     )}
@@ -633,7 +688,7 @@ export const AISahayak: React.FC<Props> = ({
 
                 {result.confidence && (
                   <span className="text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-1 rounded-full self-start">
-                    {isMr ? 'अचूकता:' : 'MATCH:'} {Math.round(result.confidence * 100)}%
+                    {isMr ? 'अचूकता:' : isHi ? 'सटीकता:' : 'MATCH:'} {Math.round(result.confidence * 100)}%
                   </span>
                 )}
               </div>
@@ -644,7 +699,11 @@ export const AISahayak: React.FC<Props> = ({
                   <UserCheck className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
                   <div className="text-xs text-emerald-950 leading-relaxed">
                     <span className="font-bold text-emerald-900 block mb-0.5">
-                      {isMr ? 'आपल्या नागरिक प्रोफाइलनुसार पात्रता पडताळणी:' : 'Citizen Profile Eligibility Assessment:'}
+                      {isMr
+                        ? 'आपल्या नागरिक प्रोफाइलनुसार पात्रता पडताळणी:'
+                        : isHi
+                        ? 'आपकी नागरिक प्रोफाइल के अनुसार पात्रता मूल्यांकन:'
+                        : 'Citizen Profile Eligibility Assessment:'}
                     </span>
                     <p>{result.profileEligibilityNote}</p>
                   </div>
@@ -655,7 +714,7 @@ export const AISahayak: React.FC<Props> = ({
               <div className="p-4 bg-black/5 border border-black/5 rounded-2xl text-xs text-[#111111] leading-relaxed space-y-2">
                 <div>
                   <span className="font-bold text-[#111111] block mb-1">
-                    {result.greeting || (isMr ? 'मार्गदर्शन व माहिती:' : 'Guidance & Advice:')}
+                    {result.greeting || (isMr ? 'मार्गदर्शन व माहिती:' : isHi ? 'मार्गदर्शन एवं जानकारी:' : 'Guidance & Advice:')}
                   </span>
                   <p className="text-[#222222] font-medium">{result.explanation}</p>
                 </div>
@@ -673,6 +732,8 @@ export const AISahayak: React.FC<Props> = ({
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#5c5c5c] block mb-2.5">
                     {isMr
                       ? 'महासेतू आंतर-विभागीय प्रणालीद्वारे विना-कागदपत्र तपासले जाणारे पुरावे:'
+                      : isHi
+                      ? 'महासेतु अंतर-विभागीय प्रणाली द्वारा बिना-कागजी स्वतः सत्यापित होने वाले प्रमाण:'
                       : 'Authoritative Proofs Automatically Verified via Mahasetu Interoperability:'}
                   </span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -694,7 +755,11 @@ export const AISahayak: React.FC<Props> = ({
                 <div className="pt-2">
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-[11px] font-bold uppercase tracking-wider text-[#5c5c5c]">
-                      {isMr ? '४,७०९+ योजना संचामधून जुळणाऱ्या योजना:' : 'Relevant Welfare & DBT Schemes from 4,709+ Repository:'}
+                      {isMr
+                        ? '४,७०९+ योजना संचामधून जुळणाऱ्या योजना:'
+                        : isHi
+                        ? '4,709+ योजना भंडार से संबंधित योजनाएं:'
+                        : 'Relevant Welfare & DBT Schemes from 4,709+ Repository:'}
                     </span>
                     {onNavigateToSchemes && (
                       <button
@@ -702,56 +767,59 @@ export const AISahayak: React.FC<Props> = ({
                         onClick={() => onNavigateToSchemes(undefined, query)}
                         className="text-xs text-emerald-800 hover:text-emerald-950 font-semibold flex items-center gap-1"
                       >
-                        <span>{isMr ? 'सर्व योजना पहा' : 'View all in catalogue'}</span>
+                        <span>{isMr ? 'सर्व योजना पहा' : isHi ? 'सभी योजनाएं देखें' : 'View all in catalogue'}</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </button>
                     )}
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {result.matchedSchemes.slice(0, 4).map((scheme: WelfareScheme) => (
-                      <div
-                        key={scheme.id}
-                        className="p-4 bg-white border border-black/8 rounded-2xl shadow-xs hover:border-black/20 transition-all flex flex-col justify-between space-y-2.5"
-                      >
-                        <div>
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full">
-                              {scheme.category}
-                            </span>
-                            <span className="text-[10px] text-[#777777] font-medium">
-                              {scheme.state}
-                            </span>
+                    {result.matchedSchemes.slice(0, 4).map((rawScheme: WelfareScheme) => {
+                      const scheme = getLocalizedScheme(rawScheme, language);
+                      return (
+                        <div
+                          key={scheme.id}
+                          className="p-4 bg-white border border-black/8 rounded-2xl shadow-xs hover:border-black/20 transition-all flex flex-col justify-between space-y-2.5"
+                        >
+                          <div>
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full">
+                                {scheme.category}
+                              </span>
+                              <span className="text-[10px] text-[#777777] font-medium">
+                                {scheme.state}
+                              </span>
+                            </div>
+                            <h4 className="text-xs font-bold text-[#111111] mt-1.5 line-clamp-2">
+                              {scheme.name}
+                            </h4>
+                            <p className="text-[11px] text-[#555555] mt-1 line-clamp-2 leading-relaxed">
+                              {scheme.benefitSummary}
+                            </p>
                           </div>
-                          <h4 className="text-xs font-bold text-[#111111] mt-1.5 line-clamp-2">
-                            {isMr && scheme.nameMr ? scheme.nameMr : scheme.name}
-                          </h4>
-                          <p className="text-[11px] text-[#555555] mt-1 line-clamp-2 leading-relaxed">
-                            {scheme.benefitSummary}
-                          </p>
-                        </div>
 
-                        <div className="pt-2 border-t border-black/5 flex items-center justify-between text-xs">
-                          <span className="text-[11px] font-bold text-emerald-700">
-                            {scheme.benefitValue || (isMr ? 'थेट डीबीटी लाभ' : 'Direct DBT Benefit')}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (onNavigateToSchemes) {
-                                onNavigateToSchemes(scheme.category, scheme.name);
-                              } else {
-                                onApplyForService(scheme.id);
-                              }
-                            }}
-                            className="text-[11px] font-semibold text-black hover:underline flex items-center gap-1"
-                          >
-                            <span>{isMr ? 'तपशील व अर्ज' : 'Details & Apply'}</span>
-                            <ArrowRight className="w-3 h-3" />
-                          </button>
+                          <div className="pt-2 border-t border-black/5 flex items-center justify-between text-xs">
+                            <span className="text-[11px] font-bold text-emerald-700">
+                              {scheme.benefitValue || (isMr ? 'थेट डीबीटी लाभ' : isHi ? 'प्रत्यक्ष डीबीटी लाभ' : 'Direct DBT Benefit')}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (onNavigateToSchemes) {
+                                  onNavigateToSchemes(scheme.category, scheme.name);
+                                } else {
+                                  onApplyForService(scheme.id);
+                                }
+                              }}
+                              className="text-[11px] font-semibold text-black hover:underline flex items-center gap-1"
+                            >
+                              <span>{isMr ? 'तपशील व अर्ज' : isHi ? 'विवरण एवं आवेदन' : 'Details & Apply'}</span>
+                              <ArrowRight className="w-3 h-3" />
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -763,6 +831,8 @@ export const AISahayak: React.FC<Props> = ({
                   <span>
                     {isMr
                       ? 'कागदपत्र स्कॅन करण्याची गरज नाही • महासेतू आंतर-विभागीय पडताळणी'
+                      : isHi
+                      ? 'दस्तावेज स्कैन की आवश्यकता नहीं • महासेतु अंतर-विभागीय सत्यापन'
                       : 'Zero physical uploads required • Peer-to-peer verification through Mahasetu'}
                   </span>
                 </div>
@@ -774,7 +844,7 @@ export const AISahayak: React.FC<Props> = ({
                       onClick={() => onNavigateToSchemes(undefined, query)}
                       className="px-4 py-2.5 bg-white hover:bg-neutral-100 text-[#111111] border border-black/10 rounded-xl text-xs font-semibold tracking-wide transition-all"
                     >
-                      {isMr ? 'योजना सूची शोधा' : 'Browse Schemes'}
+                      {isMr ? 'योजना सूची शोधा' : isHi ? 'योजना सूची देखें' : 'Browse Schemes'}
                     </button>
                   )}
 
@@ -785,7 +855,7 @@ export const AISahayak: React.FC<Props> = ({
                       onClick={() => onApplyForService(result.serviceCode || 'SRV_MAHADBT_SCHOLARSHIP')}
                       className="px-5 py-2.5 bg-[#141414] text-white hover:bg-black rounded-xl text-xs font-semibold tracking-wide shadow-sm hover:shadow transition-all flex items-center gap-2"
                     >
-                      <span>{t.applyNow} With 1-Click Verification</span>
+                      <span>{t.applyNow} ({isMr ? '१-क्लिक पडताळणी' : isHi ? '1-क्लिक सत्यापन' : '1-Click Verification'})</span>
                       <ArrowRight className="w-4 h-4" />
                     </button>
                   )}

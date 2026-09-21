@@ -119,18 +119,18 @@ export const AuditLedger: React.FC<Props> = ({ language }) => {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-[#5c5c5c] bg-black/5 border border-black/5 px-2.5 py-0.5 rounded-full">
-                  Immutable Cryptographic Ledger
+                  {language === 'mr' ? 'अपरिवर्तनीय क्रिप्टोग्राफिक नोंदवही' : language === 'hi' ? 'अपरिवर्तनीय क्रिप्टोग्राफिक लेजर' : 'Immutable Cryptographic Ledger'}
                 </span>
                 <span className="text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full font-semibold flex items-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  Chain Integrity Verified (100%)
+                  {language === 'mr' ? 'साखळी एकात्मता पडताळलेली (१००%)' : language === 'hi' ? 'श्रृंखला अखंडता सत्यापित (100%)' : 'Chain Integrity Verified (100%)'}
                 </span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#111111] mt-1.5">
                 {t.auditLogsTitle}
               </h2>
               <p className="text-xs text-[#5c5c5c] max-w-2xl mt-1 leading-relaxed">
-                {t.auditLogsSubtitle}. Every event is immutably linked to the previous transaction hash via SHA-256: H(n) = SHA-256(H(n-1) || Actor || Action || Timestamp).
+                {t.auditLogsSubtitle}. {language === 'mr' ? 'प्रत्येक घटना SHA-256 द्वारे मागील व्यवहाराशी जोडलेली आहे: H(n) = SHA-256(H(n-1) || कर्ता || कृती || वेळ).' : language === 'hi' ? 'प्रत्येक घटना SHA-256 द्वारा पिछले लेनदेन हैश से जुड़ी है: H(n) = SHA-256(H(n-1) || कर्ता || क्रिया || समय).' : 'Every event is immutably linked to the previous transaction hash via SHA-256: H(n) = SHA-256(H(n-1) || Actor || Action || Timestamp).'}
               </p>
             </div>
           </div>
@@ -150,7 +150,7 @@ export const AuditLedger: React.FC<Props> = ({ language }) => {
             <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-[#8c8c8c]" />
             <input
               type="text"
-              placeholder="Search by Actor, Entity ID, or Department..."
+              placeholder={language === 'mr' ? 'कर्ता, आयडी किंवा विभाग शोधा...' : language === 'hi' ? 'कर्ता, आईडी या विभाग खोजें...' : 'Search by Actor, Entity ID, or Department...'}
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 bg-white border border-black/10 rounded-xl text-xs font-medium text-[#111111] placeholder:text-[#8c8c8c] focus:outline-none focus:border-black shadow-xs"
@@ -169,7 +169,7 @@ export const AuditLedger: React.FC<Props> = ({ language }) => {
                     : 'text-[#5c5c5c] bg-white hover:bg-black/5 border border-black/8'
                 }`}
               >
-                {f}
+                {f === 'ALL' ? (language === 'mr' ? 'सर्व (ALL)' : language === 'hi' ? 'सभी (ALL)' : 'ALL') : f}
               </button>
             ))}
           </div>
@@ -180,7 +180,7 @@ export const AuditLedger: React.FC<Props> = ({ language }) => {
       <div className="bg-white/80 backdrop-blur-xl border border-black/8 rounded-3xl p-6 sm:p-7 shadow-[0_18px_44px_-26px_rgba(0,0,0,0.10)]">
         <div className="flex items-center justify-between mb-5 pb-4 border-b border-black/8">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-[#5c5c5c]">
-            Cryptographic Block Sequence ({filteredLogs.length} blocks)
+            {language === 'mr' ? `क्रिप्टोग्राफिक ब्लॉक अनुक्रम (${filteredLogs.length} ब्लॉक्स)` : language === 'hi' ? `क्रिप्टोग्राफिक ब्लॉक अनुक्रम (${filteredLogs.length} ब्लॉक्स)` : `Cryptographic Block Sequence (${filteredLogs.length} blocks)`}
           </span>
           <span className="text-xs text-[#111111] font-mono font-medium">Algorithm: SHA-256</span>
         </div>
@@ -188,11 +188,11 @@ export const AuditLedger: React.FC<Props> = ({ language }) => {
         {loading ? (
           <div className="py-12 text-center text-xs text-[#5c5c5c] flex items-center justify-center gap-2">
             <RefreshCw className="w-4 h-4 animate-spin text-[#111111]" />
-            <span>Loading cryptographic audit records...</span>
+            <span>{language === 'mr' ? 'क्रिप्टोग्राफिक ऑडिट नोंदी लोड होत आहेत...' : language === 'hi' ? 'क्रिप्टोग्राफिक ऑडिट रिकॉर्ड लोड हो रहे हैं...' : 'Loading cryptographic audit records...'}</span>
           </div>
         ) : filteredLogs.length === 0 ? (
           <div className="text-center py-12 text-[#5c5c5c] text-xs bg-black/5 rounded-2xl border border-dashed border-black/10">
-            No audit logs found matching criteria.
+            {language === 'mr' ? 'कोणत्याही ऑडिट नोंदी आढळल्या नाहीत.' : language === 'hi' ? 'कोई ऑडिट रिकॉर्ड नहीं मिला।' : 'No audit logs found matching criteria.'}
           </div>
         ) : (
           <div className="space-y-3">

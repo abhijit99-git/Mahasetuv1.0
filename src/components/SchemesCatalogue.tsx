@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Search,
   Sparkles,
-  Filter,
   Landmark,
   CheckCircle2,
   ArrowRight,
@@ -21,18 +20,22 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-  Send,
   Bot,
   Zap,
-  Info,
   SlidersHorizontal,
   Check
 } from 'lucide-react';
 import { WelfareScheme, SchemeStats } from '../types';
+import { Language } from '../locales';
+import {
+  CATEGORY_TRANSLATIONS,
+  CATALOGUE_STRINGS,
+  getLocalizedScheme
+} from '../utils/schemeLocalization';
 
 interface SchemesCatalogueProps {
   onSelectSchemeForApplication?: (scheme: WelfareScheme) => void;
-  language?: 'mr' | 'en' | 'hi';
+  language?: Language;
 }
 
 /**
@@ -249,8 +252,11 @@ export function resolveOfficialSchemeUrl(scheme: WelfareScheme): {
 
 export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
   onSelectSchemeForApplication,
-  language = 'mr'
+  language = 'en'
 }) => {
+  const currentLang: Language = (language === 'mr' || language === 'hi' || language === 'en') ? language : 'en';
+  const t = CATALOGUE_STRINGS[currentLang] || CATALOGUE_STRINGS.en;
+
   // State
   const [schemes, setSchemes] = useState<WelfareScheme[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -281,18 +287,18 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
     zeroUploadVerificationDetails: string;
   } | null>(null);
 
-  // Categories list
+  // Dynamic Categories list with full localization
   const categories = [
-    { id: 'ALL', label: 'All Schemes (सर्व योजना)', icon: Landmark },
-    { id: 'Agriculture & Farming', label: 'Agriculture & Farming (कृषी व शेतकरी)', icon: Sprout },
-    { id: 'Education & Scholarships', label: 'Education & Scholarships (शिक्षण व शिष्यवृत्ती)', icon: GraduationCap },
-    { id: 'Women & Child Welfare', label: 'Women & Child (महिला व बालविकास)', icon: Baby },
-    { id: 'Social Welfare & Pensions', label: 'Social Welfare & Pensions (सामाजिक न्याय व पेन्शन)', icon: ShieldCheck },
-    { id: 'Healthcare & Medical', label: 'Healthcare & Medical (आरोग्य व उपचार)', icon: HeartPulse },
-    { id: 'Employment & Skills', label: 'Employment & MSME (रोजगार व स्वयंरोजगार)', icon: Briefcase },
-    { id: 'Housing & Urban Development', label: 'Housing (गृहनिर्माण)', icon: Home },
-    { id: 'Banking & Financial Inclusion', label: 'Banking & Financial (आर्थिक समावेशन)', icon: Building2 },
-    { id: 'Divyangjan & Disability Support', label: 'Divyangjan (दिव्यांग सहाय्य)', icon: Accessibility },
+    { id: 'ALL', label: CATEGORY_TRANSLATIONS['ALL']?.[currentLang] || 'All Schemes', icon: Landmark },
+    { id: 'Agriculture & Farming', label: CATEGORY_TRANSLATIONS['Agriculture & Farming']?.[currentLang] || 'Agriculture & Farming', icon: Sprout },
+    { id: 'Education & Scholarships', label: CATEGORY_TRANSLATIONS['Education & Scholarships']?.[currentLang] || 'Education & Scholarships', icon: GraduationCap },
+    { id: 'Women & Child Welfare', label: CATEGORY_TRANSLATIONS['Women & Child Welfare']?.[currentLang] || 'Women & Child Welfare', icon: Baby },
+    { id: 'Social Welfare & Pensions', label: CATEGORY_TRANSLATIONS['Social Welfare & Pensions']?.[currentLang] || 'Social Welfare & Pensions', icon: ShieldCheck },
+    { id: 'Healthcare & Medical', label: CATEGORY_TRANSLATIONS['Healthcare & Medical']?.[currentLang] || 'Healthcare & Medical', icon: HeartPulse },
+    { id: 'Employment & Skills', label: CATEGORY_TRANSLATIONS['Employment & Skills']?.[currentLang] || 'Employment & Skills', icon: Briefcase },
+    { id: 'Housing & Urban Development', label: CATEGORY_TRANSLATIONS['Housing & Urban Development']?.[currentLang] || 'Housing & Urban Development', icon: Home },
+    { id: 'Banking & Financial Inclusion', label: CATEGORY_TRANSLATIONS['Banking & Financial Inclusion']?.[currentLang] || 'Banking & Financial Inclusion', icon: Building2 },
+    { id: 'Divyangjan & Disability Support', label: CATEGORY_TRANSLATIONS['Divyangjan & Disability Support']?.[currentLang] || 'Divyangjan & Disability Support', icon: Accessibility },
   ];
 
   // Fetch Stats once
@@ -399,46 +405,46 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
         <div className="relative z-10 max-w-4xl space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-semibold border border-indigo-400/30">
             <Zap className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Kaggle 4,709+ Verified Government Welfare Schemes + Maharashtra Flagships</span>
+            <span>{t.heroBadge}</span>
           </div>
 
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
-            शासकीय कल्याणकारी योजना निर्देशिका
+            {t.heroTitle}
             <span className="block text-indigo-300 font-normal text-lg sm:text-xl mt-1">
-              All Indian Government & Maharashtra State DBT Schemes Repository
+              {t.heroSubtitle}
             </span>
           </h1>
 
           <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-            Explore 4,709+ verified state and national welfare schemes. With Mahasetu's federated interoperability engine, citizens can check eligibility and apply with <strong className="text-amber-300 font-medium">zero manual document uploads</strong>—all proofs (7/12 land records, caste, income, domicile, driving license) are fetched directly from departmental peer adapters.
+            {t.heroDesc}
           </p>
 
           {/* Metric Stats Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4">
             <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-3.5">
-              <div className="text-xs text-slate-400 font-medium">Total Schemes</div>
+              <div className="text-xs text-slate-400 font-medium">{t.totalSchemes}</div>
               <div className="text-2xl font-bold text-white mt-0.5">{stats?.totalSchemes || '4,709+'}</div>
               <div className="text-[11px] text-emerald-400 mt-0.5 flex items-center gap-1">
-                <Check className="w-3 h-3" /> 100% Verified
+                <Check className="w-3 h-3" /> {t.totalSchemesSub}
               </div>
             </div>
 
             <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-3.5">
-              <div className="text-xs text-slate-400 font-medium">Maharashtra State</div>
+              <div className="text-xs text-slate-400 font-medium">{t.mhSchemes}</div>
               <div className="text-2xl font-bold text-amber-300 mt-0.5">{stats?.maharashtraSchemes || '90+'}</div>
-              <div className="text-[11px] text-slate-300 mt-0.5">Flagships & State DBT</div>
+              <div className="text-[11px] text-slate-300 mt-0.5">{t.mhSchemesSub}</div>
             </div>
 
             <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-3.5">
-              <div className="text-xs text-slate-400 font-medium">Central / National</div>
+              <div className="text-xs text-slate-400 font-medium">{t.centralSchemes}</div>
               <div className="text-2xl font-bold text-indigo-300 mt-0.5">{stats?.nationalSchemes || '697+'}</div>
-              <div className="text-[11px] text-slate-300 mt-0.5">All India Coverage</div>
+              <div className="text-[11px] text-slate-300 mt-0.5">{t.centralSchemesSub}</div>
             </div>
 
             <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-3.5">
-              <div className="text-xs text-slate-400 font-medium">Zero-Upload Mesh</div>
-              <div className="text-2xl font-bold text-emerald-300 mt-0.5">Active</div>
-              <div className="text-[11px] text-emerald-300 mt-0.5">6 Peer Adapters</div>
+              <div className="text-xs text-slate-400 font-medium">{t.zeroUploadMesh}</div>
+              <div className="text-2xl font-bold text-emerald-300 mt-0.5">{language === 'mr' ? 'सक्रिय' : language === 'hi' ? 'सक्रिय' : 'Active'}</div>
+              <div className="text-[11px] text-emerald-300 mt-0.5">{t.zeroUploadMeshSub}</div>
             </div>
           </div>
         </div>
@@ -453,13 +459,17 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
           <div className="flex-1 space-y-3">
             <div>
               <h2 className="text-base sm:text-lg font-semibold text-slate-900 flex items-center gap-2">
-                <span>AI योजना सहाय्यक (AI Scheme Advisor)</span>
+                <span>{t.aiAdvisorTitle}</span>
                 <span className="text-xs font-normal px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full border border-amber-300">
-                  Powered by Gemini & Kaggle Schemes
+                  {t.aiAdvisorBadge}
                 </span>
               </h2>
               <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
-                Describe your requirement or situation in Marathi, Hindi, or English (e.g. <em>"माझ्याकडे २ एकर जमीन आहे, शेततळे योजना मिळेल का?"</em>, <em>"Scholarships for OBC engineering students"</em>, <em>"Ladki Bahin scheme"</em>).
+                {language === 'mr'
+                  ? 'आपली आवश्यकता किंवा परिस्थिती मराठीत सांगा (उदा. "माझ्याकडे २ एकर जमीन आहे, शेततळे योजना मिळेल का?", "लाडकी बहीण योजना पात्रता", "ओबीसी विद्यार्थ्यांसाठी शिष्यवृत्ती").'
+                  : language === 'hi'
+                  ? 'अपनी आवश्यकता या स्थिति हिंदी में बताएं (उदा. "मेरे पास 2 एकड़ जमीन है, मुझे कौन सी योजना मिलेगी?", "लाड़की बहिन योजना", "ओबीसी छात्रवृत्ति").'
+                  : 'Describe your requirement or situation in English, Marathi, or Hindi (e.g., "Scholarships for engineering students", "Ladki Bahin scheme", "Farmer solar pump subsidy").'}
               </p>
             </div>
 
@@ -469,7 +479,7 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
                   type="text"
                   value={aiQuery}
                   onChange={(e) => setAiQuery(e.target.value)}
-                  placeholder="उदा: शेतकरी कर्जमाफी, लाडकी बहीण योजना, उच्च शिक्षण शिष्यवृत्ती, अपंग निवृत्तीवेतन..."
+                  placeholder={t.aiAdvisorPlaceholder}
                   className="w-full pl-4 pr-10 py-2.5 text-sm bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 shadow-sm"
                 />
                 {aiQuery && (
@@ -490,12 +500,12 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
                 {aiLoading ? (
                   <>
                     <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>Analyzing 4,709 Schemes...</span>
+                    <span>{t.aiAdvisorAnalyzing}</span>
                   </>
                 ) : (
                   <>
                     <Bot className="w-4 h-4" />
-                    <span>Ask AI Sahayak</span>
+                    <span>{t.aiAdvisorBtn}</span>
                   </>
                 )}
               </button>
@@ -529,13 +539,13 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
 
                   {aiResult.keyBenefitsSummary && (
                     <div className="p-3 bg-amber-50/80 rounded-lg border border-amber-200/60 text-xs text-amber-900">
-                      <strong>Key Scheme Benefits:</strong> {aiResult.keyBenefitsSummary}
+                      <strong>{t.aiBenefitsSummary}</strong> {aiResult.keyBenefitsSummary}
                     </div>
                   )}
 
                   {aiResult.eligibilityChecklist && aiResult.eligibilityChecklist.length > 0 && (
                     <div className="space-y-1.5">
-                      <div className="text-xs font-semibold text-slate-700">पात्रता निकष (Eligibility Checklist):</div>
+                      <div className="text-xs font-semibold text-slate-700">{t.aiEligibilityChecklist}</div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                         {aiResult.eligibilityChecklist.map((item, idx) => (
                           <div key={idx} className="flex items-center gap-1.5 text-xs text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-100">
@@ -549,35 +559,37 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
 
                   {aiResult.matchedSchemes && aiResult.matchedSchemes.length > 0 && (
                     <div className="space-y-2 pt-2 border-t border-slate-100">
-                      <div className="text-xs font-semibold text-slate-700">शिफारस केलेल्या योजना (Recommended Matching Schemes):</div>
+                      <div className="text-xs font-semibold text-slate-700">{t.aiRecommendedSchemes}</div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                        {aiResult.matchedSchemes.map((s) => (
-                          <div
-                            key={s.id}
-                            className="p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-amber-50/50 hover:border-amber-300 transition-all flex flex-col justify-between"
-                          >
-                            <div>
-                              <div className="text-xs font-bold text-slate-900 line-clamp-1">{s.name}</div>
-                              {s.nameMr && <div className="text-[11px] text-slate-600 line-clamp-1 mt-0.5">{s.nameMr}</div>}
-                              <div className="text-xs text-emerald-700 font-semibold mt-1.5">{s.benefitValue}</div>
+                        {aiResult.matchedSchemes.map((rawScheme) => {
+                          const s = getLocalizedScheme(rawScheme, currentLang);
+                          return (
+                            <div
+                              key={s.id}
+                              className="p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-amber-50/50 hover:border-amber-300 transition-all flex flex-col justify-between"
+                            >
+                              <div>
+                                <div className="text-xs font-bold text-slate-900 line-clamp-1">{s.name}</div>
+                                <div className="text-xs text-emerald-700 font-semibold mt-1.5">{s.benefitValue}</div>
+                              </div>
+                              <div className="flex items-center justify-between gap-2 mt-3 pt-2 border-t border-slate-200/60">
+                                <button
+                                  onClick={() => setSelectedScheme(s)}
+                                  className="text-[11px] text-indigo-600 hover:text-indigo-800 font-medium"
+                                >
+                                  {t.detailsBtn}
+                                </button>
+                                <button
+                                  onClick={() => setApplyModalScheme(s)}
+                                  className="inline-flex items-center gap-1 text-[11px] bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded-lg font-medium shadow-xs hover:shadow transition-all"
+                                >
+                                  <span>{t.applyBtn}</span>
+                                  <ArrowRight className="w-3 h-3" />
+                                </button>
+                              </div>
                             </div>
-                            <div className="flex items-center justify-between gap-2 mt-3 pt-2 border-t border-slate-200/60">
-                              <button
-                                onClick={() => setSelectedScheme(s)}
-                                className="text-[11px] text-indigo-600 hover:text-indigo-800 font-medium"
-                              >
-                                तपशील (Details)
-                              </button>
-                              <button
-                                onClick={() => setApplyModalScheme(s)}
-                                className="inline-flex items-center gap-1 text-[11px] bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded-lg font-medium shadow-xs hover:shadow transition-all"
-                              >
-                                <span>Apply</span>
-                                <ArrowRight className="w-3 h-3" />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   )}
@@ -598,7 +610,7 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="योजना, विभाग, लाभ किंवा कीवर्ड शोधा (Search 4,709+ schemes by name, department, category, benefit)..."
+              placeholder={t.searchPlaceholder}
               className="w-full pl-10 pr-10 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
             />
             {searchQuery && (
@@ -622,7 +634,7 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
               }`}
             >
               <Landmark className="w-3.5 h-3.5" />
-              <span>Maharashtra Only (महाराष्ट्र योजना)</span>
+              <span>{t.mhOnlyFilter}</span>
             </button>
 
             <button
@@ -634,7 +646,7 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
               }`}
             >
               <SlidersHorizontal className="w-4 h-4" />
-              <span className="hidden sm:inline">Filters</span>
+              <span className="hidden sm:inline">{t.filtersBtn}</span>
             </button>
           </div>
         </div>
@@ -671,30 +683,30 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
               className="pt-3 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-3 overflow-hidden text-xs"
             >
               <div>
-                <label className="block text-slate-600 font-medium mb-1">Gender Restriction (लिंग)</label>
+                <label className="block text-slate-600 font-medium mb-1">{t.genderFilterLabel}</label>
                 <select
                   value={genderFilter}
                   onChange={(e) => setGenderFilter(e.target.value)}
                   className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500"
                 >
-                  <option value="all">All Genders (सर्व)</option>
-                  <option value="female">Women / Female Only (महिला)</option>
-                  <option value="male">Male Only (पुरुष)</option>
+                  <option value="all">{t.genderAll}</option>
+                  <option value="female">{t.genderFemale}</option>
+                  <option value="male">{t.genderMale}</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-slate-600 font-medium mb-1">Occupation / Target Group (व्यवसाय)</label>
+                <label className="block text-slate-600 font-medium mb-1">{t.occupationFilterLabel}</label>
                 <select
                   value={occupationFilter}
                   onChange={(e) => setOccupationFilter(e.target.value)}
                   className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500"
                 >
-                  <option value="all">All Occupations (सर्व)</option>
-                  <option value="farmer">Farmers / Agriculture (शेतकरी)</option>
-                  <option value="student">Students & Scholars (विद्यार्थी)</option>
-                  <option value="entrepreneur">Entrepreneurs / MSME (उद्योजक)</option>
-                  <option value="unemployed">Unemployed / Destitute (बेरोजगार / निराधार)</option>
+                  <option value="all">{t.occupationAll}</option>
+                  <option value="farmer">{t.occupationFarmer}</option>
+                  <option value="student">{t.occupationStudent}</option>
+                  <option value="entrepreneur">{t.occupationEntrepreneur}</option>
+                  <option value="unemployed">{t.occupationUnemployed}</option>
                 </select>
               </div>
 
@@ -710,7 +722,7 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
                   className="w-full p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg transition-colors flex items-center justify-center gap-1.5"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
-                  <span>Reset All Filters</span>
+                  <span>{t.resetFilters}</span>
                 </button>
               </div>
             </motion.div>
@@ -721,13 +733,17 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
       {/* Results Header & Counter */}
       <div className="flex items-center justify-between text-xs text-slate-500 px-1">
         <div>
-          Showing <span className="font-semibold text-slate-900">{schemes.length}</span> of{' '}
-          <span className="font-semibold text-slate-900">{totalCount.toLocaleString()}</span> schemes
-          {selectedCategory !== 'ALL' && <span className="ml-1 text-indigo-600">in {selectedCategory}</span>}
-          {onlyMaharashtra && <span className="ml-1 text-amber-600">(Maharashtra Priority)</span>}
+          {t.showingText} <span className="font-semibold text-slate-900">{schemes.length}</span> {t.ofText}{' '}
+          <span className="font-semibold text-slate-900">{totalCount.toLocaleString()}</span> {t.schemesText}
+          {selectedCategory !== 'ALL' && (
+            <span className="ml-1 text-indigo-600">
+              ({CATEGORY_TRANSLATIONS[selectedCategory]?.[language] || selectedCategory})
+            </span>
+          )}
+          {onlyMaharashtra && <span className="ml-1 text-amber-600">{t.mhPriorityTag}</span>}
         </div>
         <div className="text-[11px] text-slate-400">
-          Page {page} of {totalPages}
+          {t.pageText} {page} {t.ofText} {totalPages}
         </div>
       </div>
 
@@ -735,14 +751,14 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
       {loading ? (
         <div className="py-20 flex flex-col items-center justify-center text-slate-400 space-y-3">
           <RefreshCw className="w-8 h-8 animate-spin text-indigo-600" />
-          <p className="text-sm font-medium">Loading government welfare schemes database...</p>
+          <p className="text-sm font-medium">{t.loadingDatabase}</p>
         </div>
       ) : schemes.length === 0 ? (
         <div className="bg-white rounded-2xl p-12 text-center border border-slate-200 space-y-3">
           <Landmark className="w-12 h-12 text-slate-300 mx-auto" />
-          <h3 className="text-base font-semibold text-slate-900">कोणतीही योजना सापडली नाही (No schemes found)</h3>
+          <h3 className="text-base font-semibold text-slate-900">{t.noSchemesFound}</h3>
           <p className="text-xs text-slate-500 max-w-md mx-auto">
-            Try adjusting your search terms, changing the category filter, or clearing the Maharashtra restriction to view all 4,709+ national schemes.
+            {t.noSchemesDesc}
           </p>
           <button
             onClick={() => {
@@ -752,13 +768,14 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
             }}
             className="px-4 py-2 bg-indigo-600 text-white text-xs font-semibold rounded-xl hover:bg-indigo-700"
           >
-            Clear Filters
+            {t.clearFilters}
           </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {schemes.map((scheme) => {
-            const isMh = scheme.isMaharashtra;
+          {schemes.map((rawScheme) => {
+            const scheme = getLocalizedScheme(rawScheme, currentLang);
+            const isMh = scheme.isMaharashtra || scheme.state === 'Maharashtra';
             return (
               <motion.div
                 key={scheme.id}
@@ -768,7 +785,7 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
                 {/* State Tag Top Accent */}
                 {isMh && (
                   <div className="absolute top-0 right-0 bg-amber-500 text-white text-[10px] font-bold px-3 py-0.5 rounded-bl-lg shadow-sm">
-                    Maharashtra State
+                    {t.mhStateBadge}
                   </div>
                 )}
 
@@ -776,7 +793,7 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
                   {/* Category Chip */}
                   <div className="flex items-center gap-2">
                     <div className="p-1.5 rounded-lg bg-slate-50 border border-slate-100">
-                      {getCategoryIcon(scheme.category)}
+                      {getCategoryIcon(rawScheme.category)}
                     </div>
                     <span className="text-xs font-medium text-slate-600 line-clamp-1">{scheme.category}</span>
                   </div>
@@ -786,11 +803,6 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
                     <h3 className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-2">
                       {scheme.name}
                     </h3>
-                    {scheme.nameMr && (
-                      <div className="text-xs text-slate-500 font-medium line-clamp-1 mt-0.5">
-                        {scheme.nameMr}
-                      </div>
-                    )}
                   </div>
 
                   {/* Issuing Authority */}
@@ -801,7 +813,7 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
 
                   {/* Benefit Callout */}
                   <div className="bg-emerald-50/80 border border-emerald-200/70 rounded-xl p-2.5">
-                    <div className="text-[11px] text-emerald-800 font-medium">Estimated Direct Benefit:</div>
+                    <div className="text-[11px] text-emerald-800 font-medium">{t.estimatedBenefit}</div>
                     <div className="text-sm font-bold text-emerald-900 mt-0.5">{scheme.benefitValue}</div>
                     <p className="text-xs text-emerald-700/90 line-clamp-2 mt-1">
                       {scheme.benefitSummary}
@@ -812,10 +824,10 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
                   <div className="space-y-1">
                     <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1">
                       <ShieldCheck className="w-3 h-3 text-indigo-500" />
-                      <span>Mahasetu Zero-Upload Adapters:</span>
+                      <span>{t.zeroUploadAdapters}</span>
                     </div>
                     <div className="flex flex-wrap gap-1">
-                      {(scheme.adapters || ['UIDAI-L1']).map((ad, i) => (
+                      {(scheme.adapters || ['UIDAI-L1', 'MAHABHUMI-712']).map((ad, i) => (
                         <span
                           key={i}
                           className="px-2 py-0.5 text-[10px] font-semibold rounded bg-indigo-50 text-indigo-700 border border-indigo-100"
@@ -833,14 +845,14 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
                     onClick={() => setSelectedScheme(scheme)}
                     className="text-xs text-slate-600 hover:text-slate-900 font-medium py-1.5 px-2 rounded-lg hover:bg-slate-50 transition-colors"
                   >
-                    View Details
+                    {t.viewDetails}
                   </button>
 
                   <button
                     onClick={() => setApplyModalScheme(scheme)}
                     className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl shadow-xs hover:shadow transition-all"
                   >
-                    <span>Apply</span>
+                    <span>{t.apply}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -867,7 +879,7 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
           </button>
 
           <div className="text-xs font-medium text-slate-700 px-3 py-2 bg-white rounded-xl border border-slate-200">
-            Page <span className="font-bold text-slate-900">{page}</span> of {totalPages}
+            {t.pageText} <span className="font-bold text-slate-900">{page}</span> {t.ofText} {totalPages}
           </div>
 
           <button
@@ -916,12 +928,12 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
                   </span>
                   {selectedScheme.isMaharashtra && (
                     <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-amber-100 text-amber-800">
-                      Maharashtra Flagship
+                      {t.mhFlagship}
                     </span>
                   )}
                   {selectedScheme.isNational && (
                     <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                      Central DBT
+                      {t.centralDbt}
                     </span>
                   )}
                 </div>
@@ -929,9 +941,6 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
                 <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
                   {selectedScheme.name}
                 </h2>
-                {selectedScheme.nameMr && (
-                  <p className="text-sm font-medium text-slate-600">{selectedScheme.nameMr}</p>
-                )}
                 <div className="text-xs text-slate-500 flex items-center gap-1.5">
                   <Building2 className="w-3.5 h-3.5 text-slate-400" />
                   <span>{selectedScheme.issuingAuthority}</span>
@@ -940,34 +949,36 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
 
               {/* Direct Benefit Value Box */}
               <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-4">
-                <div className="text-xs font-semibold text-emerald-800 uppercase tracking-wider">Direct Scheme Benefit:</div>
+                <div className="text-xs font-semibold text-emerald-800 uppercase tracking-wider">{t.directBenefitValue}</div>
                 <div className="text-xl font-bold text-emerald-950 mt-1">{selectedScheme.benefitValue}</div>
                 <p className="text-xs text-emerald-800 mt-1 leading-relaxed">{selectedScheme.benefitSummary}</p>
               </div>
 
               {/* Eligibility Criteria */}
               <div className="space-y-2">
-                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">पात्रता निकष (Eligibility Rules):</h4>
+                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">{t.eligibilityRules}</h4>
                 <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-700 leading-relaxed">
                   {selectedScheme.eligibility}
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1 text-xs">
                   {selectedScheme.maxAnnualIncome && (
                     <div className="p-2 bg-slate-50 rounded-lg border border-slate-100">
-                      <span className="text-slate-400 block text-[10px]">Income Limit:</span>
+                      <span className="text-slate-400 block text-[10px]">{t.incomeLimit}</span>
                       <span className="font-semibold text-slate-800">₹{selectedScheme.maxAnnualIncome}</span>
                     </div>
                   )}
                   {selectedScheme.minAge && (
                     <div className="p-2 bg-slate-50 rounded-lg border border-slate-100">
-                      <span className="text-slate-400 block text-[10px]">Min Age:</span>
-                      <span className="font-semibold text-slate-800">{selectedScheme.minAge} Years</span>
+                      <span className="text-slate-400 block text-[10px]">{t.minAge}</span>
+                      <span className="font-semibold text-slate-800">{selectedScheme.minAge} {t.years}</span>
                     </div>
                   )}
                   {selectedScheme.gender && selectedScheme.gender !== 'any' && (
                     <div className="p-2 bg-slate-50 rounded-lg border border-slate-100">
-                      <span className="text-slate-400 block text-[10px]">Gender:</span>
-                      <span className="font-semibold text-slate-800 capitalize">{selectedScheme.gender}</span>
+                      <span className="text-slate-400 block text-[10px]">{t.gender}</span>
+                      <span className="font-semibold text-slate-800 capitalize">
+                        {selectedScheme.gender === 'female' ? t.genderFemale : selectedScheme.gender === 'male' ? t.genderMale : selectedScheme.gender}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -977,14 +988,14 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
               <div className="space-y-2">
                 <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
                   <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                  <span>Mahasetu Interoperability Flow (शून्य कागदपत्रे):</span>
+                  <span>{t.zeroUploadFlowTitle}</span>
                 </h4>
                 <div className="p-3 bg-indigo-50/70 border border-indigo-100 rounded-xl text-xs text-indigo-900 space-y-2">
                   <p>
-                    When applying through Mahasetu, our sovereign federated peer adapters automatically fetch and verify your proofs from official government registries:
+                    {t.zeroUploadFlowDesc}
                   </p>
                   <div className="flex flex-wrap gap-1.5 pt-1">
-                    {(selectedScheme.adapters || ['UIDAI-L1']).map((ad, i) => (
+                    {(selectedScheme.adapters || ['UIDAI-L1', 'MAHABHUMI-712']).map((ad, i) => (
                       <span key={i} className="px-2.5 py-1 bg-white border border-indigo-200 text-indigo-800 font-semibold rounded-lg text-xs shadow-xs">
                         {ad}
                       </span>
@@ -1005,7 +1016,7 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
                       className="text-xs text-indigo-700 hover:text-indigo-900 font-medium flex items-center gap-1.5 order-2 sm:order-1 px-3 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors"
                     >
                       <Landmark className="w-3.5 h-3.5 text-indigo-600" />
-                      <span>Open Official Portal ({officialInfo.portalName})</span>
+                      <span>{t.openOfficialPortal} ({officialInfo.portalName})</span>
                       <ExternalLink className="w-3.5 h-3.5 ml-0.5 text-slate-400" />
                     </a>
 
@@ -1014,7 +1025,7 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
                         onClick={() => setSelectedScheme(null)}
                         className="flex-1 sm:flex-none px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
                       >
-                        Close
+                        {t.close}
                       </button>
                       <button
                         onClick={() => {
@@ -1024,7 +1035,7 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
                         }}
                         className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md transition-all"
                       >
-                        <span>Apply</span>
+                        <span>{t.apply}</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -1069,7 +1080,7 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
                   </span>
                   {applyModalScheme.isMaharashtra && (
                     <span className="px-3 py-1 text-xs font-semibold rounded-full bg-amber-50 text-amber-900 border border-amber-200">
-                      Maharashtra Flagship
+                      {t.mhFlagship}
                     </span>
                   )}
                 </div>
@@ -1077,18 +1088,15 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
                 <h3 className="text-lg sm:text-xl font-bold text-slate-900 leading-snug">
                   {applyModalScheme.name}
                 </h3>
-                {applyModalScheme.nameMr && (
-                  <p className="text-xs text-slate-500 font-medium">{applyModalScheme.nameMr}</p>
-                )}
 
                 {/* Benefit Badge */}
                 <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-50/90 border border-emerald-200 text-emerald-800 text-xs font-semibold mt-1">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>लाभ: {applyModalScheme.benefitValue || 'Direct Benefit Transfer (DBT)'}</span>
+                  <span>{t.estimatedBenefit} {applyModalScheme.benefitValue || 'Direct Benefit Transfer (DBT)'}</span>
                 </div>
               </div>
 
-              {/* Option 1: Apply via Mahasetu Mesh (Zero-Upload Paperless) - NO recommended tag */}
+              {/* Option 1: Apply via Mahasetu Mesh (Zero-Upload Paperless) */}
               <div className="border-2 border-indigo-600 rounded-2xl p-4 bg-white space-y-3 relative">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-xs">
@@ -1096,13 +1104,13 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <h4 className="text-sm sm:text-base font-bold text-slate-900">Apply via Mahasetu</h4>
+                      <h4 className="text-sm sm:text-base font-bold text-slate-900">{t.applyViaMahasetu}</h4>
                       <span className="px-1.5 py-0.5 text-[9.5px] font-bold rounded bg-emerald-100 text-emerald-800 uppercase tracking-wide">
-                        ZERO UPLOADS
+                        {t.zeroUploadsBadge}
                       </span>
                     </div>
                     <p className="text-xs text-indigo-900/90 font-medium mt-0.5">
-                      शून्य कागदपत्रे • 1-Click Federated Verification
+                      {t.oneClickTag}
                     </p>
                   </div>
                 </div>
@@ -1111,15 +1119,15 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
                 <div className="space-y-1.5 bg-slate-50/90 p-3 rounded-xl border border-slate-100/80 text-xs text-slate-700">
                   <div className="flex items-center gap-2">
                     <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>7/12 Land, Income & Caste verified via registry</span>
+                    <span>{t.point1}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>No document scanning or certificate uploads needed</span>
+                    <span>{t.point2}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>Citizen consent verified with immutable ledger</span>
+                    <span>{t.point3}</span>
                   </div>
                 </div>
 
@@ -1135,7 +1143,7 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
                   className="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold shadow-xs hover:shadow transition-all flex items-center justify-center gap-2"
                 >
                   <ShieldCheck className="w-4 h-4 text-emerald-300" />
-                  <span>Continue via Mahasetu (शून्य कागदपत्रे)</span>
+                  <span>{t.continueViaMahasetu}</span>
                   <ArrowRight className="w-4 h-4 text-indigo-200" />
                 </button>
               </div>
@@ -1162,20 +1170,20 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <h4 className="text-sm sm:text-base font-bold text-slate-900">Go to Official Government Portal</h4>
+                          <h4 className="text-sm sm:text-base font-bold text-slate-900">{t.goToOfficialPortal}</h4>
                           <span className="px-2 py-0.5 text-[10px] font-medium rounded-md bg-slate-100 text-slate-600 border border-slate-200">
-                            External
+                            {t.externalBadge}
                           </span>
                         </div>
                         <p className="text-xs text-slate-500 font-medium mt-0.5">
-                          शासकीय अधिकृत संकेतस्थळावर अर्ज करा
+                          {t.officialPortalDesc}
                         </p>
                       </div>
                     </div>
 
                     <div className="p-3 bg-slate-50/90 rounded-xl border border-slate-100/80 text-xs space-y-1">
                       <div className="text-slate-600">
-                        Destination:{' '}
+                        {t.destination}{' '}
                         <a
                           href={officialInfo.url}
                           target="_blank"
@@ -1187,7 +1195,7 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
                         </a>
                       </div>
                       <p className="text-[11px] text-slate-500 italic">
-                        * Note: Requires manual account registration & scanned PDF document uploads.
+                        {t.externalNote}
                       </p>
                     </div>
 
@@ -1200,7 +1208,7 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
                       className="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-black text-white text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2"
                     >
                       <Landmark className="w-4 h-4 text-amber-400" />
-                      <span>Open Official Portal (अधिकृत संकेतस्थळ)</span>
+                      <span>{t.openOfficialPortalBtn}</span>
                       <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
                     </button>
                   </div>
@@ -1211,14 +1219,14 @@ export const SchemesCatalogue: React.FC<SchemesCatalogueProps> = ({
               <div className="flex items-center justify-between pt-2 text-xs">
                 <div className="flex items-center gap-2 text-slate-600 font-medium">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-                  <span>महाराष्ट्र शासन डिजिटल महासेतू</span>
+                  <span>{t.footerGovtTag}</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setApplyModalScheme(null)}
                   className="text-slate-600 hover:text-slate-900 font-semibold transition-colors"
                 >
-                  Cancel / मागे जा
+                  {t.cancel}
                 </button>
               </div>
             </motion.div>

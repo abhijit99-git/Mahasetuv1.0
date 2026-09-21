@@ -43,10 +43,13 @@ export type DocTopicId =
   | 'terms'
   | 'status';
 
+import { Language } from '../locales.ts';
+
 interface DocumentationModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialTopic?: DocTopicId;
+  language?: Language;
   onNavigateTab?: (tab: 'citizen' | 'consent' | 'audit' | 'ai' | 'officer' | 'gateway' | 'supabase') => void;
 }
 
@@ -66,6 +69,7 @@ export function DocumentationModal({
   isOpen,
   onClose,
   initialTopic = 'working',
+  language = 'en',
   onNavigateTab
 }: DocumentationModalProps) {
   const [activeTopicId, setActiveTopicId] = useState<DocTopicId>(initialTopic);
