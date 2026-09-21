@@ -42,11 +42,16 @@ export const ConsentCenter: React.FC<Props> = ({
   const fetchConsents = async () => {
     try {
       setLoading(true);
+      console.log(`[ConsentCenter] Fetching consents for citizen ID: ${citizen.id}`);
       const res = await fetch(`/api/consent/${citizen.id}`);
+      if (!res.ok) {
+        console.error(`[ConsentCenter] Failed to fetch consents: HTTP status ${res.status} ${res.statusText}`);
+      }
       const data = await res.json();
-      setConsents(data);
+      console.log('[ConsentCenter] Fetched consents data:', data);
+      setConsents(Array.isArray(data) ? data : []);
     } catch (e) {
-      console.error('Error fetching consents', e);
+      console.error('[ConsentCenter] Error fetching consents (exception):', e);
     } finally {
       setLoading(false);
     }
@@ -59,17 +64,26 @@ export const ConsentCenter: React.FC<Props> = ({
   const handleRevokeConsent = async (consentId: string) => {
     try {
       setRevokingId(consentId);
+      console.log(`[ConsentCenter] Revoking consent ID: ${consentId}`);
       const res = await fetch(`/api/consent/${consentId}/revoke`, {
-        method: 'POST'
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ citizenId: citizen.id })
       });
+      if (!res.ok) {
+        console.error(`[ConsentCenter] Failed to revoke consent: HTTP status ${res.status} ${res.statusText}`);
+      }
       const data = await res.json();
+      console.log('[ConsentCenter] Revocation response:', data);
       if (data.success) {
         setActionSuccessMsg(t.revokedSuccess);
         setTimeout(() => setActionSuccessMsg(''), 4000);
         fetchConsents();
+      } else {
+        console.error('[ConsentCenter] Revocation returned success: false', data);
       }
     } catch (e) {
-      console.error('Revocation error', e);
+      console.error('[ConsentCenter] Revocation error (exception):', e);
     } finally {
       setRevokingId(null);
     }

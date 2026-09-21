@@ -330,30 +330,46 @@ export const CitizenPortal: React.FC<Props> = ({
     if (!selectedService) return;
     setIsGrantingConsent(true);
 
+    const payload = {
+      citizen_id: citizen.id,
+      requesting_department_id: selectedService.departmentCode,
+      source_department_ids: selectedService.requiredFields.map(f => f.sourceDepartmentCode),
+      service_id: selectedService.id,
+      purpose: `Authoritative qualification verification for ${selectedService.name}`,
+      data_fields: selectedService.requiredFields.map(f => f.fieldCode),
+      expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+    };
+
+    console.log('[CitizenPortal] Initiating give consent API call (/api/consent) with payload:', payload);
+
     try {
       const res = await fetch('/api/consent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          citizen_id: citizen.id,
-          requesting_department_id: selectedService.departmentCode,
-          source_department_ids: selectedService.requiredFields.map(f => f.sourceDepartmentCode),
-          service_id: selectedService.id,
-          purpose: `Authoritative qualification verification for ${selectedService.name}`,
-          data_fields: selectedService.requiredFields.map(f => f.fieldCode),
-          expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-        })
+        body: JSON.stringify(payload)
       });
 
+      console.log(`[CitizenPortal] Give consent API response status: ${res.status} ${res.statusText}`);
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error(`[CitizenPortal] Give consent failed with HTTP status ${res.status} ${res.statusText}. Response body:`, errorText);
+        return;
+      }
+
       const data = await res.json();
+      console.log('[CitizenPortal] Give consent API response data:', data);
+
       if (data.success && data.consent) {
         setCurrentConsent(data.consent);
-        setIsGrantingConsent(false);
         setActiveWorkflowStep('HOPS');
         executeLiveInteroperabilityHops(data.consent);
+      } else {
+        console.error('[CitizenPortal] Give consent response returned success: false or missing consent object:', data);
       }
     } catch (err) {
-      console.error('Consent error', err);
+      console.error('[CitizenPortal] Give consent asynchronous submission exception error:', err);
+    } finally {
       setIsGrantingConsent(false);
     }
   };
