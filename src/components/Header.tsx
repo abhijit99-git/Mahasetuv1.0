@@ -145,14 +145,14 @@ export const Header: React.FC<Props> = ({
         </div>
 
         {/* Role-Aware Tab Navigation */}
-        <nav className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto py-2 no-scrollbar text-xs font-medium">
+        <nav className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto py-1.5 no-scrollbar text-[10px] font-medium">
           {/* If Logged in as Officer: Show Officer Workbench & Administrative Tools */}
           {currentUser?.role === 'officer' ? (
             <>
               <button
                 id="tab-nav-officer"
                 onClick={() => setActiveTab('officer')}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${
                   activeTab === 'officer'
                     ? 'bg-[#141414] text-white font-semibold shadow-xs'
                     : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
@@ -168,7 +168,7 @@ export const Header: React.FC<Props> = ({
               <button
                 id="tab-nav-schemes"
                 onClick={() => setActiveTab('schemes')}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${
                   activeTab === 'schemes'
                     ? 'bg-[#141414] text-white font-semibold shadow-xs'
                     : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
@@ -181,7 +181,7 @@ export const Header: React.FC<Props> = ({
               <button
                 id="tab-nav-audit"
                 onClick={() => setActiveTab('audit')}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${
                   activeTab === 'audit'
                     ? 'bg-[#141414] text-white font-semibold shadow-xs'
                     : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
@@ -194,7 +194,7 @@ export const Header: React.FC<Props> = ({
               <button
                 id="tab-nav-ai"
                 onClick={() => setActiveTab('ai')}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${
                   activeTab === 'ai'
                     ? 'bg-[#141414] text-white font-semibold shadow-xs'
                     : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
@@ -213,7 +213,7 @@ export const Header: React.FC<Props> = ({
               <button
                 id="tab-nav-citizen"
                 onClick={() => setActiveTab('citizen')}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${
                   activeTab === 'citizen'
                     ? 'bg-[#141414] text-white font-semibold shadow-xs'
                     : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
@@ -226,7 +226,7 @@ export const Header: React.FC<Props> = ({
               <button
                 id="tab-nav-schemes"
                 onClick={() => setActiveTab('schemes')}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${
                   activeTab === 'schemes'
                     ? 'bg-[#141414] text-white font-semibold shadow-xs'
                     : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
@@ -242,7 +242,7 @@ export const Header: React.FC<Props> = ({
               <button
                 id="tab-nav-consent"
                 onClick={() => setActiveTab('consent')}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${
                   activeTab === 'consent'
                     ? 'bg-[#141414] text-white font-semibold shadow-xs'
                     : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
@@ -255,7 +255,7 @@ export const Header: React.FC<Props> = ({
               <button
                 id="tab-nav-audit"
                 onClick={() => setActiveTab('audit')}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${
                   activeTab === 'audit'
                     ? 'bg-[#141414] text-white font-semibold shadow-xs'
                     : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
@@ -268,7 +268,7 @@ export const Header: React.FC<Props> = ({
               <button
                 id="tab-nav-ai"
                 onClick={() => setActiveTab('ai')}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${
                   activeTab === 'ai'
                     ? 'bg-[#141414] text-white font-semibold shadow-xs'
                     : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
@@ -287,7 +287,7 @@ export const Header: React.FC<Props> = ({
               <button
                 id="tab-nav-schemes"
                 onClick={() => setActiveTab('schemes')}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${
                   activeTab === 'schemes'
                     ? 'bg-[#141414] text-white font-semibold shadow-xs'
                     : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
@@ -303,7 +303,7 @@ export const Header: React.FC<Props> = ({
               <button
                 id="tab-nav-ai"
                 onClick={() => setActiveTab('ai')}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${
                   activeTab === 'ai'
                     ? 'bg-[#141414] text-white font-semibold shadow-xs'
                     : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
@@ -319,7 +319,7 @@ export const Header: React.FC<Props> = ({
               <button
                 id="tab-nav-audit"
                 onClick={() => setActiveTab('audit')}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${
                   activeTab === 'audit'
                     ? 'bg-[#141414] text-white font-semibold shadow-xs'
                     : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
