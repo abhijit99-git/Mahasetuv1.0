@@ -56,7 +56,7 @@ export const Header: React.FC<Props> = ({
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 shrink-0 flex items-center justify-center overflow-hidden">
               <img
-                src="/mahasetu-logo.png"
+                src="/mahasetu-logo-transparent.png"
                 alt="Mahasetu Logo"
                 className="w-full h-full object-contain hover:scale-105 transition-transform"
                 referrerPolicy="no-referrer"

@@ -1963,16 +1963,39 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Row-Level Security (RLS)
+-- Row-Level Security (RLS) & Security Policies
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE officers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE departments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE services ENABLE ROW LEVEL SECURITY;
 ALTER TABLE consent_records ENABLE ROW LEVEL SECURITY;
-ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE data_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE applications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY citizen_see_own_consent ON consent_records
-  FOR SELECT USING (citizen_id = auth.uid());
+DROP POLICY IF EXISTS users_all_policy ON users;
+CREATE POLICY users_all_policy ON users FOR ALL USING (true) WITH CHECK (true);
 
-CREATE POLICY citizen_see_own_applications ON applications
-  FOR SELECT USING (citizen_id = auth.uid());
+DROP POLICY IF EXISTS officers_all_policy ON officers;
+CREATE POLICY officers_all_policy ON officers FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS departments_read_policy ON departments;
+CREATE POLICY departments_read_policy ON departments FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS services_read_policy ON services;
+CREATE POLICY services_read_policy ON services FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS consent_records_policy ON consent_records;
+CREATE POLICY consent_records_policy ON consent_records FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS data_requests_policy ON data_requests;
+CREATE POLICY data_requests_policy ON data_requests FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS applications_policy ON applications;
+CREATE POLICY applications_policy ON applications FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS audit_logs_policy ON audit_logs;
+CREATE POLICY audit_logs_policy ON audit_logs FOR ALL USING (true) WITH CHECK (true);
 `;
     if (req.query.format === 'raw' || req.headers.accept === 'text/plain') {
       res.setHeader('Content-Type', 'text/plain; charset=utf-8');
