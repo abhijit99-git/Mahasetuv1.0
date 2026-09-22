@@ -43,7 +43,7 @@ export function Footer({ language = 'en', onOpenDoc, onNavigateTab }: FooterProp
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 shrink-0 flex items-center justify-center overflow-hidden">
                 <img
-                  src="/mahasetu-logo.png"
+                  src="/mahasetu-logo-transparent.png"
                   alt="Mahasetu Logo"
                   className="w-full h-full object-contain"
                   referrerPolicy="no-referrer"
@@ -51,10 +51,12 @@ export function Footer({ language = 'en', onOpenDoc, onNavigateTab }: FooterProp
               </div>
               <div>
                 <span className="text-[11px] font-medium text-[#5c5c5c] block mb-0.5">
-                  {t.govDepartment}
+                  {isMr ? 'महाराष्ट्र शासन • डिजिटल सार्वजनिक पायाभूत सुविधा' : isHi ? 'महाराष्ट्र शासन • डिजिटल सार्वजनिक अवसंरचना' : 'Govt of Maharashtra • Inter-Departmental Interoperability'}
                 </span>
-                <div className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111111] font-marathi-calligraphy">
-                  {t.portalTitle}
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 leading-none font-marathi-calligraphy">
+                    महासेतू
+                  </span>
                 </div>
               </div>
             </div>

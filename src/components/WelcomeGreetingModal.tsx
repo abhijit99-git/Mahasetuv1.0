@@ -51,7 +51,7 @@ export const WelcomeGreetingModal: React.FC<Props> = ({
             <div className="flex justify-center items-center gap-3 mb-3">
               <div className="w-24 h-24 flex items-center justify-center overflow-hidden">
                 <img
-                  src="/mahasetu-logo.png"
+                  src="/mahasetu-logo-transparent.png"
                   alt="Mahasetu Golden Emblem"
                   className="w-full h-full object-contain"
                   referrerPolicy="no-referrer"

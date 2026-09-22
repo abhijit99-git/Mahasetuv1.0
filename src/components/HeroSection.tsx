@@ -339,7 +339,7 @@ export const HeroSection: React.FC<Props> = ({
             <img
               alt="Government of Maharashtra Official Emblem"
               className="w-12 h-12 md:w-14 md:h-14 object-contain drop-shadow-sm transition-transform group-hover:scale-105"
-              src="https://lh3.googleusercontent.com/aida/AEtjO1UPR3k70QCbGE30jI_u8OLZfVRHsXCOXMJVsyMr6Gf7ejR21QYYEcfjY0k1P0JYzdI0K-mYrGUP3lVNQhb1FUu_P2K_PZsUtAh_VSrR9ETO-J6cfC3Cpw-K_BfcE9r5jXcyunXJCeuxogFX-HxEHhcoCSXca4V3SigXbV0SbvxxT_X0L4X_GXdMQQ7vFYlNmOjV8Zpzj1faXn3VbZmHYPIhsHw6AQs-swN_m2yDGjbglZQHt3tXmbSo3oaf"
+              src="/mahasetu-logo-transparent.png"
             />
             <div className="flex flex-col min-w-0">
               <div className="flex items-baseline gap-1.5">
@@ -546,7 +546,7 @@ export const HeroSection: React.FC<Props> = ({
 
         {/* Main Headings */}
         <div className="max-w-4xl mx-auto mb-6">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-serif text-slate-800 tracking-tight font-medium mb-2">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl text-slate-800 tracking-tight font-normal mb-2 font-marathi-calligraphy">
             महाराष्ट्र शासन
           </h2>
           <h1 className="text-3.5xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.15]">
