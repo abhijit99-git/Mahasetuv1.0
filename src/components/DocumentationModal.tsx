@@ -535,7 +535,7 @@ export function DocumentationModal({
               <div className="text-emerald-700 font-bold mb-1">POST /api/departments/query</div>
               <div className="text-[#5c5c5c] text-[11px] mb-2">Query authoritative field proof using citizen Aadhaar hash and Consent ID</div>
               <pre className="text-[#141414] overflow-x-auto bg-black/5 p-3 rounded-xl text-[11px]">
-{`{
+                {`{
   "targetDepartment": "REVENUE",
   "fieldCode": "LAND_RECORD_7_12",
   "citizenAadhaar": "548912048923",
@@ -548,7 +548,7 @@ export function DocumentationModal({
               <div className="text-sky-700 font-bold mb-1">POST /api/consent/create</div>
               <div className="text-[#5c5c5c] text-[11px] mb-2">Mint a new DPDP-compliant time-bound consent grant</div>
               <pre className="text-[#141414] overflow-x-auto bg-black/5 p-3 rounded-xl text-[11px]">
-{`{
+                {`{
   "citizenId": "c1111111-2222-3333-4444-555555555501",
   "requestingDept": "HIGHER_EDU",
   "sourceDept": "REVENUE",
@@ -858,11 +858,10 @@ export function DocumentationModal({
                     key={c}
                     type="button"
                     onClick={() => setSelectedCat(c)}
-                    className={`px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-all ${
-                      selectedCat === c
+                    className={`px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-all ${selectedCat === c
                         ? 'bg-[#141414] text-white shadow-2xs'
                         : 'bg-black/5 text-[#5c5c5c] hover:bg-black/10'
-                    }`}
+                      }`}
                   >
                     {c}
                   </button>
@@ -880,16 +879,14 @@ export function DocumentationModal({
                     key={art.id}
                     type="button"
                     onClick={() => setActiveTopicId(art.id)}
-                    className={`w-full text-left p-3 rounded-2xl transition-all border flex items-start gap-3 ${
-                      isActive
+                    className={`w-full text-left p-3 rounded-2xl transition-all border flex items-start gap-3 ${isActive
                         ? 'bg-white border-black/20 shadow-xs ring-1 ring-black/5'
                         : 'border-transparent hover:bg-black/5 text-[#5c5c5c]'
-                    }`}
+                      }`}
                   >
                     <div
-                      className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
-                        isActive ? 'bg-[#141414] text-white' : 'bg-black/5 text-[#5c5c5c]'
-                      }`}
+                      className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${isActive ? 'bg-[#141414] text-white' : 'bg-black/5 text-[#5c5c5c]'
+                        }`}
                     >
                       <Icon className="w-4 h-4" />
                     </div>
@@ -901,9 +898,8 @@ export function DocumentationModal({
                         <span className="text-[10px] text-[#8c8c8c]">{art.readTime}</span>
                       </div>
                       <h4
-                        className={`text-xs font-semibold leading-snug line-clamp-1 ${
-                          isActive ? 'text-[#111111]' : 'text-[#333333]'
-                        }`}
+                        className={`text-xs font-semibold leading-snug line-clamp-1 ${isActive ? 'text-[#111111]' : 'text-[#333333]'
+                          }`}
                       >
                         {art.title}
                       </h4>

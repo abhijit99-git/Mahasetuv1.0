@@ -138,11 +138,10 @@ export const GatewayInspector: React.FC<Props> = ({ language }) => {
               key={d.code}
               type="button"
               onClick={() => handleRunAdapterTest(d.code)}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all flex items-center gap-2 ${
-                selectedAdapter === d.code
+              className={`px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all flex items-center gap-2 ${selectedAdapter === d.code
                   ? 'bg-[#141414] text-white shadow-xs'
                   : 'bg-white text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5 border border-black/8'
-              }`}
+                }`}
             >
               <Zap className="w-3.5 h-3.5" />
               <span>{d.code}</span>
@@ -234,7 +233,7 @@ export const GatewayInspector: React.FC<Props> = ({ language }) => {
         {aiMappingResult && (
           <div className="mt-5 p-5 bg-black/5 border border-black/10 rounded-2xl space-y-4 text-xs">
             <span className="font-semibold text-[#111111] block uppercase tracking-wider text-[11px]">AI Generated Transformation Rules:</span>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <span className="font-semibold text-[#5c5c5c] block mb-2 text-[10px] uppercase">Field Level Mapping Table:</span>

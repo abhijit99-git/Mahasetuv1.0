@@ -28,7 +28,7 @@ import { ShieldCheck, Fingerprint, Sparkles, ArrowUp } from 'lucide-react';
 export default function App() {
   const [language, setLanguage] = useState<Language>('en');
   const [activeTab, setActiveTab] = useState<'schemes' | 'citizen' | 'consent' | 'audit' | 'ai' | 'officer'>('schemes');
-  
+
   // Welcome Greeting Overlay state (opens automatically on site load)
   const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState(true);
 
@@ -54,7 +54,7 @@ export default function App() {
       .then(data => {
         if (Array.isArray(data)) setDepartmentsCount(data.length);
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   // Restore logged-in user session from localStorage on app load and re-hydrate from database
@@ -110,12 +110,12 @@ export default function App() {
         let email = params.get('email') || params.get('verify_email');
         let name = params.get('name');
         let photoUrl = params.get('photo_url');
-        
+
         let aadhaarNumber = params.get('aadhaar') || params.get('verify_aadhaar');
         if (!aadhaarNumber) {
           try {
             aadhaarNumber = localStorage.getItem('mahasetu_pending_aadhaar') || '';
-          } catch (e) {}
+          } catch (e) { }
         }
 
         // Try getting Supabase public config
@@ -156,7 +156,7 @@ export default function App() {
               handleCitizenAuthenticated(data.citizen);
               try {
                 localStorage.removeItem('mahasetu_pending_aadhaar');
-              } catch (e) {}
+              } catch (e) { }
               window.history.replaceState({}, document.title, window.location.pathname);
             }
           } catch (e) {
@@ -175,7 +175,7 @@ export default function App() {
     setCurrentUser(citizen);
     try {
       localStorage.setItem('mahasetu_active_user', JSON.stringify(citizen));
-    } catch (e) {}
+    } catch (e) { }
     setIsWelcomeModalOpen(false);
     setIsAuthModalOpen(false);
     setActiveTab('citizen');
@@ -192,7 +192,7 @@ export default function App() {
     setCurrentUser(officer);
     try {
       localStorage.setItem('mahasetu_active_user', JSON.stringify(officer));
-    } catch (e) {}
+    } catch (e) { }
     setIsAuthModalOpen(false);
     setActiveTab('officer');
   };
@@ -201,14 +201,14 @@ export default function App() {
     setCurrentUser(updatedUser);
     try {
       localStorage.setItem('mahasetu_active_user', JSON.stringify(updatedUser));
-    } catch (e) {}
+    } catch (e) { }
   };
 
   const handleLogout = () => {
     setCurrentUser(null);
     try {
       localStorage.removeItem('mahasetu_active_user');
-    } catch (e) {}
+    } catch (e) { }
     setIsAuthModalOpen(true);
   };
 
@@ -272,11 +272,11 @@ export default function App() {
                   {language === 'mr' ? 'आधार व ईमेल ओटीपी द्वारे लॉगिन करा' : language === 'hi' ? 'आधार एवं ईमेल ओटीपी द्वारा लॉगिन करें' : 'Sign In with Aadhaar & Email OTP'}
                 </h2>
                 <p className="text-xs text-[#5c5c5c] max-w-md mx-auto mt-2 leading-relaxed">
-                  {language === 'mr' 
+                  {language === 'mr'
                     ? 'महासेतू आंतर-विभागीय मंचावर प्रवेश करण्यासाठी, कृपया आपल्या १२ अंकी आधार क्रमांकाने व ईमेल ओटीपीने पडताळणी करा.'
                     : language === 'hi'
-                    ? 'महासेतु इंटरऑपरेबिलिटी लेयर तक पहुंचने हेतु, कृपया अपने 12 अंकों के आधार नंबर और ईमेल ओटीपी से सत्यापन करें।'
-                    : 'To access the Mahasetu Interoperability Layer, please verify your identity using your 12-digit Aadhaar UID Number and linked Email OTP code.'}
+                      ? 'महासेतु इंटरऑपरेबिलिटी लेयर तक पहुंचने हेतु, कृपया अपने 12 अंकों के आधार नंबर और ईमेल ओटीपी से सत्यापन करें।'
+                      : 'To access the Mahasetu Interoperability Layer, please verify your identity using your 12-digit Aadhaar UID Number and linked Email OTP code.'}
                 </p>
               </div>
 

@@ -93,7 +93,7 @@ export const AuditLedger: React.FC<Props> = ({ language, currentUser, onOpenAuth
       entityStr.toLowerCase().includes(searchTerm.toLowerCase()) ||
       actorStr.toLowerCase().includes(searchTerm.toLowerCase()) ||
       reqDeptStr.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     if (selectedFilter === 'ALL') return matchSearch;
     return matchSearch && log.action === selectedFilter;
   });
@@ -133,11 +133,11 @@ export const AuditLedger: React.FC<Props> = ({ language, currentUser, onOpenAuth
             {language === 'mr' ? 'ऑडिट लॉग पाहण्यासाठी लॉगिन करा' : language === 'hi' ? 'ऑडिट लॉग देखने के लिए लॉगिन करें' : 'Sign In to View Your Audit Trail'}
           </h2>
           <p className="text-xs text-[#5c5c5c] max-w-md mx-auto mt-2 leading-relaxed">
-            {language === 'mr' 
+            {language === 'mr'
               ? 'आपल्या योजनांचे अर्ज आणि पडताळणी प्रक्रियेची वैयक्तिक क्रिप्टोग्राफिक ऑडिट ट्रेल पाहण्यासाठी कृपया आधार द्वारे लॉगिन करा.'
               : language === 'hi'
-              ? 'अपनी योजनाओं के आवेदन और सत्यापन प्रक्रिया की व्यक्तिगत क्रिप्टोग्राफिक ऑडिट ट्रेल देखने के लिए कृपया आधार द्वारा लॉगिन करें।'
-              : 'Please sign in to view your personalized cryptographic audit trail detailing all verification requests, consent grants, and status transitions associated with your identity.'}
+                ? 'अपनी योजनाओं के आवेदन और सत्यापन प्रक्रिया की व्यक्तिगत क्रिप्टोग्राफिक ऑडिट ट्रेल देखने के लिए कृपया आधार द्वारा लॉगिन करें।'
+                : 'Please sign in to view your personalized cryptographic audit trail detailing all verification requests, consent grants, and status transitions associated with your identity.'}
           </p>
         </div>
 
@@ -209,11 +209,10 @@ export const AuditLedger: React.FC<Props> = ({ language, currentUser, onOpenAuth
                 key={f}
                 type="button"
                 onClick={() => setSelectedFilter(f)}
-                className={`px-3 py-1.5 rounded-xl whitespace-nowrap transition-all text-xs font-medium ${
-                  selectedFilter === f
+                className={`px-3 py-1.5 rounded-xl whitespace-nowrap transition-all text-xs font-medium ${selectedFilter === f
                     ? 'bg-[#141414] text-white shadow-xs'
                     : 'text-[#5c5c5c] bg-white hover:bg-black/5 border border-black/8'
-                }`}
+                  }`}
               >
                 {f === 'ALL' ? (language === 'mr' ? 'सर्व (ALL)' : language === 'hi' ? 'सभी (ALL)' : 'ALL') : f}
               </button>

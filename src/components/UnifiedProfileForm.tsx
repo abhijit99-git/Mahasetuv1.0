@@ -265,13 +265,13 @@ export const UnifiedProfileForm: React.FC<Props> = ({
       if (data.success && data.citizen) {
         try {
           localStorage.setItem('mahasetu_active_user', JSON.stringify(data.citizen));
-        } catch (e) {}
+        } catch (e) { }
         setSuccessMsg(
           language === 'mr'
             ? 'एकात्मिक डिजिटल प्रोफाईल यशस्वीरित्या डेटाबेसमध्ये जतन झाले!'
             : language === 'hi'
-            ? 'एकीकृत डिजिटल प्रोफाइल सफलतापूर्वक डेटाबेस में सहेजा गया!'
-            : 'Unified Digital Profile saved and synchronized with Database!'
+              ? 'एकीकृत डिजिटल प्रोफाइल सफलतापूर्वक डेटाबेस में सहेजा गया!'
+              : 'Unified Digital Profile saved and synchronized with Database!'
         );
         setTimeout(() => {
           onProfileSaved(data.citizen);
@@ -312,8 +312,8 @@ export const UnifiedProfileForm: React.FC<Props> = ({
               <p className="text-xs text-gray-300 max-w-3xl leading-relaxed mt-1">
                 {isExistingProfile
                   ? (language === 'mr'
-                      ? 'येथे आपली सामाजिक-आर्थिक माहिती, कायमचा पत्ता, ७/१२ शेतजमीन, थेट बँक खाते (DBT) व आवश्यक कागदपत्रे कधीही अद्ययावत करू शकता. सर्व ४,७०९+ योजनांसाठी हाच डेटा त्वरित लागू होईल.'
-                      : language === 'hi'
+                    ? 'येथे आपली सामाजिक-आर्थिक माहिती, कायमचा पत्ता, ७/१२ शेतजमीन, थेट बँक खाते (DBT) व आवश्यक कागदपत्रे कधीही अद्ययावत करू शकता. सर्व ४,७०९+ योजनांसाठी हाच डेटा त्वरित लागू होईल.'
+                    : language === 'hi'
                       ? 'यहाँ आप अपना सामाजिक-आर्थिक विवरण, स्थायी पता, 7/12 कृषि भूमि, प्रत्यक्ष बैंक खाता (DBT) एवं आवश्यक दस्तावेज कभी भी अपडेट कर सकते हैं।'
                       : 'You can update your socio-economic status, address, 7/12 land records, DBT bank account, and document attachments at any time. Changes sync instantly across all 4,709+ government schemes.')
                   : 'No profile details exist in the database for this Aadhaar yet. Fill in your one-time Unified Digital Profile below. All Maharashtra welfare scheme portals will fetch this data automatically.'}
@@ -722,13 +722,12 @@ export const UnifiedProfileForm: React.FC<Props> = ({
             {documents.map((doc, idx) => (
               <div
                 key={idx}
-                className={`p-4 rounded-2xl border transition-all ${
-                  doc.isManualOption
+                className={`p-4 rounded-2xl border transition-all ${doc.isManualOption
                     ? 'bg-amber-50/70 border-amber-200'
                     : doc.file
-                    ? 'bg-emerald-50/70 border-emerald-200'
-                    : 'bg-white border-black/10'
-                }`}
+                      ? 'bg-emerald-50/70 border-emerald-200'
+                      : 'bg-white border-black/10'
+                  }`}
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   {/* Left Title & Status */}
@@ -756,11 +755,10 @@ export const UnifiedProfileForm: React.FC<Props> = ({
 
                   {/* Right Upload Input & Manual Checkbox */}
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 shrink-0">
-                    <label className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all ${
-                      doc.isManualOption
+                    <label className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all ${doc.isManualOption
                         ? 'opacity-40 cursor-not-allowed bg-gray-100 border-gray-200 text-gray-400'
                         : 'bg-white hover:bg-black/5 border-black/15 text-[#111111]'
-                    }`}>
+                      }`}>
                       <Upload className="w-3.5 h-3.5 text-emerald-700" />
                       <span>{doc.file ? 'Change File' : 'Upload File'}</span>
                       <input
@@ -821,8 +819,8 @@ export const UnifiedProfileForm: React.FC<Props> = ({
                 {saving
                   ? (language === 'mr' ? 'सुपाबेस डेटाबेसमध्ये जतन करत आहे...' : 'Saving Profile to Supabase...')
                   : isExistingProfile
-                  ? (language === 'mr' ? 'डिजिटल प्रोफाईल अद्ययावत करा' : language === 'hi' ? 'डिजिटल प्रोफाइल अपडेट करें' : 'Update Unified Profile')
-                  : (language === 'mr' ? 'डिजिटल प्रोफाईल जतन करा' : language === 'hi' ? 'डिजिटल प्रोफाइल सहेजें' : 'Save Unified Profile to Database')}
+                    ? (language === 'mr' ? 'डिजिटल प्रोफाईल अद्ययावत करा' : language === 'hi' ? 'डिजिटल प्रोफाइल अपडेट करें' : 'Update Unified Profile')
+                    : (language === 'mr' ? 'डिजिटल प्रोफाईल जतन करा' : language === 'hi' ? 'डिजिटल प्रोफाइल सहेजें' : 'Save Unified Profile to Database')}
               </span>
             </button>
           </div>

@@ -73,7 +73,7 @@ export const AISahayak: React.FC<Props> = ({
     fetch('/api/ai/pool-status')
       .then(res => res.json())
       .then(data => setPoolStatus(data))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const isMr = language === 'mr';
@@ -86,8 +86,8 @@ export const AISahayak: React.FC<Props> = ({
       text: isMr
         ? 'माझ्या प्रोफाइलनुसार मला कोणत्या शासकीय योजना व अनुदानाचा लाभ मिळू शकतो?'
         : isHi
-        ? 'मेरी प्रोफाइल के अनुसार मुझे कौन-सी सरकारी योजनाओं का लाभ मिल सकता है?'
-        : 'Based on my unified citizen profile, which government welfare schemes am I eligible for?'
+          ? 'मेरी प्रोफाइल के अनुसार मुझे कौन-सी सरकारी योजनाओं का लाभ मिल सकता है?'
+          : 'Based on my unified citizen profile, which government welfare schemes am I eligible for?'
     },
     {
       category: 'ladki-bahin',
@@ -95,8 +95,8 @@ export const AISahayak: React.FC<Props> = ({
       text: isMr
         ? 'माझी लाडकी बहीण योजनेची पात्रता काय आहे आणि ₹१,५०० दरमहा मिळवण्यासाठी काय करावे लागेल?'
         : isHi
-        ? 'मुख्यमंत्री माझी लाड़की बहिन योजना की पात्रता क्या है और प्रतिमाह ₹1,500 कैसे मिलेंगे?'
-        : 'What is the eligibility for Mukhyamantri Majhi Ladki Bahin Yojana and how to receive ₹1,500 monthly?'
+          ? 'मुख्यमंत्री माझी लाड़की बहिन योजना की पात्रता क्या है और प्रतिमाह ₹1,500 कैसे मिलेंगे?'
+          : 'What is the eligibility for Mukhyamantri Majhi Ladki Bahin Yojana and how to receive ₹1,500 monthly?'
     },
     {
       category: 'farmer',
@@ -104,8 +104,8 @@ export const AISahayak: React.FC<Props> = ({
       text: isMr
         ? 'नमो शेतकरी महासन्मान निधीसाठी ७/१२ उतारा आणि आधार कसा पडताळायचा?'
         : isHi
-        ? 'नमो शेतकरी महासम्मान निधि के लिए 7/12 भूमि रिकॉर्ड और आधार कैसे सत्यापित होगा?'
-        : 'How does Mahasetu verify 7/12 land extract and Aadhaar for Namo Shetkari Sanman Nidhi without physical visits?'
+          ? 'नमो शेतकरी महासम्मान निधि के लिए 7/12 भूमि रिकॉर्ड और आधार कैसे सत्यापित होगा?'
+          : 'How does Mahasetu verify 7/12 land extract and Aadhaar for Namo Shetkari Sanman Nidhi without physical visits?'
     },
     {
       category: 'scholarship',
@@ -113,8 +113,8 @@ export const AISahayak: React.FC<Props> = ({
       text: isMr
         ? 'मला इंजिनीअरिंग / मेडिकल कॉलेजसाठी महाडीबीटी छत्रपती शाहू महाराज शिष्यवृत्ती हवी आहे.'
         : isHi
-        ? 'मुझे इंजीनियरिंग/मेडिकल कॉलेज हेतु महाडीबीटी छात्रवृत्ति के नियम व दस्तावेज जानने हैं।'
-        : 'I need Rajarshi Chhatrapati Shahu Maharaj Merit Scholarship for engineering college.'
+          ? 'मुझे इंजीनियरिंग/मेडिकल कॉलेज हेतु महाडीबीटी छात्रवृत्ति के नियम व दस्तावेज जानने हैं।'
+          : 'I need Rajarshi Chhatrapati Shahu Maharaj Merit Scholarship for engineering college.'
     },
     {
       category: 'transport',
@@ -122,8 +122,8 @@ export const AISahayak: React.FC<Props> = ({
       text: isMr
         ? 'मला शिकाऊ वाहन चालक परवाना (Learner Driving License) आरटीओ कार्यालयात न जाता कसा काढता येईल?'
         : isHi
-        ? 'मुझे आरटीओ कार्यालय जाए बिना लर्नर ड्राइविंग लाइसेंस कैसे मिलेगा?'
-        : 'How can I get a Learner Driving License without visiting the RTO office?'
+          ? 'मुझे आरटीओ कार्यालय जाए बिना लर्नर ड्राइविंग लाइसेंस कैसे मिलेगा?'
+          : 'How can I get a Learner Driving License without visiting the RTO office?'
     },
     {
       category: 'civil',
@@ -131,8 +131,8 @@ export const AISahayak: React.FC<Props> = ({
       text: isMr
         ? 'माझे वार्षिक कौटुंबिक उत्पन्न ८ लाखांपेक्षा कमी आहे, EWS व उत्पन्न दाखला कसा मिळेल?'
         : isHi
-        ? 'मेरी वार्षिक पारिवारिक आय 8 लाख से कम है, EWS और आय प्रमाण पत्र कैसे प्राप्त करें?'
-        : 'My family income is under 8 lakhs. How can I get an EWS and Income Certificate through Mahasetu?'
+          ? 'मेरी वार्षिक पारिवारिक आय 8 लाख से कम है, EWS और आय प्रमाण पत्र कैसे प्राप्त करें?'
+          : 'My family income is under 8 lakhs. How can I get an EWS and Income Certificate through Mahasetu?'
     }
   ];
 
@@ -176,28 +176,28 @@ export const AISahayak: React.FC<Props> = ({
         serviceName: isMr
           ? 'राजर्षी छत्रपती शाहू महाराज गुणवत्ता शिष्यवृत्ती'
           : isHi
-          ? 'राजर्षि छत्रपति शाहू महाराज मेरिट छात्रवृत्ति'
-          : 'Rajarshi Chhatrapati Shahu Maharaj Merit Scholarship',
+            ? 'राजर्षि छत्रपति शाहू महाराज मेरिट छात्रवृत्ति'
+            : 'Rajarshi Chhatrapati Shahu Maharaj Merit Scholarship',
         department: isMr
           ? 'उच्च व तंत्र शिक्षण विभाग (महाडीबीटी)'
           : isHi
-          ? 'उच्च एवं तकनीकी शिक्षा विभाग (महाडीबीटी)'
-          : 'Higher & Technical Education Department',
+            ? 'उच्च एवं तकनीकी शिक्षा विभाग (महाडीबीटी)'
+            : 'Higher & Technical Education Department',
         explanation: isMr
           ? 'आपल्या विचारणेशी संबंधित शासकीय सेवा महासेतू आंतर-विभागीय पडताळणीद्वारे उपलब्ध आहेत.'
           : isHi
-          ? 'आपके अनुरोध से संबंधित सरकारी सेवाएं महासेतु अंतर-विभागीय सत्यापन द्वारा उपलब्ध हैं।'
-          : 'Identified Maharashtra public service. All proofs are verified peer-to-peer with zero paper scans.',
+            ? 'आपके अनुरोध से संबंधित सरकारी सेवाएं महासेतु अंतर-विभागीय सत्यापन द्वारा उपलब्ध हैं।'
+            : 'Identified Maharashtra public service. All proofs are verified peer-to-peer with zero paper scans.',
         requiredDocuments: isMr
           ? ['सक्षम प्राधिकाऱ्याचा उत्पन्न दाखला', 'महाराष्ट्र अधिवास प्रमाणपत्र']
           : isHi
-          ? ['आय प्रमाण पत्र (राजस्व विभाग)', 'महाराष्ट्र अधिवास प्रमाण पत्र']
-          : ['Income Certificate (Revenue)', 'Maharashtra Domicile Certificate'],
+            ? ['आय प्रमाण पत्र (राजस्व विभाग)', 'महाराष्ट्र अधिवास प्रमाण पत्र']
+            : ['Income Certificate (Revenue)', 'Maharashtra Domicile Certificate'],
         availableInMesh: isMr
           ? ['सक्षम प्राधिकाऱ्याचा उत्पन्न दाखला', 'महाराष्ट्र अधिवास प्रमाणपत्र']
           : isHi
-          ? ['आय प्रमाण पत्र (राजस्व विभाग)', 'महाराष्ट्र अधिवास प्रमाण पत्र']
-          : ['Income Certificate (Revenue)', 'Maharashtra Domicile Certificate'],
+            ? ['आय प्रमाण पत्र (राजस्व विभाग)', 'महाराष्ट्र अधिवास प्रमाण पत्र']
+            : ['Income Certificate (Revenue)', 'Maharashtra Domicile Certificate'],
         confidence: 0.95
       });
     } finally {
@@ -246,8 +246,8 @@ export const AISahayak: React.FC<Props> = ({
                 {isMr
                   ? 'महासेतू अधिकृत एआय साहाय्यक: महाराष्ट्र शासन व केंद्र सरकारच्या जनकल्याणकारी योजना, दाखले (७/१२, जात, उत्पन्न, अधिवास), शेतकरी अनुदान व शिष्यवृत्ती या विषयांवर अधिकृत मार्गदर्शन. असंबंधित प्रश्न आपोआप वगळले जातात.'
                   : isHi
-                  ? 'महासेतु आधिकारिक एआई सहायक: महाराष्ट्र सरकार एवं केंद्र सरकार की कल्याणकारी योजनाओं, प्रमाण पत्रों, किसान सब्सिडी एवं छात्रवृत्ति हेतु अधिकृत मार्गदर्शन। असंबंधित प्रश्न स्वतः अस्वीकृत होते हैं।'
-                  : 'Official Mahasetu AI Citizen Assistant: Authorized guidance for Maharashtra and Central Government welfare schemes, civil certificates (7/12, caste, income, domicile), farmer subsidies, and scholarships. Unrelated queries are strictly guarded.'}
+                    ? 'महासेतु आधिकारिक एआई सहायक: महाराष्ट्र सरकार एवं केंद्र सरकार की कल्याणकारी योजनाओं, प्रमाण पत्रों, किसान सब्सिडी एवं छात्रवृत्ति हेतु अधिकृत मार्गदर्शन। असंबंधित प्रश्न स्वतः अस्वीकृत होते हैं।'
+                    : 'Official Mahasetu AI Citizen Assistant: Authorized guidance for Maharashtra and Central Government welfare schemes, civil certificates (7/12, caste, income, domicile), farmer subsidies, and scholarships. Unrelated queries are strictly guarded.'}
               </p>
             </div>
           </div>
@@ -280,8 +280,8 @@ export const AISahayak: React.FC<Props> = ({
                   {isMr
                     ? 'बायोमेट्रिक लॉगिन केल्यास प्रोफाइल जुळवणी होईल'
                     : isHi
-                    ? 'बायोमेट्रिक लॉगिन करने पर व्यक्तिगत पात्रता प्राप्त होगी'
-                    : 'Log in via Aadhaar for personalized qualification'}
+                      ? 'बायोमेट्रिक लॉगिन करने पर व्यक्तिगत पात्रता प्राप्त होगी'
+                      : 'Log in via Aadhaar for personalized qualification'}
                 </span>
               </div>
             )}
@@ -296,8 +296,8 @@ export const AISahayak: React.FC<Props> = ({
             {isMr
               ? 'शासकीय सेवा, योजना किंवा दाखल्याविषयी विचारा:'
               : isHi
-              ? 'सरकारी सेवा, योजना अथवा प्रमाण पत्र के बारे में पूछें:'
-              : 'Ask about any Maharashtra government service, certificate, or welfare scheme:'}
+                ? 'सरकारी सेवा, योजना अथवा प्रमाण पत्र के बारे में पूछें:'
+                : 'Ask about any Maharashtra government service, certificate, or welfare scheme:'}
           </label>
           <div className="relative">
             <textarea
@@ -315,8 +315,8 @@ export const AISahayak: React.FC<Props> = ({
                 isMr
                   ? 'उदा. मला इंजिनीअरिंगसाठी शिष्यवृत्ती हवी आहे, माझी लाडकी बहीण योजनेची पात्रता काय आहे, किंवा ७/१२ उतारा कसा काढायचा...'
                   : isHi
-                  ? 'उदा. मुझे लाड़की बहिन योजना की पात्रता जाननी है, 7/12 भूमि रिकॉर्ड कैसे प्राप्त करें, या ड्राइविंग लाइसेंस कैसे बनेगा...'
-                  : 'E.g., Which schemes match my profile, what is the eligibility for Ladki Bahin Yojana, or how to get a 7/12 land extract...'
+                    ? 'उदा. मुझे लाड़की बहिन योजना की पात्रता जाननी है, 7/12 भूमि रिकॉर्ड कैसे प्राप्त करें, या ड्राइविंग लाइसेंस कैसे बनेगा...'
+                    : 'E.g., Which schemes match my profile, what is the eligibility for Ladki Bahin Yojana, or how to get a 7/12 land extract...'
               }
               className="w-full p-4 pr-32 bg-white/70 border border-black/10 rounded-2xl text-sm font-medium text-[#111111] placeholder:text-[#8c8c8c] focus:outline-none focus:border-black focus:ring-1 focus:ring-black resize-none transition-all shadow-inner"
             />
@@ -345,8 +345,8 @@ export const AISahayak: React.FC<Props> = ({
               {isMr
                 ? '💡 टीप: केवळ महाराष्ट्र शासन व केंद्र सरकारच्या योजनांशी संबंधित प्रश्न विचारा.'
                 : isHi
-                ? '💡 नोट: केवल सरकारी योजनाओं, प्रमाण पत्रों और नागरिक सेवाओं के संबंध में पूछें।'
-                : '💡 Note: Strictly limited to government welfare schemes, civil certificates, and public services.'}
+                  ? '💡 नोट: केवल सरकारी योजनाओं, प्रमाण पत्रों और नागरिक सेवाओं के संबंध में पूछें।'
+                  : '💡 Note: Strictly limited to government welfare schemes, civil certificates, and public services.'}
             </span>
             <span className="hidden sm:inline text-[10px] text-[#888888]">Ctrl + Enter to send</span>
           </div>
@@ -358,8 +358,8 @@ export const AISahayak: React.FC<Props> = ({
             {isMr
               ? 'नागरिकांचे वारंवार विचारले जाणारे अधिकृत प्रश्न:'
               : isHi
-              ? 'नागरिकों द्वारा अक्सर पूछे जाने वाले आधिकारिक प्रश्न:'
-              : 'Suggested Citizen Inquiries:'}
+                ? 'नागरिकों द्वारा अक्सर पूछे जाने वाले आधिकारिक प्रश्न:'
+                : 'Suggested Citizen Inquiries:'}
           </span>
           <div className="flex flex-wrap gap-2.5">
             {samplePrompts.map((p, i) => (
@@ -405,8 +405,8 @@ export const AISahayak: React.FC<Props> = ({
                       {isMr
                         ? 'महासेतू एआय साहाय्यक'
                         : isHi
-                        ? 'महासेतु एआई सहायक'
-                        : 'Mahasetu AI Citizen Sahayak'}
+                          ? 'महासेतु एआई सहायक'
+                          : 'Mahasetu AI Citizen Sahayak'}
                     </span>
                   </div>
                   <p className="text-xs text-[#555555] mt-1 font-medium transition-all duration-300">
@@ -414,29 +414,29 @@ export const AISahayak: React.FC<Props> = ({
                       isMr
                         ? 'विचारणा स्वीकारली... महासेतू एआय द्वारे विश्लेषण सुरू आहे...'
                         : isHi
-                        ? 'अनुरोध प्राप्त हुआ... महासेतु एआई द्वारा विश्लेषण जारी है...'
-                        : 'Inquiry received. Analyzing with Mahasetu AI Sahayak...'
+                          ? 'अनुरोध प्राप्त हुआ... महासेतु एआई द्वारा विश्लेषण जारी है...'
+                          : 'Inquiry received. Analyzing with Mahasetu AI Sahayak...'
                     )}
                     {loadingStep === 1 && (
                       isMr
                         ? 'नागरिक युनिफाइड प्रोफाइल, उत्पन्न व शेतजमीन निकष तपासले जात आहेत...'
                         : isHi
-                        ? 'नागरिक एकीकृत प्रोफाइल, आय एवं भूमि रिकॉर्ड की जांच की जा रही है...'
-                        : 'Evaluating citizen profile credentials, income ceiling & land holding...'
+                          ? 'नागरिक एकीकृत प्रोफाइल, आय एवं भूमि रिकॉर्ड की जांच की जा रही है...'
+                          : 'Evaluating citizen profile credentials, income ceiling & land holding...'
                     )}
                     {loadingStep === 2 && (
                       isMr
                         ? '४,७०९+ महाराष्ट्र शासकीय योजना व विभागांशी संदर्भ जुळवला जात आहे...'
                         : isHi
-                        ? '4,709+ महाराष्ट्र सरकारी योजनाओं एवं विभागों से संदर्भ मिलान किया जा रहा है...'
-                        : 'Cross-referencing 4,709+ Maharashtra Welfare Schemes & departmental registries...'
+                          ? '4,709+ महाराष्ट्र सरकारी योजनाओं एवं विभागों से संदर्भ मिलान किया जा रहा है...'
+                          : 'Cross-referencing 4,709+ Maharashtra Welfare Schemes & departmental registries...'
                     )}
                     {loadingStep === 3 && (
                       isMr
                         ? 'शून्य-कागदपत्र पडताळणी मार्ग व शिफारसी तयार केल्या जात आहेत...'
                         : isHi
-                        ? 'शून्य-कागजी सत्यापन व अधिकृत अनुशंसाएं तैयार की जा रही हैं...'
-                        : 'Formulating Zero-Upload guidance & verified service pathways...'
+                          ? 'शून्य-कागजी सत्यापन व अधिकृत अनुशंसाएं तैयार की जा रही हैं...'
+                          : 'Formulating Zero-Upload guidance & verified service pathways...'
                     )}
                   </p>
                 </div>
@@ -447,13 +447,12 @@ export const AISahayak: React.FC<Props> = ({
                 {[0, 1, 2, 3].map(step => (
                   <span
                     key={step}
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                      loadingStep === step
+                    className={`h-2 rounded-full transition-all duration-300 ${loadingStep === step
                         ? 'w-6 bg-emerald-600'
                         : loadingStep > step
-                        ? 'w-2 bg-emerald-400'
-                        : 'w-2 bg-black/20'
-                    }`}
+                          ? 'w-2 bg-emerald-400'
+                          : 'w-2 bg-black/20'
+                      }`}
                   />
                 ))}
               </div>
@@ -566,8 +565,8 @@ export const AISahayak: React.FC<Props> = ({
                       {isMr
                         ? 'विषयाशी असंबंधित विचारणा (Out of Scope)'
                         : isHi
-                        ? 'विषय से बाहर का अनुरोध (Out of Scope)'
-                        : 'Request Out of Context'}
+                          ? 'विषय से बाहर का अनुरोध (Out of Scope)'
+                          : 'Request Out of Context'}
                     </span>
                     <span className="text-[11px] font-semibold text-amber-800">
                       {isMr ? 'महासेतू नागरिक नियंत्रण' : isHi ? 'महासेतु नागरिक नियंत्रण' : 'Mahasetu Citizen Guardrail'}
@@ -596,8 +595,8 @@ export const AISahayak: React.FC<Props> = ({
                   {isMr
                     ? 'कृपया यापैकी कोणत्याही शासकीय सेवेबद्दल विचारा:'
                     : isHi
-                    ? 'कृपया इनमें से किसी सरकारी सेवा के बारे में पूछें:'
-                    : 'Please ask about official government services:'}
+                      ? 'कृपया इनमें से किसी सरकारी सेवा के बारे में पूछें:'
+                      : 'Please ask about official government services:'}
                 </span>
                 <div className="flex flex-wrap gap-2">
                   {(result.suggestedTopics || (isMr ? [
@@ -626,8 +625,8 @@ export const AISahayak: React.FC<Props> = ({
                         const newQ = isMr
                           ? `${topic} विषयी मला संपूर्ण माहिती व अर्ज प्रक्रिया सांगा.`
                           : isHi
-                          ? `${topic} के बारे में मुझे पूरी जानकारी एवं आवेदन प्रक्रिया बताएं।`
-                          : `Tell me the eligibility and application process for ${topic}.`;
+                            ? `${topic} के बारे में मुझे पूरी जानकारी एवं आवेदन प्रक्रिया बताएं।`
+                            : `Tell me the eligibility and application process for ${topic}.`;
                         setQuery(newQ);
                         handleAskAI(newQ);
                       }}
@@ -702,8 +701,8 @@ export const AISahayak: React.FC<Props> = ({
                       {isMr
                         ? 'आपल्या नागरिक प्रोफाइलनुसार पात्रता पडताळणी:'
                         : isHi
-                        ? 'आपकी नागरिक प्रोफाइल के अनुसार पात्रता मूल्यांकन:'
-                        : 'Citizen Profile Eligibility Assessment:'}
+                          ? 'आपकी नागरिक प्रोफाइल के अनुसार पात्रता मूल्यांकन:'
+                          : 'Citizen Profile Eligibility Assessment:'}
                     </span>
                     <p>{result.profileEligibilityNote}</p>
                   </div>
@@ -733,8 +732,8 @@ export const AISahayak: React.FC<Props> = ({
                     {isMr
                       ? 'महासेतू आंतर-विभागीय प्रणालीद्वारे विना-कागदपत्र तपासले जाणारे पुरावे:'
                       : isHi
-                      ? 'महासेतु अंतर-विभागीय प्रणाली द्वारा बिना-कागजी स्वतः सत्यापित होने वाले प्रमाण:'
-                      : 'Authoritative Proofs Automatically Verified via Mahasetu Interoperability:'}
+                        ? 'महासेतु अंतर-विभागीय प्रणाली द्वारा बिना-कागजी स्वतः सत्यापित होने वाले प्रमाण:'
+                        : 'Authoritative Proofs Automatically Verified via Mahasetu Interoperability:'}
                   </span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {result.requiredDocuments.map((doc: string, idx: number) => (
@@ -758,8 +757,8 @@ export const AISahayak: React.FC<Props> = ({
                       {isMr
                         ? '४,७०९+ योजना संचामधून जुळणाऱ्या योजना:'
                         : isHi
-                        ? '4,709+ योजना भंडार से संबंधित योजनाएं:'
-                        : 'Relevant Welfare & DBT Schemes from 4,709+ Repository:'}
+                          ? '4,709+ योजना भंडार से संबंधित योजनाएं:'
+                          : 'Relevant Welfare & DBT Schemes from 4,709+ Repository:'}
                     </span>
                     {onNavigateToSchemes && (
                       <button
@@ -832,8 +831,8 @@ export const AISahayak: React.FC<Props> = ({
                     {isMr
                       ? 'कागदपत्र स्कॅन करण्याची गरज नाही • महासेतू आंतर-विभागीय पडताळणी'
                       : isHi
-                      ? 'दस्तावेज स्कैन की आवश्यकता नहीं • महासेतु अंतर-विभागीय सत्यापन'
-                      : 'Zero physical uploads required • Peer-to-peer verification through Mahasetu'}
+                        ? 'दस्तावेज स्कैन की आवश्यकता नहीं • महासेतु अंतर-विभागीय सत्यापन'
+                        : 'Zero physical uploads required • Peer-to-peer verification through Mahasetu'}
                   </span>
                 </div>
 

@@ -194,8 +194,8 @@ export const SupabaseHub: React.FC<Props> = ({ language }) => {
               {connectionStatus.connected
                 ? `PostgreSQL Cluster: ${connectionStatus.url} • Tables active & live sync enabled.`
                 : connectionStatus.error
-                ? connectionStatus.error
-                : 'Local mode active: Operating with high performance in-memory database.'}
+                  ? connectionStatus.error
+                  : 'Local mode active: Operating with high performance in-memory database.'}
             </p>
           </div>
 
@@ -232,11 +232,10 @@ export const SupabaseHub: React.FC<Props> = ({ language }) => {
 
         {/* Sync Result Banner */}
         {syncResult && (
-          <div className={`mt-4 p-4 rounded-2xl border text-xs space-y-2 animate-fadeIn ${
-            syncResult.success
+          <div className={`mt-4 p-4 rounded-2xl border text-xs space-y-2 animate-fadeIn ${syncResult.success
               ? 'bg-emerald-50/90 border-emerald-300 text-emerald-950'
               : 'bg-rose-50/90 border-rose-300 text-rose-950'
-          }`}>
+            }`}>
             <div className="flex items-center gap-2 font-bold text-sm">
               {syncResult.success ? (
                 <>

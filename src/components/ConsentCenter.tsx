@@ -283,9 +283,8 @@ export const ConsentCenter: React.FC<Props> = ({
                     ID: {(c.id || '').slice(0, 16)}... • {getGrantedDate(c)}
                   </div>
                 </div>
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase border ${
-                  c.status === 'revoked' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-black/5 text-[#5c5c5c] border-black/5'
-                }`}>
+                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase border ${c.status === 'revoked' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-black/5 text-[#5c5c5c] border-black/5'
+                  }`}>
                   {c.status.toUpperCase()}
                 </span>
               </div>

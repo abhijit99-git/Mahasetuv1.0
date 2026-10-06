@@ -333,30 +333,30 @@ export const HeroSection: React.FC<Props> = ({
 
       {/* 1. TOP HERO HEADER / NAVIGATION */}
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200/80 transition-all">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
           {/* Brand & Maharashtra Emblem */}
-          <a className="flex items-center gap-3.5 shrink-0 group focus:outline-none" href="#hero">
+          <a className="flex items-center gap-2.5 sm:gap-3.5 shrink-0 group focus:outline-none min-w-0" href="#hero">
             <img
               alt="Government of Maharashtra Official Emblem"
-              className="w-12 h-12 md:w-14 md:h-14 object-contain drop-shadow-sm transition-transform group-hover:scale-105"
+              className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 object-contain drop-shadow-sm transition-transform group-hover:scale-105 shrink-0"
               src="/mahasetu-logo-transparent.png"
             />
             <div className="flex flex-col min-w-0">
               <div className="flex items-baseline gap-1.5">
-                <span className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 leading-none font-marathi-calligraphy">
+                <span className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-slate-900 leading-none font-marathi-calligraphy truncate">
                   महासेतू
                 </span>
               </div>
-              <span className="text-[11px] md:text-[12px] font-medium text-slate-600 tracking-tight leading-tight mt-0.5">
+              <span className="text-[10px] sm:text-[11px] md:text-[12px] font-medium text-slate-600 tracking-tight leading-tight mt-0.5 truncate">
                 <span className="sm:hidden">
                   {language === 'mr' ? 'महाराष्ट्र शासन' : language === 'hi' ? 'महाराष्ट्र शासन' : 'Govt of Maharashtra'}
                 </span>
                 <span className="hidden sm:inline">
-                  {language === 'mr' 
-                    ? 'महाराष्ट्र शासन • आंतर-विभागीय इंटरऑपरेबिलिटी मंच' 
-                    : language === 'hi' 
-                    ? 'महाराष्ट्र शासन • अंतर-विभागीय इंटरऑपरेबिलिटी मंच' 
-                    : 'Govt of Maharashtra • Inter-Departmental Interoperability'}
+                  {language === 'mr'
+                    ? 'महाराष्ट्र शासन • आंतर-विभागीय इंटरऑपरेबिलिटी मंच'
+                    : language === 'hi'
+                      ? 'महाराष्ट्र शासन • अंतर-विभागीय इंटरऑपरेबिलिटी मंच'
+                      : 'Govt of Maharashtra • Inter-Departmental Interoperability'}
                 </span>
               </span>
             </div>
@@ -368,57 +368,57 @@ export const HeroSection: React.FC<Props> = ({
               onClick={() => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="px-3.5 py-2 font-semibold text-slate-950 hover:text-amber-700 transition-colors"
+              className="px-3.5 py-2 font-semibold text-slate-950 hover:text-amber-700 transition-colors cursor-pointer"
             >
               {language === 'mr' ? 'मुख्यपृष्ठ' : language === 'hi' ? 'मुख्य पृष्ठ' : 'Home'}
             </button>
             <button
               onClick={() => handleNavClick('citizen')}
-              className="px-3.5 py-2 hover:text-amber-700 transition-colors"
+              className="px-3.5 py-2 hover:text-amber-700 transition-colors cursor-pointer"
             >
               {t.navCitizen}
             </button>
             <button
               onClick={() => handleNavClick('schemes')}
-              className="px-3.5 py-1.5 text-amber-800 font-semibold rounded-lg bg-amber-50/90 border border-amber-300/80 hover:bg-amber-100 transition-colors"
+              className="px-3.5 py-1.5 text-amber-800 font-semibold rounded-lg bg-amber-50/90 border border-amber-300/80 hover:bg-amber-100 transition-colors cursor-pointer"
             >
               {t.navSchemes}
             </button>
             <button
               onClick={() => handleNavClick('officer')}
-              className="px-3.5 py-2 hover:text-amber-700 transition-colors"
+              className="px-3.5 py-2 hover:text-amber-700 transition-colors cursor-pointer"
             >
               {t.navOfficer}
             </button>
             <button
               onClick={() => handleNavClick('audit')}
-              className="px-3.5 py-2 hover:text-amber-700 transition-colors"
+              className="px-3.5 py-2 hover:text-amber-700 transition-colors cursor-pointer"
             >
               {t.navAudit}
             </button>
           </nav>
 
           {/* Right Header Actions */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 md:gap-3 shrink-0">
             {/* Language Selector Segmented Pill */}
             <div className="hidden sm:inline-flex items-center p-1 bg-slate-100 rounded-full border border-slate-200/90 text-xs font-medium text-slate-600 shadow-inner" data-purpose="language-selector">
               <button
                 onClick={() => setLanguage('en')}
-                className={`px-2.5 py-1 rounded-full transition-all ${language === 'en' ? 'bg-slate-900 text-white font-bold shadow-sm' : 'hover:text-slate-900'}`}
+                className={`px-2.5 py-1 rounded-full transition-all cursor-pointer ${language === 'en' ? 'bg-slate-900 text-white font-bold shadow-sm' : 'hover:text-slate-900'}`}
                 type="button"
               >
                 EN
               </button>
               <button
                 onClick={() => setLanguage('mr')}
-                className={`px-2.5 py-1 rounded-full transition-all ${language === 'mr' ? 'bg-slate-900 text-white font-bold shadow-sm' : 'hover:text-slate-900'}`}
+                className={`px-2.5 py-1 rounded-full transition-all cursor-pointer ${language === 'mr' ? 'bg-slate-900 text-white font-bold shadow-sm' : 'hover:text-slate-900'}`}
                 type="button"
               >
                 मराठी
               </button>
               <button
                 onClick={() => setLanguage('hi')}
-                className={`px-2.5 py-1 rounded-full transition-all ${language === 'hi' ? 'bg-slate-900 text-white font-bold shadow-sm' : 'hover:text-slate-900'}`}
+                className={`px-2.5 py-1 rounded-full transition-all cursor-pointer ${language === 'hi' ? 'bg-slate-900 text-white font-bold shadow-sm' : 'hover:text-slate-900'}`}
                 type="button"
               >
                 हिंदी
@@ -429,7 +429,7 @@ export const HeroSection: React.FC<Props> = ({
             {currentUser ? (
               <button
                 onClick={onOpenAuthModal}
-                className="hidden md:inline-flex items-center gap-2.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-sm font-semibold shadow-md hover:shadow-lg transition-all"
+                className="hidden md:inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-xs sm:text-sm font-semibold shadow-md hover:shadow-lg transition-all cursor-pointer shrink-0 whitespace-nowrap"
               >
                 <ShieldCheck className="w-4 h-4 text-emerald-200 animate-pulse" />
                 <span>
@@ -438,12 +438,17 @@ export const HeroSection: React.FC<Props> = ({
               </button>
             ) : (
               <button
+                id="btn-hero-top-aadhaar-auth"
                 onClick={onOpenAuthModal}
-                className="hidden md:inline-flex items-center gap-2.5 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-full text-sm font-semibold shadow-md hover:shadow-lg transition-all transform active:scale-95"
+                className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 md:px-5 py-2 sm:py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-full text-xs sm:text-sm font-semibold shadow-md hover:shadow-lg transition-all transform active:scale-95 cursor-pointer shrink-0 whitespace-nowrap min-h-[38px] sm:min-h-[42px]"
                 data-purpose="citizen-auth-btn"
+                aria-label="Aadhaar Biometric Authentication"
               >
-                <Fingerprint className="w-4 h-4 text-amber-400" />
-                <span>{t.aadhaarAuth}</span>
+                <Fingerprint className="w-4 h-4 text-amber-400 shrink-0" />
+                <span className="hidden md:inline whitespace-nowrap">{t.aadhaarAuth}</span>
+                <span className="md:hidden whitespace-nowrap text-[11px] sm:text-xs">
+                  {language === 'mr' ? 'आधार बायोमेट्रिक' : language === 'hi' ? 'आधार बायोमेट्रिक' : 'Aadhaar Auth'}
+                </span>
               </button>
             )}
 
@@ -451,10 +456,10 @@ export const HeroSection: React.FC<Props> = ({
             <button
               onClick={toggleMenu}
               aria-label="Open Navigation Menu"
-              className="xl:hidden p-2.5 text-slate-700 hover:text-slate-950 rounded-xl hover:bg-slate-100 border border-slate-200 transition focus:outline-none"
+              className="xl:hidden p-2 sm:p-2.5 text-slate-700 hover:text-slate-950 rounded-xl hover:bg-slate-100 border border-slate-200 transition focus:outline-none min-h-[38px] min-w-[38px] flex items-center justify-center cursor-pointer"
               type="button"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24">
                 {isMenuOpen ? (
                   <path d="M6 18L18 6M6 6l12 12" />
                 ) : (
@@ -496,7 +501,7 @@ export const HeroSection: React.FC<Props> = ({
             >
               {t.navAudit}
             </button>
-            
+
             <div className="pt-4 border-t border-slate-100">
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
                 {language === 'mr' ? 'भाषा निवडा' : language === 'hi' ? 'भाषा चुनें' : 'Select Language'}
@@ -552,21 +557,21 @@ export const HeroSection: React.FC<Props> = ({
           <h1 className="text-3.5xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.15]">
             {language === 'mr' ? (
               <>
-                सर्व सेवा आणि योजनांसाठी<br className="hidden sm:block"/>
+                सर्व सेवा आणि योजनांसाठी<br className="hidden sm:block" />
                 <span className="text-orange-500 font-serif italic font-normal tracking-wide wavy-underline">
                   युनिफाइड सिटीझन गेटवे
                 </span>
               </>
             ) : language === 'hi' ? (
               <>
-                सभी सेवाओं और योजनाओं के लिए<br className="hidden sm:block"/>
+                सभी सेवाओं और योजनाओं के लिए<br className="hidden sm:block" />
                 <span className="text-orange-500 font-serif italic font-normal tracking-wide wavy-underline">
                   एकीकृत नागरिक गेटवे
                 </span>
               </>
             ) : (
               <>
-                Unified Citizen Gateway for All<br className="hidden sm:block"/>
+                Unified Citizen Gateway for All<br className="hidden sm:block" />
                 <span className="text-orange-500 font-serif italic font-normal tracking-wide wavy-underline">
                   Services and Schemes
                 </span>
@@ -578,18 +583,18 @@ export const HeroSection: React.FC<Props> = ({
         {/* Description Subtitle */}
         <div className="max-w-3xl text-slate-600 text-sm sm:text-base md:text-lg leading-relaxed mb-10 text-center">
           <span className="font-bold text-slate-800 block mb-1">
-            {language === 'mr' 
-              ? 'शून्य अपलोड फेडरेटेड गव्हर्नन्स:' 
-              : language === 'hi' 
-              ? 'शून्य अपलोड फेडरेटेड गवर्नेंस:' 
-              : 'Zero Upload Federated Governance:'}
+            {language === 'mr'
+              ? 'शून्य अपलोड फेडरेटेड गव्हर्नन्स:'
+              : language === 'hi'
+                ? 'शून्य अपलोड फेडरेटेड गवर्नेंस:'
+                : 'Zero Upload Federated Governance:'}
           </span>
           <span className="text-slate-700 block">
-            {language === 'mr' 
+            {language === 'mr'
               ? 'डिजिटल पडताळणी: भौतिक कागदपत्रे अपलोड न करता महसूल, शिक्षण, कृषी आणि सामाजिक कल्याण सेवांमध्ये प्रवेश मिळवण्यासाठी सिंगल क्लिक आधार प्रमाणीकरण'
               : language === 'hi'
-              ? 'डिजिटल सत्यापन: भौतिक दस्तावेज अपलोड किए बिना राजस्व, शिक्षा, कृषि और समाज कल्याण सेवाओं तक पहुंच के लिए सिंगल क्लिक आधार प्रमाणीकरण'
-              : 'Digital Verification: Single Click Aadhaar Authentication to Access Revenue, Education, Agriculture, and Social Welfare Services Without Uploading Physical Documents'}
+                ? 'डिजिटल सत्यापन: भौतिक दस्तावेज अपलोड किए बिना राजस्व, शिक्षा, कृषि और समाज कल्याण सेवाओं तक पहुंच के लिए सिंगल क्लिक आधार प्रमाणीकरण'
+                : 'Digital Verification: Single Click Aadhaar Authentication to Access Revenue, Education, Agriculture, and Social Welfare Services Without Uploading Physical Documents'}
           </span>
         </div>
 
@@ -624,9 +629,8 @@ export const HeroSection: React.FC<Props> = ({
               <div className="flex items-center gap-2 shrink-0 pr-1">
                 {/* Mic Voice Button */}
                 <button
-                  className={`p-2 rounded-full transition-all ${
-                    isListening ? 'bg-rose-500 text-white animate-pulse' : 'text-slate-500 hover:text-slate-800 hover:bg-white'
-                  }`}
+                  className={`p-2 rounded-full transition-all ${isListening ? 'bg-rose-500 text-white animate-pulse' : 'text-slate-500 hover:text-slate-800 hover:bg-white'
+                    }`}
                   title="Voice Search"
                   type="button"
                   onClick={handleToggleVoice}
@@ -708,11 +712,11 @@ export const HeroSection: React.FC<Props> = ({
                   <span className="text-[10px] text-emerald-700 font-semibold flex items-center gap-1">
                     <Check className="w-3 h-3" />
                     <span>
-                      {language === 'mr' 
-                        ? 'राज्य डेटा मेश द्वारे आपोआप पडताळणीकृत' 
-                        : language === 'hi' 
-                        ? 'राज्य डेटा मेश द्वारा स्वचालित सत्यापित' 
-                        : 'Auto-verified via State Data Mesh'}
+                      {language === 'mr'
+                        ? 'राज्य डेटा मेश द्वारे आपोआप पडताळणीकृत'
+                        : language === 'hi'
+                          ? 'राज्य डेटा मेश द्वारा स्वचालित सत्यापित'
+                          : 'Auto-verified via State Data Mesh'}
                     </span>
                   </span>
                   <button
@@ -800,7 +804,7 @@ export const HeroSection: React.FC<Props> = ({
           <div className="bg-slate-900 p-3 sm:p-5 md:p-6 rounded-[2.5rem] shadow-2xl border-4 border-slate-800 relative overflow-hidden">
             {/* Screen Content */}
             <div className="bg-gradient-to-b from-slate-100 to-slate-200/90 rounded-[2rem] h-[340px] sm:h-[420px] md:h-[480px] w-full relative flex items-center justify-center overflow-hidden border border-white/60">
-              
+
               {/* Product Animation Video inside Device Screen */}
               <video
                 src="/GovTech_platform_product_animation_202609092312.mp4"
@@ -862,11 +866,11 @@ export const HeroSection: React.FC<Props> = ({
               <div className="text-center px-6 py-4 z-20 max-w-sm sm:max-w-md bg-white/80 backdrop-blur-md rounded-2xl border border-white/40 shadow-lg">
                 <h3 className="text-xl sm:text-2xl font-serif text-slate-800 leading-tight">
                   {language === 'mr' ? (
-                    <>तुमच्या डिजिटल सेवा<br/>थेट जोडत आहोत...</>
+                    <>तुमच्या डिजिटल सेवा<br />थेट जोडत आहोत...</>
                   ) : language === 'hi' ? (
-                    <>आपकी डिजिटल सेवाएं<br/>सीधे जोड़ रहे हैं...</>
+                    <>आपकी डिजिटल सेवाएं<br />सीधे जोड़ रहे हैं...</>
                   ) : (
-                    <>Connecting your<br/>digital services...</>
+                    <>Connecting your<br />digital services...</>
                   )}
                 </h3>
               </div>

@@ -48,13 +48,13 @@ export const Header: React.FC<Props> = ({
   const t = TRANSLATIONS[language];
 
   return (
-    <header className="sticky top-0 z-40 bg-white/80 border-b border-black/8 backdrop-blur-xl text-[#111111]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+    <header className="sticky top-0 z-50 bg-white/95 border-b border-black/10 backdrop-blur-xl text-[#111111] shadow-xs transition-all">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6">
         {/* Main Brand Row */}
-        <div className="flex items-center justify-between py-3 border-b border-black/5">
+        <div className="flex items-center justify-between py-2 sm:py-3 border-b border-black/5 gap-2">
           {/* Logo & Identity */}
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 shrink-0 flex items-center justify-center overflow-hidden">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 shrink-0 flex items-center justify-center overflow-hidden">
               <img
                 src="/mahasetu-logo-transparent.png"
                 alt="Mahasetu Logo"
@@ -62,17 +62,17 @@ export const Header: React.FC<Props> = ({
                 referrerPolicy="no-referrer"
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <span className="text-[11px] text-[#5c5c5c] font-medium hidden sm:inline-block">
+                <span className="text-[10px] sm:text-[11px] text-[#5c5c5c] font-medium hidden sm:inline-block truncate">
                   {t.govDepartment}
                 </span>
               </div>
-              <div className="flex items-baseline gap-2 mt-0.5">
-                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111111] font-marathi-calligraphy">
+              <div className="flex items-baseline gap-1.5 sm:gap-2 mt-0.5">
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-[#111111] font-marathi-calligraphy leading-none truncate">
                   महासेतू
                 </h1>
-                <span className="text-[10.5px] tracking-wider text-[#5c5c5c] uppercase hidden md:inline-block">
+                <span className="text-[9.5px] sm:text-[10.5px] tracking-wider text-[#5c5c5c] uppercase hidden md:inline-block shrink-0">
                   v1.0.4
                 </span>
               </div>
@@ -80,7 +80,7 @@ export const Header: React.FC<Props> = ({
           </div>
 
           {/* Right Header Controls: Telemetry, Language, Auth Pill */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 relative z-20">
             {/* Live Gateway Health Indicator */}
             <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/90 border border-black/8 text-xs font-medium text-[#4a4a4a] shadow-xs">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -90,18 +90,18 @@ export const Header: React.FC<Props> = ({
 
             {/* User Profile / Biometric Badge */}
             {currentUser ? (
-              <div className="flex items-center gap-2 bg-white/95 border border-black/10 rounded-2xl p-1.5 pl-3 shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-1.5 sm:gap-2 bg-white/95 border border-black/10 rounded-2xl p-1 sm:p-1.5 pl-2 sm:pl-3 shadow-xs hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-2">
                   <div className="relative">
-                    <div className="w-8 h-8 rounded-full bg-black/5 border border-black/10 text-[#111111] flex items-center justify-center shadow-xs">
-                      <User className="w-4.5 h-4.5 text-[#111111]" />
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/5 border border-black/10 text-[#111111] flex items-center justify-center shadow-xs">
+                      <User className="w-4 h-4 text-[#111111]" />
                     </div>
-                    <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white flex items-center justify-center">
-                      <ShieldCheck className="w-2 h-2 text-white" />
+                    <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-emerald-500 rounded-full border-2 border-white flex items-center justify-center">
+                      <ShieldCheck className="w-1.5 h-1.5 sm:w-2 sm:h-2 text-white" />
                     </span>
                   </div>
                   <div className="hidden sm:block text-left">
-                    <div className="text-xs font-bold text-[#111111] leading-tight truncate max-w-[140px]">
+                    <div className="text-xs font-bold text-[#111111] leading-tight truncate max-w-[120px] md:max-w-[150px]">
                       {currentUser.name}
                     </div>
                     <div className="text-[10px] text-[#5c5c5c] font-mono flex items-center gap-1 mt-0.5">
@@ -111,13 +111,13 @@ export const Header: React.FC<Props> = ({
                   </div>
                 </div>
 
-                <div className="h-6 w-[1px] bg-black/10 mx-1 hidden sm:block" />
+                <div className="h-5 sm:h-6 w-[1px] bg-black/10 mx-0.5 sm:mx-1 hidden sm:block" />
 
                 <button
                   type="button"
                   title={t.switchUser}
                   onClick={onOpenAuthModal}
-                  className="p-1.5 text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5 rounded-lg transition-all"
+                  className="p-1.5 text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5 rounded-lg transition-all min-w-[32px] min-h-[32px] flex items-center justify-center cursor-pointer"
                 >
                   <Fingerprint className="w-4 h-4" />
                 </button>
@@ -126,19 +126,24 @@ export const Header: React.FC<Props> = ({
                   type="button"
                   title={t.logout}
                   onClick={onLogout}
-                  className="p-1.5 text-[#5c5c5c] hover:text-rose-600 hover:bg-black/5 rounded-lg transition-all"
+                  className="p-1.5 text-[#5c5c5c] hover:text-rose-600 hover:bg-black/5 rounded-lg transition-all min-w-[32px] min-h-[32px] flex items-center justify-center cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
                 </button>
               </div>
             ) : (
               <button
+                id="btn-header-aadhaar-auth"
                 type="button"
                 onClick={onOpenAuthModal}
-                className="flex items-center gap-2 px-5 py-2.5 bg-[#141414] hover:bg-black text-white rounded-xl text-xs font-bold transition-all shadow-md hover:shadow-lg active:scale-95"
+                className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 md:px-5 py-2 sm:py-2.5 bg-[#141414] hover:bg-black text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md hover:shadow-lg active:scale-95 cursor-pointer shrink-0 whitespace-nowrap min-h-[38px] sm:min-h-[42px]"
+                aria-label="Aadhaar Biometric Authentication"
               >
-                <Fingerprint className="w-4.5 h-4.5 text-amber-400" />
-                <span>{t.aadhaarAuth}</span>
+                <Fingerprint className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-amber-400 shrink-0" />
+                <span className="hidden md:inline whitespace-nowrap">{t.aadhaarAuth}</span>
+                <span className="md:hidden whitespace-nowrap text-[11px] sm:text-xs">
+                  {language === 'mr' ? 'आधार बायोमेट्रिक' : language === 'hi' ? 'आधार बायोमेट्रिक' : 'Aadhaar Auth'}
+                </span>
               </button>
             )}
           </div>
@@ -152,11 +157,10 @@ export const Header: React.FC<Props> = ({
               <button
                 id="tab-nav-officer"
                 onClick={() => setActiveTab('officer')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${
-                  activeTab === 'officer'
-                    ? 'bg-[#141414] text-white font-semibold shadow-xs'
-                    : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
-                }`}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${activeTab === 'officer'
+                  ? 'bg-[#141414] text-white font-semibold shadow-xs'
+                  : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
+                  }`}
               >
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
                 <span>{t.navOfficer}</span>
@@ -168,11 +172,10 @@ export const Header: React.FC<Props> = ({
               <button
                 id="tab-nav-schemes"
                 onClick={() => setActiveTab('schemes')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${
-                  activeTab === 'schemes'
-                    ? 'bg-[#141414] text-white font-semibold shadow-xs'
-                    : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
-                }`}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${activeTab === 'schemes'
+                  ? 'bg-[#141414] text-white font-semibold shadow-xs'
+                  : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
+                  }`}
               >
                 <BookOpen className="w-3.5 h-3.5 text-amber-500" />
                 <span>{t.navSchemes}</span>
@@ -181,11 +184,10 @@ export const Header: React.FC<Props> = ({
               <button
                 id="tab-nav-audit"
                 onClick={() => setActiveTab('audit')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${
-                  activeTab === 'audit'
-                    ? 'bg-[#141414] text-white font-semibold shadow-xs'
-                    : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
-                }`}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${activeTab === 'audit'
+                  ? 'bg-[#141414] text-white font-semibold shadow-xs'
+                  : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
+                  }`}
               >
                 <ScrollText className="w-3.5 h-3.5" />
                 <span>{t.navAudit}</span>
@@ -194,11 +196,10 @@ export const Header: React.FC<Props> = ({
               <button
                 id="tab-nav-ai"
                 onClick={() => setActiveTab('ai')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${
-                  activeTab === 'ai'
-                    ? 'bg-[#141414] text-white font-semibold shadow-xs'
-                    : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
-                }`}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${activeTab === 'ai'
+                  ? 'bg-[#141414] text-white font-semibold shadow-xs'
+                  : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
+                  }`}
               >
                 <Bot className="w-3.5 h-3.5" />
                 <span>{t.navAiSahayak}</span>
@@ -213,11 +214,10 @@ export const Header: React.FC<Props> = ({
               <button
                 id="tab-nav-citizen"
                 onClick={() => setActiveTab('citizen')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${
-                  activeTab === 'citizen'
-                    ? 'bg-[#141414] text-white font-semibold shadow-xs'
-                    : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
-                }`}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${activeTab === 'citizen'
+                  ? 'bg-[#141414] text-white font-semibold shadow-xs'
+                  : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
+                  }`}
               >
                 <Building2 className="w-3.5 h-3.5" />
                 <span>{t.navCitizen}</span>
@@ -226,11 +226,10 @@ export const Header: React.FC<Props> = ({
               <button
                 id="tab-nav-schemes"
                 onClick={() => setActiveTab('schemes')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${
-                  activeTab === 'schemes'
-                    ? 'bg-[#141414] text-white font-semibold shadow-xs'
-                    : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
-                }`}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${activeTab === 'schemes'
+                  ? 'bg-[#141414] text-white font-semibold shadow-xs'
+                  : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
+                  }`}
               >
                 <BookOpen className="w-3.5 h-3.5 text-amber-500" />
                 <span>{t.navSchemes || 'All Schemes (4,709+)'}</span>
@@ -242,11 +241,10 @@ export const Header: React.FC<Props> = ({
               <button
                 id="tab-nav-consent"
                 onClick={() => setActiveTab('consent')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${
-                  activeTab === 'consent'
-                    ? 'bg-[#141414] text-white font-semibold shadow-xs'
-                    : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
-                }`}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${activeTab === 'consent'
+                  ? 'bg-[#141414] text-white font-semibold shadow-xs'
+                  : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
+                  }`}
               >
                 <FileCheck2 className="w-3.5 h-3.5" />
                 <span>{t.navConsent}</span>
@@ -255,11 +253,10 @@ export const Header: React.FC<Props> = ({
               <button
                 id="tab-nav-audit"
                 onClick={() => setActiveTab('audit')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${
-                  activeTab === 'audit'
-                    ? 'bg-[#141414] text-white font-semibold shadow-xs'
-                    : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
-                }`}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${activeTab === 'audit'
+                  ? 'bg-[#141414] text-white font-semibold shadow-xs'
+                  : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
+                  }`}
               >
                 <ScrollText className="w-3.5 h-3.5" />
                 <span>{t.navAudit}</span>
@@ -268,11 +265,10 @@ export const Header: React.FC<Props> = ({
               <button
                 id="tab-nav-ai"
                 onClick={() => setActiveTab('ai')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${
-                  activeTab === 'ai'
-                    ? 'bg-[#141414] text-white font-semibold shadow-xs'
-                    : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
-                }`}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${activeTab === 'ai'
+                  ? 'bg-[#141414] text-white font-semibold shadow-xs'
+                  : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
+                  }`}
               >
                 <Bot className="w-3.5 h-3.5" />
                 <span>{t.navAiSahayak}</span>
@@ -287,11 +283,10 @@ export const Header: React.FC<Props> = ({
               <button
                 id="tab-nav-schemes"
                 onClick={() => setActiveTab('schemes')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${
-                  activeTab === 'schemes'
-                    ? 'bg-[#141414] text-white font-semibold shadow-xs'
-                    : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
-                }`}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${activeTab === 'schemes'
+                  ? 'bg-[#141414] text-white font-semibold shadow-xs'
+                  : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
+                  }`}
               >
                 <BookOpen className="w-3.5 h-3.5 text-amber-500" />
                 <span>{t.navSchemes || 'All Schemes (4,709+)'}</span>
@@ -303,11 +298,10 @@ export const Header: React.FC<Props> = ({
               <button
                 id="tab-nav-ai"
                 onClick={() => setActiveTab('ai')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${
-                  activeTab === 'ai'
-                    ? 'bg-[#141414] text-white font-semibold shadow-xs'
-                    : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
-                }`}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${activeTab === 'ai'
+                  ? 'bg-[#141414] text-white font-semibold shadow-xs'
+                  : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
+                  }`}
               >
                 <Bot className="w-3.5 h-3.5" />
                 <span>{t.navAiSahayak}</span>
@@ -319,11 +313,10 @@ export const Header: React.FC<Props> = ({
               <button
                 id="tab-nav-audit"
                 onClick={() => setActiveTab('audit')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${
-                  activeTab === 'audit'
-                    ? 'bg-[#141414] text-white font-semibold shadow-xs'
-                    : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
-                }`}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg whitespace-nowrap transition-all ${activeTab === 'audit'
+                  ? 'bg-[#141414] text-white font-semibold shadow-xs'
+                  : 'text-[#5c5c5c] hover:text-[#111111] hover:bg-black/5'
+                  }`}
               >
                 <ScrollText className="w-3.5 h-3.5" />
                 <span>{t.navAudit}</span>

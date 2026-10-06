@@ -10,15 +10,19 @@
   --muted: #5c5c5c;
   --card: rgba(248, 248, 246, 0.97);
   --shell: 1120px;
-  --ease: cubic-bezier(0.16, 1, 0.3, 1); /* expo-out, used by every animation */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  /* expo-out, used by every animation */
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
 body.menu-open {
-  overflow: hidden; /* scroll lock while mobile menu is open */
+  overflow: hidden;
+  /* scroll lock while mobile menu is open */
 }
 
 @layer base {
@@ -74,7 +78,8 @@ body.menu-open {
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: fill; /* Use object-fit: FILL, not cover — the entire frame must span the section with no crop and no zoom */
+  object-fit: fill;
+  /* Use object-fit: FILL, not cover — the entire frame must span the section with no crop and no zoom */
 }
 
 /* 4. HERO SHELL */
@@ -103,7 +108,8 @@ body.menu-open {
 /* 5. NAV BAR (desktop) */
 .nav {
   position: relative;
-  z-index: 70; /* must stay above the mobile panel */
+  z-index: 70;
+  /* must stay above the mobile panel */
   width: 100%;
   max-width: var(--shell);
   margin: 0 auto;
@@ -221,7 +227,8 @@ body.menu-open {
 
 .bar--bot {
   bottom: 0;
-  width: 70%; /* deliberately short — asymmetric detail */
+  width: 70%;
+  /* deliberately short — asymmetric detail */
 }
 
 .nav__toggle:hover .bar--bot {
@@ -305,9 +312,11 @@ body.menu-open {
   .brk {
     display: inline;
   }
+
   .stage .headline {
     max-width: none;
   }
+
   .stage .sub {
     max-width: none;
   }
@@ -427,6 +436,7 @@ body.menu-open {
     opacity: 0;
     transform: translate3d(0, 18px, 0);
   }
+
   to {
     opacity: 1;
     transform: translate3d(0, 0, 0);
@@ -437,6 +447,7 @@ body.menu-open {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -492,7 +503,8 @@ body.menu-open {
     justify-content: center;
     gap: 30px;
     padding: 92px 28px 46px;
-    background: #fafbf9; /* fully opaque — no ghosting of the hero */
+    background: #fafbf9;
+    /* fully opaque — no ghosting of the hero */
     opacity: 0;
     visibility: hidden;
     transform: translateY(-12px);
@@ -515,7 +527,8 @@ body.menu-open {
   }
 
   .nav__links li {
-    overflow: hidden; /* the mask each link slides out of */
+    overflow: hidden;
+    /* the mask each link slides out of */
   }
 
   .nav__links a,
@@ -534,7 +547,8 @@ body.menu-open {
 
   .nav__links a:hover,
   .nav__links button:hover {
-    opacity: 0; /* stays hidden while closed */
+    opacity: 0;
+    /* stays hidden while closed */
   }
 
   .nav__nav.is-open .nav__links a,
@@ -553,22 +567,27 @@ body.menu-open {
   .nav__nav.is-open .nav__links li:nth-child(1) button {
     transition-delay: 0.12s;
   }
+
   .nav__nav.is-open .nav__links li:nth-child(2) a,
   .nav__nav.is-open .nav__links li:nth-child(2) button {
     transition-delay: 0.18s;
   }
+
   .nav__nav.is-open .nav__links li:nth-child(3) a,
   .nav__nav.is-open .nav__links li:nth-child(3) button {
     transition-delay: 0.24s;
   }
+
   .nav__nav.is-open .nav__links li:nth-child(4) a,
   .nav__nav.is-open .nav__links li:nth-child(4) button {
     transition-delay: 0.30s;
   }
+
   .nav__nav.is-open .nav__links li:nth-child(5) a,
   .nav__nav.is-open .nav__links li:nth-child(5) button {
     transition-delay: 0.36s;
   }
+
   .nav__nav.is-open .nav__links li:nth-child(6) a,
   .nav__nav.is-open .nav__links li:nth-child(6) button {
     transition-delay: 0.42s;
@@ -713,13 +732,16 @@ body.menu-open {
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: #050507;
 }
+
 ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.15);
   border-radius: 9999px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(34, 211, 238, 0.4);
 }
@@ -730,7 +752,3 @@ body.menu-open {
   -webkit-appearance: none;
   margin: 0;
 }
-.no-spin-buttons {
-  -moz-appearance: textfield;
-}
-

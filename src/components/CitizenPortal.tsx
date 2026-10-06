@@ -44,7 +44,7 @@ function mapSchemeToService(scheme: WelfareScheme): ServiceDefinition {
   let deptCode: DepartmentCode = 'DISTRICT_ADMIN';
   const authority = (scheme.issuingAuthority || '').toLowerCase();
   const category = (scheme.rawCategory || '').toLowerCase();
-  
+
   if (authority.includes('revenue') || authority.includes('महसूल') || category.includes('agriculture') || category.includes('farmer')) {
     deptCode = 'REVENUE';
   } else if (authority.includes('education') || authority.includes('शिक्षण') || category.includes('education') || category.includes('scholarship')) {
@@ -66,7 +66,7 @@ function mapSchemeToService(scheme: WelfareScheme): ServiceDefinition {
   const docs = scheme.requiredDocuments || ['aadhaar', 'domicile_certificate', 'income_certificate'];
   const fields: RequiredDataField[] = docs.map((doc, idx) => {
     const code = doc.toUpperCase().replace(/-/g, '_');
-    
+
     if (code.includes('INCOME')) {
       return {
         id: `rf-mapped-${idx}-${scheme.id}`,
@@ -203,7 +203,7 @@ export const CitizenPortal: React.FC<Props> = ({
   const [services, setServices] = useState<ServiceDefinition[]>([]);
   const [selectedService, setSelectedService] = useState<ServiceDefinition | null>(null);
   const [activeWorkflowStep, setActiveWorkflowStep] = useState<'SELECT' | 'CONSENT' | 'HOPS' | 'FORM' | 'SUCCESS'>('SELECT');
-  
+
   // Consent flow state
   const [isGrantingConsent, setIsGrantingConsent] = useState(false);
   const [currentConsent, setCurrentConsent] = useState<ConsentRecord | null>(null);
@@ -324,7 +324,7 @@ export const CitizenPortal: React.FC<Props> = ({
             }
           }
         })
-        .catch(() => {});
+        .catch(() => { });
     } catch (e) {
       console.error('Error fetching services/applications', e);
     }
@@ -595,22 +595,20 @@ export const CitizenPortal: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() => setActiveAppTab('catalogue')}
-                className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
-                  activeAppTab === 'catalogue'
+                className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${activeAppTab === 'catalogue'
                     ? 'bg-[#141414] text-white shadow-xs'
                     : 'text-[#5c5c5c] hover:text-[#111111]'
-                }`}
+                  }`}
               >
                 {t.servicesTitle}
               </button>
               <button
                 type="button"
                 onClick={() => setActiveAppTab('my_apps')}
-                className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 ${
-                  activeAppTab === 'my_apps'
+                className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 ${activeAppTab === 'my_apps'
                     ? 'bg-[#141414] text-white shadow-xs'
                     : 'text-[#5c5c5c] hover:text-[#111111]'
-                }`}
+                  }`}
               >
                 <span>{t.myApplications}</span>
                 <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${activeAppTab === 'my_apps' ? 'bg-white/20 text-white font-bold' : 'bg-black/10 text-[#5c5c5c]'}`}>
@@ -621,11 +619,10 @@ export const CitizenPortal: React.FC<Props> = ({
                 id="btn-tab-edit-profile"
                 type="button"
                 onClick={() => setActiveAppTab('profile')}
-                className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 ${
-                  activeAppTab === 'profile'
+                className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 ${activeAppTab === 'profile'
                     ? 'bg-[#141414] text-white shadow-xs'
                     : 'text-[#5c5c5c] hover:text-[#111111]'
-                }`}
+                  }`}
               >
                 <PenLine className="w-3.5 h-3.5 text-amber-500" />
                 <span>{t.editProfile || 'Edit Profile'}</span>
@@ -635,7 +632,7 @@ export const CitizenPortal: React.FC<Props> = ({
         </div>
       </div>
 
-          {/* Main Content View */}
+      {/* Main Content View */}
       {activeAppTab === 'profile' ? (
         <UnifiedProfileForm
           citizen={citizen}
@@ -808,14 +805,12 @@ export const CitizenPortal: React.FC<Props> = ({
 
                     <div className="space-y-4">
                       {/* Hop 1 */}
-                      <div className={`p-4 rounded-2xl border transition-all ${
-                        hopStep >= 1 ? 'border-emerald-300 bg-emerald-50/50 shadow-xs' : 'border-black/8 bg-white'
-                      }`}>
+                      <div className={`p-4 rounded-2xl border transition-all ${hopStep >= 1 ? 'border-emerald-300 bg-emerald-50/50 shadow-xs' : 'border-black/8 bg-white'
+                        }`}>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs font-mono ${
-                              hopStep > 1 ? 'bg-[#141414] text-white' : hopStep === 1 ? 'bg-black/10 text-black animate-pulse' : 'bg-black/5 text-[#5c5c5c]'
-                            }`}>
+                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs font-mono ${hopStep > 1 ? 'bg-[#141414] text-white' : hopStep === 1 ? 'bg-black/10 text-black animate-pulse' : 'bg-black/5 text-[#5c5c5c]'
+                              }`}>
                               {hopStep > 1 ? <Check className="w-4 h-4" /> : '1'}
                             </div>
                             <div>
@@ -839,14 +834,12 @@ export const CitizenPortal: React.FC<Props> = ({
                       </div>
 
                       {/* Hop 2 */}
-                      <div className={`p-4 rounded-2xl border transition-all ${
-                        hopStep >= 2 ? 'border-emerald-300 bg-emerald-50/50 shadow-xs' : 'border-black/8 bg-white'
-                      }`}>
+                      <div className={`p-4 rounded-2xl border transition-all ${hopStep >= 2 ? 'border-emerald-300 bg-emerald-50/50 shadow-xs' : 'border-black/8 bg-white'
+                        }`}>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs font-mono ${
-                              hopStep > 2 ? 'bg-[#141414] text-white' : hopStep === 2 ? 'bg-black/10 text-black animate-pulse' : 'bg-black/5 text-[#5c5c5c]'
-                            }`}>
+                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs font-mono ${hopStep > 2 ? 'bg-[#141414] text-white' : hopStep === 2 ? 'bg-black/10 text-black animate-pulse' : 'bg-black/5 text-[#5c5c5c]'
+                              }`}>
                               {hopStep > 2 ? <Check className="w-4 h-4" /> : '2'}
                             </div>
                             <div>
@@ -870,14 +863,12 @@ export const CitizenPortal: React.FC<Props> = ({
                       </div>
 
                       {/* Hop 3: Canonical Mapping Result */}
-                      <div className={`p-4 rounded-2xl border transition-all ${
-                        hopStep >= 3 ? 'border-emerald-300 bg-emerald-50/50 shadow-xs' : 'border-black/8 bg-white'
-                      }`}>
+                      <div className={`p-4 rounded-2xl border transition-all ${hopStep >= 3 ? 'border-emerald-300 bg-emerald-50/50 shadow-xs' : 'border-black/8 bg-white'
+                        }`}>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs font-mono ${
-                              hopStep >= 3 ? 'bg-[#141414] text-white' : 'bg-black/5 text-[#5c5c5c]'
-                            }`}>
+                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs font-mono ${hopStep >= 3 ? 'bg-[#141414] text-white' : 'bg-black/5 text-[#5c5c5c]'
+                              }`}>
                               {hopStep >= 3 ? <Check className="w-4 h-4" /> : '3'}
                             </div>
                             <div>
@@ -1160,11 +1151,10 @@ export const CitizenPortal: React.FC<Props> = ({
                         key={cat.id}
                         type="button"
                         onClick={() => { setSchemeCategory(cat.id); setSchemePage(1); }}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
-                          schemeCategory === cat.id
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${schemeCategory === cat.id
                             ? 'bg-[#141414] text-white border-black shadow-xs'
                             : 'bg-white text-[#5c5c5c] border-black/8 hover:text-[#111111] hover:border-black/20'
-                        }`}
+                          }`}
                       >
                         {cat.label}
                       </button>
@@ -1269,8 +1259,8 @@ export const CitizenPortal: React.FC<Props> = ({
                           {language === 'mr'
                             ? `पान ${schemePage} पैकी ${schemeTotalPages} (एकूण ${schemeTotalCount} योजना)`
                             : language === 'hi'
-                            ? `पृष्ठ ${schemePage} का ${schemeTotalPages} (कुल ${schemeTotalCount} योजनाएं)`
-                            : `Page ${schemePage} of ${schemeTotalPages} (${schemeTotalCount} schemes)`}
+                              ? `पृष्ठ ${schemePage} का ${schemeTotalPages} (कुल ${schemeTotalCount} योजनाएं)`
+                              : `Page ${schemePage} of ${schemeTotalPages} (${schemeTotalCount} schemes)`}
                         </span>
 
                         <button
@@ -1337,12 +1327,11 @@ export const CitizenPortal: React.FC<Props> = ({
                     </div>
 
                     <div className="flex items-center gap-2.5">
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wider uppercase border ${
-                        app.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' :
-                        app.status === 'IN_PROGRESS' ? 'bg-amber-100 text-amber-800 border-amber-300' :
-                        app.status === 'REJECTED' ? 'bg-rose-100 text-rose-800 border-rose-300' :
-                        'bg-sky-100 text-sky-800 border-sky-300'
-                      }`}>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wider uppercase border ${app.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' :
+                          app.status === 'IN_PROGRESS' ? 'bg-amber-100 text-amber-800 border-amber-300' :
+                            app.status === 'REJECTED' ? 'bg-rose-100 text-rose-800 border-rose-300' :
+                              'bg-sky-100 text-sky-800 border-sky-300'
+                        }`}>
                         {app.status}
                       </span>
 

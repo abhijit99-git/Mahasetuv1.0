@@ -108,10 +108,10 @@ export const OfficerPortal: React.FC<Props> = ({
     setIsUpdating(true);
 
     const remarks = actionRemarks.trim() || (
-      status === 'APPROVED' 
-        ? 'Approved based on Mahasetu verified proofs' 
-        : status === 'REJECTED' 
-          ? 'Requires clarification or proof resubmission' 
+      status === 'APPROVED'
+        ? 'Approved based on Mahasetu verified proofs'
+        : status === 'REJECTED'
+          ? 'Requires clarification or proof resubmission'
           : 'Under active departmental scrutiny'
     );
 
@@ -297,11 +297,10 @@ export const OfficerPortal: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => setActiveTaskTab('applications')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-              activeTaskTab === 'applications'
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${activeTaskTab === 'applications'
                 ? 'bg-black text-white shadow-xs'
                 : 'text-gray-600 hover:text-black hover:bg-gray-100'
-            }`}
+              }`}
           >
             <FileCheck2 className="w-3.5 h-3.5 text-amber-400" />
             <span>Applications Adjudication</span>
@@ -313,11 +312,10 @@ export const OfficerPortal: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => setActiveTaskTab('dbt')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-              activeTaskTab === 'dbt'
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${activeTaskTab === 'dbt'
                 ? 'bg-black text-white shadow-xs'
                 : 'text-gray-600 hover:text-black hover:bg-gray-100'
-            }`}
+              }`}
           >
             <IndianRupee className="w-3.5 h-3.5 text-emerald-400" />
             <span>Direct Benefit Transfer (DBT)</span>
@@ -329,11 +327,10 @@ export const OfficerPortal: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => setActiveTaskTab('interop')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-              activeTaskTab === 'interop'
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${activeTaskTab === 'interop'
                 ? 'bg-black text-white shadow-xs'
                 : 'text-gray-600 hover:text-black hover:bg-gray-100'
-            }`}
+              }`}
           >
             <Layers className="w-3.5 h-3.5 text-blue-400" />
             <span>Inter-Department Data Hops</span>
@@ -342,11 +339,10 @@ export const OfficerPortal: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => setActiveTaskTab('roster')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-              activeTaskTab === 'roster'
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${activeTaskTab === 'roster'
                 ? 'bg-black text-white shadow-xs'
                 : 'text-gray-600 hover:text-black hover:bg-gray-100'
-            }`}
+              }`}
           >
             <Database className="w-3.5 h-3.5 text-purple-400" />
             <span>Officer Registry</span>
@@ -358,11 +354,10 @@ export const OfficerPortal: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => setActiveTaskTab('supabase_sql')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-              activeTaskTab === 'supabase_sql'
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${activeTaskTab === 'supabase_sql'
                 ? 'bg-emerald-900 text-white shadow-xs'
                 : 'text-gray-600 hover:text-black hover:bg-gray-100'
-            }`}
+              }`}
           >
             <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
             <span>Supabase Officers Table & DDL</span>
@@ -409,11 +404,10 @@ export const OfficerPortal: React.FC<Props> = ({
                     key={st}
                     type="button"
                     onClick={() => setFilterStatus(st)}
-                    className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-                      filterStatus === st
+                    className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${filterStatus === st
                         ? 'bg-gray-900 text-white shadow-xs'
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
+                      }`}
                   >
                     {st === 'ALL' ? 'All' : st}
                   </button>
@@ -437,22 +431,20 @@ export const OfficerPortal: React.FC<Props> = ({
                     key={app.id}
                     type="button"
                     onClick={() => setSelectedApp(app)}
-                    className={`w-full text-left p-4 rounded-2xl border text-xs transition-all cursor-pointer ${
-                      selectedApp?.id === app.id
+                    className={`w-full text-left p-4 rounded-2xl border text-xs transition-all cursor-pointer ${selectedApp?.id === app.id
                         ? 'border-emerald-600 bg-emerald-50/50 shadow-xs ring-1 ring-emerald-500'
                         : 'border-black/8 bg-white hover:border-black/20'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="font-mono font-bold text-gray-950 text-xs">
                         {app.applicationNumber}
                       </span>
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${
-                        app.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-900 border-emerald-300' :
-                        app.status === 'IN_PROGRESS' ? 'bg-amber-100 text-amber-900 border-amber-300' :
-                        app.status === 'REJECTED' ? 'bg-rose-100 text-rose-900 border-rose-300' :
-                        'bg-sky-100 text-sky-900 border-sky-300'
-                      }`}>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${app.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-900 border-emerald-300' :
+                          app.status === 'IN_PROGRESS' ? 'bg-amber-100 text-amber-900 border-amber-300' :
+                            app.status === 'REJECTED' ? 'bg-rose-100 text-rose-900 border-rose-300' :
+                              'bg-sky-100 text-sky-900 border-sky-300'
+                        }`}>
                         {app.status}
                       </span>
                     </div>
@@ -494,12 +486,11 @@ export const OfficerPortal: React.FC<Props> = ({
                       initial={{ scale: 0.85, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                      className={`font-extrabold px-3 py-1 rounded-full text-xs inline-flex items-center gap-1.5 mt-0.5 shadow-xs border ${
-                        selectedApp.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-950 border-emerald-300 ring-2 ring-emerald-400/30' :
-                        selectedApp.status === 'REJECTED' ? 'bg-rose-100 text-rose-950 border-rose-300 ring-2 ring-rose-400/30' :
-                        selectedApp.status === 'IN_PROGRESS' ? 'bg-amber-100 text-amber-950 border-amber-300 ring-2 ring-amber-400/30' :
-                        'bg-sky-100 text-sky-950 border-sky-300'
-                      }`}
+                      className={`font-extrabold px-3 py-1 rounded-full text-xs inline-flex items-center gap-1.5 mt-0.5 shadow-xs border ${selectedApp.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-950 border-emerald-300 ring-2 ring-emerald-400/30' :
+                          selectedApp.status === 'REJECTED' ? 'bg-rose-100 text-rose-950 border-rose-300 ring-2 ring-rose-400/30' :
+                            selectedApp.status === 'IN_PROGRESS' ? 'bg-amber-100 text-amber-950 border-amber-300 ring-2 ring-amber-400/30' :
+                              'bg-sky-100 text-sky-950 border-sky-300'
+                        }`}
                     >
                       {selectedApp.status === 'APPROVED' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 shrink-0" />}
                       {selectedApp.status === 'REJECTED' && <XCircle className="w-3.5 h-3.5 text-rose-700 shrink-0" />}
@@ -657,11 +648,10 @@ export const OfficerPortal: React.FC<Props> = ({
                       type="button"
                       disabled={isUpdating}
                       onClick={() => handleUpdateStatus('APPROVED')}
-                      className={`px-5 py-2.5 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-2 cursor-pointer ${
-                        selectedApp.status === 'APPROVED'
+                      className={`px-5 py-2.5 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-2 cursor-pointer ${selectedApp.status === 'APPROVED'
                           ? 'bg-emerald-700 hover:bg-emerald-800 ring-2 ring-emerald-500/40'
                           : 'bg-emerald-800 hover:bg-emerald-900'
-                      } ${isUpdating ? 'opacity-80 cursor-wait' : ''}`}
+                        } ${isUpdating ? 'opacity-80 cursor-wait' : ''}`}
                     >
                       {isUpdating ? (
                         <>
@@ -736,11 +726,10 @@ export const OfficerPortal: React.FC<Props> = ({
                     key={amt}
                     type="button"
                     onClick={() => setDbtAmount(amt)}
-                    className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all ${
-                      dbtAmount === amt
+                    className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all ${dbtAmount === amt
                         ? 'border-emerald-600 bg-emerald-600 text-white font-extrabold'
                         : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-100'
-                    }`}
+                      }`}
                   >
                     ₹{amt.toLocaleString('en-IN')}
                   </button>
@@ -958,7 +947,7 @@ ON CONFLICT (email) DO UPDATE SET
 
           <div className="bg-[#121815] text-emerald-300 p-5 rounded-2xl border border-emerald-900/50 font-mono text-xs overflow-x-auto max-h-[380px] leading-relaxed shadow-inner">
             <pre className="text-gray-300 font-mono text-[11px] whitespace-pre-wrap">
-{`-- ==========================================================
+              {`-- ==========================================================
 -- 1. Create Dedicated 'officers' Table
 -- ==========================================================
 CREATE TABLE IF NOT EXISTS officers (
